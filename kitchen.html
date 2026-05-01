@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的厨房</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --accent: #c97b3a;
+  --accent-h: #b5692c;
+  --accent-light: #f5e8d8;
+  --accent-subtle: rgba(201,123,58,0.08);
+  --green: #5a8a5e;
+  --green-bg: #e8f5e9;
+  --purple: #7c6baa;
+  --purple-bg: #f0ecf8;
+  --orange-bg: #fef3e6;
+  --red: #c0392b;
+  --border: #e0d9ce;
+  --border-light: #ede8e0;
+  --text: #2c2520;
+  --text2: #7a6f65;
+  --text3: #b0a499;
+  --sidebar-bg: rgba(240,235,226,0.96);
+  --mid-bg: rgba(247,244,239,0.95);
+  --card-bg: rgba(255,255,255,0.97);
+  --item-bg: rgba(250,248,245,0.95);
+}
+
+body {
+  font-family: -apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background: #e8e2d5;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#bg-layer {
+  position: fixed; inset: 0; z-index: 0;
+  background: linear-gradient(135deg,#e8e2d5 0%,#d5ccbe 100%);
+  background-size: cover; background-position: center;
+  transition: opacity 0.4s;
+}
+
+.app {
+  position: relative; z-index: 1;
+  width: 1140px; max-width: 98vw;
+  height: 92vh;
+  border-radius: 18px;
+  display: flex; overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+  background: rgba(250,248,245,0.9);
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  transition: backdrop-filter 0.4s, background 0.4s;
+}
+.app.glass {
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+.app.glass .sidebar { background: rgba(235,228,218,0.72); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); }
+.app.glass .mid { background: rgba(245,241,234,0.62); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); }
+.app.glass .right-panel { background: rgba(255,252,248,0.55); backdrop-filter: blur(26px); -webkit-backdrop-filter: blur(26px); }
+.app.glass .item-card { background: rgba(255,252,248,0.80); }
+.app.glass .store-sec { background: rgba(255,252,248,0.80); }
+.app.glass .modal { background: rgba(255,255,255,0.94); backdrop-filter: blur(20px); }
+/* Readable text rows in glass mode */
+.app.glass .ing-row { background: rgba(255,252,248,0.55); margin: 1px 6px; border-radius: 8px; }
+.app.glass .rrow { background: rgba(255,252,248,0.55); margin: 1px 6px; border-radius: 8px; }
+.app.glass .srow { background: rgba(255,252,248,0.50); margin: 1px 6px; border-radius: 8px; }
+.app.glass .ing-row.on { background: rgba(201,123,58,0.18); }
+.app.glass .rrow.on { background: rgba(201,123,58,0.18); }
+.app.glass .srow.on { background: rgba(201,123,58,0.18); }
+.app.glass .ing-row:hover { background: rgba(255,252,248,0.75); }
+.app.glass .rrow:hover { background: rgba(255,252,248,0.75); }
+/* Darker secondary text when glass is active */
+.app.glass .ing-m,
+.app.glass .rm,
+.app.glass .sc,
+.app.glass .mid-subtitle,
+.app.glass .ifreq,
+.app.glass .inote { color: #6a5e55; }
+.app.glass .rfrow { background: rgba(255,252,248,0.45); }
+/* Recipe detail text in glass mode */
+.app.glass .rdet-meta { color: #5a5048; font-weight: 500; }
+.app.glass .sec-t { color: #7a6a5e; font-weight: 600; }
+.app.glass .itag { background: rgba(245,240,230,0.88); color: #3a2e28; border: 1px solid rgba(160,130,100,0.3); }
+.app.glass .itag.opt { background: rgba(230,225,220,0.80); color: #6a5e55; }
+.app.glass .stag { background: rgba(230,224,242,0.88); color: #4a3878; border: 1px solid rgba(130,100,160,0.3); }
+.app.glass .stag.opt { background: rgba(224,220,228,0.80); color: #6a5e6a; }
+.app.glass .store-sec { background: rgba(255,252,248,0.80); border-color: rgba(200,185,165,0.5); }
+.app.glass .rdet-body .det-name,
+.app.glass .rdet-name { color: #2c2520; }
+.app.glass .chip { background: rgba(250,246,240,0.88); color: #4a3e38; border-color: rgba(200,185,165,0.4); }
+.app.glass .det-body .sec-t { color: #7a6a5e; font-weight: 600; }
+.app.glass .badge { opacity: 0.95; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 186px; min-width: 186px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  transition: background 0.4s;
+}
+.logo-area {
+  display: flex; align-items: center; gap: 10px;
+  padding: 22px 18px 16px;
+}
+.logo-icon {
+  width: 38px; height: 38px;
+  background: var(--accent); border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(201,123,58,0.4);
+}
+.logo-name { font-size: 15px; font-weight: 700; color: var(--text); }
+.sec-label { font-size: 10.5px; color: var(--text3); letter-spacing: 0.07em; padding: 6px 18px 5px; }
+.nav {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 18px; font-size: 13.5px;
+  color: var(--text2); cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background 0.15s, color 0.15s;
+  user-select: none;
+}
+.nav:hover { background: rgba(0,0,0,0.04); color: var(--text); }
+.nav.on { color: var(--text); font-weight: 600; border-left-color: var(--accent); background: var(--accent-subtle); }
+.nav-icon { font-size: 16px; }
+.sidebar-foot {
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+  padding: 12px 18px;
+  font-size: 11px; color: var(--text3); line-height: 1.95;
+}
+.foot-btn {
+  display: flex; align-items: center; gap: 5px;
+  background: none; border: none; font-family: inherit;
+  font-size: 11px; color: var(--text3); cursor: pointer;
+  padding: 1px 0; transition: color 0.15s;
+}
+.foot-btn:hover { color: var(--accent); }
+.foot-btn.danger:hover { color: var(--red); }
+.status-row { display: flex; align-items: center; justify-content: space-between; margin-top: 2px; }
+.sdot { width: 6px; height: 6px; border-radius: 50%; background: var(--red); display: inline-block; margin-right: 4px; vertical-align: middle; }
+.sdot.ok { background: var(--green); }
+
+/* ── MID PANEL ── */
+.mid {
+  width: 218px; min-width: 218px;
+  background: var(--mid-bg);
+  border-right: 1px solid var(--border-light);
+  display: flex; flex-direction: column;
+  overflow: hidden; transition: background 0.4s;
+}
+.mid-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 14px 12px;
+  border-bottom: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+.mid-title { font-size: 14.5px; font-weight: 600; color: var(--text); }
+.mid-subtitle { font-size: 12.5px; color: var(--text3); font-weight: 400; }
+.plus-btn {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--accent-light); border: none;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; color: var(--accent); cursor: pointer;
+  transition: background 0.15s;
+}
+.plus-btn:hover { background: var(--accent); color: white; }
+
+/* Ingredient tabs */
+.ing-tabs { display: flex; border-bottom: 1px solid var(--border-light); flex-shrink: 0; }
+.itab {
+  flex: 1; text-align: center; padding: 8px 4px;
+  font-size: 12.5px; color: var(--text2); cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s; user-select: none;
+}
+.itab.on { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+.itab-n { font-size: 11px; color: var(--text3); margin-left: 2px; }
+
+/* Recipe filter rows */
+.rfrow {
+  display: flex; gap: 6px; padding: 7px 10px;
+  flex-wrap: nowrap; overflow-x: auto;
+  border-bottom: 1px solid var(--border-light); flex-shrink: 0;
+  scrollbar-width: none;
+}
+.rfrow::-webkit-scrollbar { display: none; }
+.rfrow:last-child { border-bottom: none; }
+.rtag {
+  padding: 5px 12px; border-radius: 99px; white-space: nowrap;
+  font-size: 12px; cursor: pointer; user-select: none;
+  border: 1.5px solid rgba(160,140,120,0.45); color: var(--text2);
+  transition: all 0.12s; background: rgba(255,255,255,0.35);
+  flex-shrink: 0;
+}
+.rtag.on { background: var(--accent); border-color: var(--accent); color: white; }
+.rtag:hover:not(.on) { border-color: var(--accent); color: var(--accent); background: rgba(201,123,58,0.08); }
+
+/* Scrollable list areas */
+.scroll { flex: 1; overflow-y: auto; }
+.scroll::-webkit-scrollbar { width: 4px; }
+.scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+/* Ingredient item */
+.ing-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; cursor: pointer;
+  border-left: 3px solid transparent; transition: background 0.12s;
+}
+.ing-row:hover { background: rgba(0,0,0,0.04); }
+.ing-row.on { background: var(--accent-subtle); border-left-color: var(--accent); }
+.ing-thumb {
+  width: 38px; height: 38px; border-radius: 9px;
+  background: rgba(240,235,226,0.9);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; flex-shrink: 0;
+}
+.ing-info { flex: 1; min-width: 0; }
+.ing-n-row { display: flex; align-items: center; gap: 5px; }
+.idot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.ing-n { font-size: 13.5px; font-weight: 500; color: var(--text); }
+.ing-m { font-size: 11px; color: var(--text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Recipe list item */
+.rrow {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; cursor: pointer;
+  border-left: 3px solid transparent; transition: background 0.12s;
+}
+.rrow:hover { background: rgba(0,0,0,0.04); }
+.rrow.on { background: var(--accent-subtle); border-left-color: var(--accent); }
+.rthumb {
+  width: 42px; height: 42px; border-radius: 10px;
+  background: rgba(240,235,226,0.9);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 21px; flex-shrink: 0; overflow: hidden;
+}
+.rthumb img { width: 100%; height: 100%; object-fit: cover; }
+.rn { font-size: 13.5px; font-weight: 500; color: var(--text); }
+.rm { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+/* Store list items */
+.srow {
+  padding: 12px 16px; cursor: pointer;
+  border-left: 3px solid transparent; transition: background 0.12s;
+}
+.srow:hover { background: rgba(0,0,0,0.04); }
+.srow.on { background: rgba(201,123,58,0.1); border-left-color: var(--accent); }
+.sn { font-size: 14px; font-weight: 500; color: var(--text); }
+.srow.on .sn { color: var(--accent); }
+.sc { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+/* ── RIGHT PANEL ── */
+.right-panel {
+  flex: 1; display: flex; flex-direction: column;
+  overflow: hidden; background: var(--card-bg);
+  transition: background 0.4s;
+}
+
+/* Placeholder */
+.ph {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  color: var(--text3); gap: 10px;
+}
+.ph-icon { font-size: 44px; opacity: 0.3; }
+.ph-text { font-size: 14px; }
+
+/* Shopping panel */
+.rp-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 19px 26px 13px; border-bottom: 1px solid var(--border-light); flex-shrink: 0;
+}
+.rp-title { display: flex; align-items: center; gap: 8px; font-size: 16.5px; font-weight: 600; }
+.icon-act {
+  padding: 5px 12px; border: 1px solid var(--border); border-radius: 7px;
+  font-size: 12px; color: var(--text2); cursor: pointer;
+  background: none; font-family: inherit; transition: all 0.12s;
+}
+.icon-act:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+.icon-act.del:hover { background: #fff0f0; color: var(--red); border-color: #f5c0c0; }
+
+.prog-wrap { padding: 0 26px 12px; flex-shrink: 0; }
+.prog-meta { text-align: right; font-size: 12px; color: var(--text3); margin-bottom: 5px; }
+.prog-track { height: 4px; background: #e8e2d8; border-radius: 99px; overflow: hidden; }
+.prog-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.35s ease; }
+
+.item-list { flex: 1; overflow-y: auto; padding: 0 18px 18px; }
+.item-list::-webkit-scrollbar { width: 5px; }
+.item-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+.grp-head {
+  display: flex; align-items: center; gap: 7px;
+  padding: 13px 8px 7px; font-size: 11.5px;
+  color: var(--text3); font-weight: 500;
+}
+.gdot { width: 7px; height: 7px; border-radius: 50%; }
+
+.item-card {
+  background: var(--item-bg); border: 1px solid var(--border-light);
+  border-radius: 10px; padding: 12px 16px;
+  margin-bottom: 7px;
+  display: flex; align-items: flex-start; gap: 12px;
+  cursor: pointer; transition: background 0.12s, opacity 0.2s;
+  user-select: none;
+}
+.item-card:hover { border-color: var(--border); }
+.item-card.ck { opacity: 0.5; }
+.cb {
+  width: 21px; height: 21px; border: 1.5px solid var(--border);
+  border-radius: 6px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px; transition: all 0.15s;
+}
+.item-card.ck .cb { background: var(--accent); border-color: var(--accent); }
+.chk { display: none; }
+.item-card.ck .chk { display: block; }
+.iname { font-size: 14px; font-weight: 500; color: var(--text); }
+.item-card.ck .iname { text-decoration: line-through; color: var(--text3); }
+.inote { font-size: 12px; color: var(--text2); margin-top: 3px; }
+.ifreq { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+.add-bar {
+  padding: 10px 16px; border-top: 1px solid var(--border-light);
+  display: flex; gap: 7px; flex-shrink: 0;
+}
+.ai {
+  flex: 1; border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 12px; font-size: 13.5px; font-family: inherit;
+  background: rgba(250,248,245,0.9); color: var(--text);
+  outline: none; transition: border-color 0.15s;
+}
+.ai:focus { border-color: var(--accent); }
+.ai::placeholder { color: var(--text3); }
+.add-btn {
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 8px;
+  padding: 8px 16px; font-size: 13.5px;
+  font-family: inherit; cursor: pointer; font-weight: 500;
+  transition: background 0.12s;
+}
+.add-btn:hover { background: var(--accent-h); }
+
+/* ── INGREDIENT DETAIL ── */
+.ing-det { flex: 1; overflow-y: auto; }
+.ing-det::-webkit-scrollbar { width: 5px; }
+.ing-det::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+.det-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 26px 14px; border-bottom: 1px solid var(--border-light); flex-shrink: 0;
+}
+.det-body { padding: 22px 26px 32px; }
+.det-big-icon {
+  width: 68px; height: 68px; border-radius: 18px;
+  background: var(--item-bg); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 34px; margin-bottom: 14px;
+}
+.det-name { font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 12px; border-radius: 99px;
+  font-size: 12px; font-weight: 500; margin-bottom: 20px;
+}
+.badge.long { background: var(--purple-bg); color: var(--purple); }
+.badge.short { background: var(--green-bg); color: var(--green); }
+.badge.meal { background: #f5ede0; color: #a06020; }
+.badge.break { background: #e8f4f8; color: #3a7a9b; }
+.badge.brunch { background: #e8f5e9; color: #3a7a5a; }
+.badge.dessert { background: #f9e8f0; color: #9b3a6e; }
+.badge.late { background: #eee8f5; color: #6a3a9b; }
+
+.sec-t { font-size: 11.5px; color: var(--text3); font-weight: 500; letter-spacing: 0.04em; margin-bottom: 9px; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.chip {
+  padding: 6px 13px; background: var(--item-bg);
+  border-radius: 8px; font-size: 13px; color: var(--text2);
+  border: 1px solid var(--border-light);
+}
+.chip.link { cursor: pointer; transition: background 0.12s; }
+.chip.link:hover { background: var(--accent-light); color: var(--accent); }
+
+/* ── RECIPE DETAIL ── */
+.rdet { flex: 1; overflow-y: auto; }
+.rdet::-webkit-scrollbar { width: 5px; }
+.rdet::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+.rimg-area {
+  height: 210px; flex-shrink: 0; position: relative;
+  background: #f0ece6; display: flex;
+  align-items: center; justify-content: center; overflow: hidden;
+}
+.rimg-area img { width: 100%; height: 100%; object-fit: cover; }
+.rimg-ph { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--text3); font-size: 13px; }
+.rimg-ph-icon { font-size: 36px; opacity: 0.3; }
+.rimg-btn {
+  position: absolute; bottom: 12px; right: 12px;
+  background: rgba(20,15,10,0.58); color: #fff;
+  border: none; border-radius: 8px;
+  padding: 6px 14px; font-size: 12.5px;
+  cursor: pointer; font-family: inherit;
+  transition: background 0.12s;
+}
+.rimg-btn:hover { background: rgba(0,0,0,0.75); }
+.rdet-body { padding: 20px 26px 32px; }
+.rdet-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 3px; }
+.rdet-name { font-size: 22px; font-weight: 700; color: var(--text); }
+.rdet-meta { font-size: 13px; color: var(--text3); margin-bottom: 18px; display: flex; align-items: center; gap: 6px; }
+.act-row { display: flex; gap: 8px; justify-content: flex-end; margin-bottom: 14px; }
+
+.itags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 20px; }
+.itag {
+  padding: 5px 13px; border-radius: 99px;
+  font-size: 12.5px; background: #f5f0e6; color: var(--text2);
+}
+.itag.opt { background: #f0f0f0; color: var(--text3); }
+.itag .iamt { opacity: 0.75; font-size: 11.5px; }
+
+.store-sec {
+  background: var(--item-bg); border: 1px solid var(--border-light);
+  border-radius: 10px; padding: 13px 16px; margin-bottom: 9px;
+}
+.store-sec-h {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13.5px; font-weight: 500; color: var(--text); margin-bottom: 10px;
+}
+.fresh-badge {
+  font-size: 10.5px; padding: 2px 8px; border-radius: 99px;
+  background: #e8f5e9; color: var(--green);
+}
+.store-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.stag {
+  padding: 4px 11px; border-radius: 99px;
+  font-size: 12px; background: var(--purple-bg); color: var(--purple);
+}
+.stag.opt { background: #f0f0f0; color: var(--text3); }
+.stag .sopt { font-size: 10px; opacity: 0.75; }
+
+.steps-ul { list-style: none; }
+.step-li { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border-light); }
+.step-li:last-child { border-bottom: none; }
+.snum {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--accent); color: white;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.stxt { font-size: 13.5px; color: var(--text2); line-height: 1.65; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.45);
+  display: flex; align-items: center; justify-content: center;
+}
+.modal {
+  background: white; border-radius: 16px;
+  padding: 28px 32px; width: 480px; max-width: 95vw;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+}
+.modal-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 20px; }
+.field { margin-bottom: 14px; }
+.field label { display: block; font-size: 12px; color: var(--text3); margin-bottom: 5px; }
+.field input, .field select, .field textarea {
+  width: 100%; border: 1px solid var(--border); border-radius: 8px;
+  padding: 9px 12px; font-size: 13.5px; font-family: inherit;
+  color: var(--text); background: var(--item-bg); outline: none;
+  transition: border-color 0.15s;
+}
+.field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+.field textarea { resize: vertical; min-height: 80px; }
+.field-row { display: flex; gap: 10px; }
+.field-row .field { flex: 1; }
+.modal-btns { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+.mbtn {
+  padding: 9px 20px; border-radius: 8px; font-size: 13.5px;
+  font-family: inherit; cursor: pointer; font-weight: 500;
+  transition: all 0.12s;
+}
+.mbtn.cancel { background: var(--item-bg); border: 1px solid var(--border); color: var(--text2); }
+.mbtn.cancel:hover { background: #eee; }
+.mbtn.confirm { background: var(--accent); border: 1px solid var(--accent); color: white; }
+.mbtn.confirm:hover { background: var(--accent-h); }
+/* ── PASSWORD GATE ── */
+#gate {
+  position: fixed; inset: 0; z-index: 999;
+  background: linear-gradient(145deg,#f0ebe0 0%,#ddd4c4 100%);
+  display: flex; align-items: center; justify-content: center;
+}
+#gate.has-bg {
+  backdrop-filter: blur(30px);
+}
+.gate-card {
+  background: rgba(255,253,250,0.92);
+  backdrop-filter: blur(20px);
+  border-radius: 22px;
+  padding: 44px 48px;
+  width: 380px; max-width: 90vw;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  text-align: center;
+}
+.gate-logo {
+  width: 54px; height: 54px;
+  background: var(--accent); border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; margin: 0 auto 16px;
+  box-shadow: 0 4px 16px rgba(201,123,58,0.4);
+}
+.gate-title { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.gate-sub { font-size: 13px; color: var(--text3); margin-bottom: 30px; }
+.gate-input {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 13px 16px; font-size: 15px; font-family: inherit;
+  background: rgba(250,248,245,0.8); color: var(--text);
+  outline: none; transition: border-color 0.15s;
+  text-align: center; letter-spacing: 0.1em;
+  margin-bottom: 14px;
+}
+.gate-input:focus { border-color: var(--accent); }
+.gate-btn {
+  width: 100%; background: var(--accent); color: white;
+  border: none; border-radius: 10px; padding: 13px;
+  font-size: 15px; font-family: inherit; font-weight: 600;
+  cursor: pointer; transition: background 0.15s;
+}
+.gate-btn:hover { background: var(--accent-h); }
+.gate-btn:disabled { background: var(--border); cursor: not-allowed; }
+.gate-err { font-size: 13px; color: var(--red); margin-top: 12px; min-height: 18px; }
+.gate-sync { font-size: 11.5px; color: var(--text3); margin-top: 20px; }
+.sync-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--text3);
+  background: var(--item-bg); border: 1px solid var(--border-light);
+  border-radius: 99px; padding: 3px 10px;
+}
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+.sync-dot.off { background: var(--text3); }
+</style>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-logo">🍳</div>
+    <div class="gate-title">我的厨房</div>
+    <div class="gate-sub">私人食谱 · 输入密码继续</div>
+    <input class="gate-input" id="gate-pwd" type="password" placeholder="请输入密码"
+      autocomplete="current-password"
+      onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="gate-btn" id="gate-btn" onclick="doLogin()">进入</button>
+    <div class="gate-err" id="gate-err"></div>
+    <div class="gate-sync">登录后数据自动同步至所有设备 ☁️</div>
+  </div>
+</div>
+
+<div id="bg-layer"></div>
+
+<div class="app" id="app" style="display:none">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo-area">
+      <div class="logo-icon">🍳</div>
+      <div class="logo-name">我的厨房</div>
+    </div>
+    <div class="sec-label">视图</div>
+    <div class="nav" data-v="recipes" onclick="go('recipes')"><span class="nav-icon">🍜</span>菜谱</div>
+    <div class="nav" data-v="ingredients" onclick="go('ingredients')"><span class="nav-icon">🌿</span>原料</div>
+    <div class="nav" data-v="shopping" onclick="go('shopping')"><span class="nav-icon">🛒</span>购物清单</div>
+    <div class="sidebar-foot">
+      <div>点击标签跳转</div>
+      <div>数据自动保存</div>
+      <label class="foot-btn" style="margin-top:3px;">
+        <span>🖼</span> 更换背景图
+        <input type="file" accept="image/*" style="display:none" onchange="uploadBg(event)">
+      </label>
+      <button class="foot-btn danger" id="clear-bg-btn" style="display:none" onclick="clearBg()">✕ 移除背景</button>
+      <div class="status-row" style="margin-top:4px;">
+        <div id="sync-status" class="sync-badge"><div class="sync-dot off" id="sync-dot"></div><span id="sync-txt">同步中…</span></div>
+        <span style="cursor:pointer;font-size:11px;color:var(--text3)" onclick="doLogout()">退出</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MID PANEL -->
+  <div class="mid" id="mid">
+    <!-- Shopping mid -->
+    <div id="mid-shopping" style="display:none;flex-direction:column;height:100%;">
+      <div style="padding:16px 14px 10px;font-size:12.5px;color:var(--text3);font-weight:500;">购物地点</div>
+      <div class="scroll" id="store-rows"></div>
+    </div>
+    <!-- Ingredients mid -->
+    <div id="mid-ing" style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+      <div class="mid-head">
+        <div>
+          <span class="mid-title">原料</span>
+          <span class="mid-subtitle" id="ing-count-txt"></span>
+        </div>
+        <button class="plus-btn" onclick="openModal('add-ing')">+</button>
+      </div>
+      <div class="ing-tabs">
+        <div class="itab on" data-t="all" onclick="setIngTab('all')">全部<span class="itab-n" id="tn-all"></span></div>
+        <div class="itab" data-t="long" onclick="setIngTab('long')">长期<span class="itab-n" id="tn-long"></span></div>
+        <div class="itab" data-t="short" onclick="setIngTab('short')">短期<span class="itab-n" id="tn-short"></span></div>
+      </div>
+      <div class="scroll" id="ing-rows"></div>
+    </div>
+    <!-- Recipes mid -->
+    <div id="mid-recipes" style="display:none;flex-direction:column;height:100%;overflow:hidden;">
+      <div class="mid-head">
+        <div>
+          <span class="mid-title">菜谱</span>
+          <span class="mid-subtitle" id="recipe-count-txt"></span>
+        </div>
+        <button class="plus-btn" onclick="openModal('add-recipe')">+</button>
+      </div>
+      <div id="recipe-filter-rows"></div>
+      <div class="scroll" id="recipe-rows"></div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel" id="right"></div>
+
+</div>
+
+<!-- Recipe image hidden input -->
+<input type="file" accept="image/*" id="rimg-inp" style="display:none" onchange="onRecipeImg(event)">
+<!-- Ingredient image hidden input -->
+<input type="file" accept="image/*" id="iimg-inp" style="display:none" onchange="onIngImg(event)">
+
+<!-- MODALS -->
+<div id="modal-overlay" class="modal-overlay" style="display:none" onclick="closeModal(event)">
+  <!-- Add Ingredient -->
+  <div class="modal" id="modal-add-ing" style="display:none" onclick="event.stopPropagation()">
+    <div class="modal-title">添加原料</div>
+    <div class="field-row">
+      <div class="field"><label>名称</label><input id="mi-name" placeholder="例：番茄"></div>
+      <div class="field"><label>图标</label><input id="mi-icon" placeholder="🥬" style="width:70px;text-align:center;"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>购买地点</label>
+        <select id="mi-store">
+          <option>超市</option><option>菜市场</option><option>盒马鲜生</option>
+          <option>调料铺</option><option>Whole Foods</option><option>其他</option>
+        </select>
+      </div>
+      <div class="field"><label>类型</label>
+        <select id="mi-type">
+          <option value="short">短期新鲜</option>
+          <option value="long">长期储备</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>补货频率</label><input id="mi-freq" placeholder="例：每周 / 每月 / 半年以上"></div>
+    <div class="modal-btns">
+      <button class="mbtn cancel" onclick="closeModal()">取消</button>
+      <button class="mbtn confirm" onclick="addIngredient()">添加</button>
+    </div>
+  </div>
+  <!-- Edit Ingredient -->
+  <div class="modal" id="modal-edit-ing" style="display:none" onclick="event.stopPropagation()">
+    <div class="modal-title">编辑原料</div>
+    <input type="hidden" id="ei-id">
+    <div class="field-row">
+      <div class="field"><label>名称</label><input id="ei-name"></div>
+      <div class="field"><label>图标</label><input id="ei-icon" style="width:70px;text-align:center;"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>购买地点</label><input id="ei-store"></div>
+      <div class="field"><label>类型</label>
+        <select id="ei-type">
+          <option value="short">短期新鲜</option>
+          <option value="long">长期储备</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>补货频率</label><input id="ei-freq"></div>
+    <div class="modal-btns">
+      <button class="mbtn cancel" onclick="closeModal()">取消</button>
+      <button class="mbtn confirm" onclick="saveIngEdit()">保存</button>
+    </div>
+  </div>
+  <!-- Add Recipe -->
+  <div class="modal" id="modal-add-recipe" style="display:none" onclick="event.stopPropagation()">
+    <div class="modal-title">添加菜谱</div>
+    <div class="field"><label>菜谱名称</label><input id="mr-name" placeholder="例：麻婆豆腐"></div>
+    <div class="field-row">
+      <div class="field"><label>菜系</label>
+        <select id="mr-cuisine">
+          <option>中餐</option><option>西餐</option><option>轻食</option>
+        </select>
+      </div>
+      <div class="field"><label>餐型</label>
+        <select id="mr-meal">
+          <option>正餐</option><option>Brunch</option><option>甜品</option>
+        </select>
+      </div>
+      <div class="field"><label>时间（分钟）</label><input id="mr-time" type="number" placeholder="20"></div>
+    </div>
+    <div class="field"><label>烹饪步骤（每行一步）</label><textarea id="mr-steps" placeholder="第一步&#10;第二步&#10;第三步"></textarea></div>
+    <div class="modal-btns">
+      <button class="mbtn cancel" onclick="closeModal()">取消</button>
+      <button class="mbtn confirm" onclick="addRecipe()">添加</button>
+    </div>
+  </div>
+  <!-- Edit Recipe -->
+  <div class="modal" id="modal-edit-recipe" style="display:none" onclick="event.stopPropagation()">
+    <div class="modal-title">编辑菜谱</div>
+    <input type="hidden" id="er-id">
+    <div class="field"><label>菜谱名称</label><input id="er-name"></div>
+    <div class="field-row">
+      <div class="field"><label>菜系</label><input id="er-cuisine"></div>
+      <div class="field"><label>餐型</label>
+        <select id="er-meal">
+          <option>正餐</option><option>Brunch</option><option>甜品</option>
+        </select>
+      </div>
+      <div class="field"><label>时间（分钟）</label><input id="er-time" type="number"></div>
+    </div>
+    <div class="field"><label>烹饪步骤（每行一步）</label><textarea id="er-steps"></textarea></div>
+    <div class="modal-btns">
+      <button class="mbtn cancel" onclick="closeModal()">取消</button>
+      <button class="mbtn confirm" onclick="saveRecipeEdit()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════
+//  DATA
+// ════════════════════════════════════
+const DEF = {
+  bgImage: null,
+  view: 'recipes',
+  ingTab: 'all',
+  activeIngId: null,
+  activeRecipeId: 4,
+  activeStoreId: 'wf',
+  rfType: '全部',
+  rfCuisine: '全部',
+  ingredients: [
+    {id:1, name:'五花肉',   store:"99大华", freq:'每周',    type:'short', icon:'🥩', dot:'green'},
+    {id:2, name:'老抽',     store:"Trader Joe's", freq:'半年一次',type:'long',  icon:'🧴', dot:'purple'},
+    {id:3, name:'生抽',     store:"Trader Joe's", freq:'半年一次',type:'long',  icon:'🧴', dot:'purple'},
+    {id:4, name:'冰糖',     store:"Trader Joe's", freq:'数月一次',type:'long',  icon:'🧴', dot:'purple'},
+    {id:5, name:'八角',     store:"Trader Joe's", freq:'半年以上',type:'long',  icon:'⭐', dot:'orange'},
+    {id:6, name:'桂皮',     store:"Trader Joe's", freq:'半年以上',type:'long',  icon:'🍂', dot:'orange'},
+    {id:7, name:'鸡蛋',     store:"99大华", freq:'每周',    type:'short', icon:'🥚', dot:'green'},
+    {id:8, name:'嫩豆腐',   store:"99大华", freq:'2-3天',   type:'short', icon:'⬜', dot:'green'},
+    {id:9, name:'猪肉末',   store:"99大华", freq:'按需',    type:'short', icon:'🥩', dot:'green'},
+    {id:10,name:'郫县豆瓣酱',store:"99大华", freq:'2-3个月', type:'long',  icon:'🌶', dot:'orange'},
+    {id:11,name:'花椒',     store:"Trader Joe's", freq:'半年以上',type:'long',  icon:'🌰', dot:'orange'},
+    {id:12,name:'番茄',     store:"99大华", freq:'每周',    type:'short', icon:'🍅', dot:'green'},
+    {id:13,name:'葱',       store:"99大华", freq:'每周',    type:'short', icon:'🌿', dot:'green'},
+    {id:14,name:'姜',       store:"99大华", freq:'每月',    type:'long',  icon:'🫚', dot:'orange'},
+    {id:15,name:'蒜',       store:"99大华", freq:'每月',    type:'long',  icon:'🧄', dot:'orange'},
+    {id:16,name:'花生油',   store:"Trader Joe's", freq:'每月',    type:'long',  icon:'🧴', dot:'purple'},
+    {id:17,name:'料酒',     store:"99大华", freq:'每月',    type:'long',  icon:'🧴', dot:'purple'},
+    {id:18,name:'食盐',     store:"Trader Joe's", freq:'每季度',  type:'long',  icon:'🧂', dot:'purple'},
+    {id:19,name:'白糖',     store:"Trader Joe's", freq:'每月',    type:'long',  icon:'🍚', dot:'purple'},
+    {id:20,name:'酸种面包', store:'Whole Foods', freq:'每周', type:'short', icon:'🍞', dot:'green'},
+    {id:21,name:'布里芝士', store:'Whole Foods', freq:'按需', type:'short', icon:'🧀', dot:'green'},
+    {id:22,name:'小番茄',   store:'Whole Foods', freq:'每周', type:'short', icon:'🍅', dot:'green'},
+    {id:23,name:'帕尔马火腿',store:'Whole Foods',freq:'按需', type:'short', icon:'🥩', dot:'green'},
+    {id:24,name:'蜂蜜',     store:"Trader Joe's", freq:'每季度',  type:'long',  icon:'🍯', dot:'orange'},
+    {id:25,name:'花椒油',   store:"Trader Joe's", freq:'每月',    type:'long',  icon:'🧴', dot:'purple'},
+    {id:26,name:'核桃',     store:"Trader Joe's", freq:'每月',    type:'long',  icon:'🥜', dot:'orange'},
+    {id:27,name:'柠檬',     store:'Whole Foods', freq:'每周', type:'short', icon:'🍋', dot:'green'},
+    {id:28,name:'青提',     store:'Whole Foods', freq:'按需',    type:'short', icon:'🍇', dot:'green'},
+    {id:29,name:'Burrata',  store:'Whole Foods', freq:'按需', type:'short', icon:'🧀', dot:'green'},
+    {id:30,name:'法棍面包', store:'Whole Foods', freq:'每周', type:'short', icon:'🥖', dot:'green'},
+    {id:31,name:'橄榄油',   store:"Trader Joe's", freq:'每月',    type:'long',  icon:'🫒', dot:'purple'},
+  ],
+  recipes: [
+    {id:1, name:'红烧肉', cuisine:'中餐', mealType:'正餐', time:90, image:null,
+     ingredients:[
+       {name:'五花肉',   amount:'500g',  opt:false, store:'99大华'},
+       {name:'老抽',     amount:'2大勺', opt:false, store:"Trader Joe's"},
+       {name:'生抽',     amount:'3大勺', opt:false, store:"Trader Joe's"},
+       {name:'冰糖',     amount:'30g',   opt:false, store:"Trader Joe's"},
+       {name:'料酒',     amount:'2大勺', opt:false, store:"Trader Joe's"},
+       {name:'八角',     amount:'2颗',   opt:false, store:"Trader Joe's"},
+       {name:'桂皮',     amount:'1段',   opt:false, store:"Trader Joe's"},
+       {name:'姜',       amount:'适量',  opt:false, store:'99大华'},
+       {name:'葱',       amount:'适量',  opt:true,  store:'99大华'},
+     ],
+     steps:['五花肉切3cm方块，冷水下锅焯水，捞起沥干备用。','锅中放少许油，加入冰糖小火炒至焦糖色。','下入五花肉翻炒上色，加料酒、生抽、老抽翻炒均匀。','加入足量热水没过肉，放入八角、桂皮、姜片，大火烧开转小火炖60分钟。','开大火收汁至浓稠，撒葱花出锅。']},
+    {id:2, name:'麻婆豆腐', cuisine:'中餐', mealType:'正餐', time:20, image:null,
+     ingredients:[
+       {name:'嫩豆腐',    amount:'1盒',   opt:false, store:'99大华'},
+       {name:'猪肉末',    amount:'100g',  opt:false, store:'99大华'},
+       {name:'郫县豆瓣酱',amount:'1大勺', opt:false, store:'99大华'},
+       {name:'花椒',      amount:'适量',  opt:false, store:"Trader Joe's"},
+       {name:'生抽',      amount:'1大勺', opt:false, store:"Trader Joe's"},
+       {name:'葱',        amount:'适量',  opt:false, store:'99大华'},
+       {name:'姜',        amount:'适量',  opt:false, store:'99大华'},
+       {name:'蒜',        amount:'3瓣',   opt:false, store:'99大华'},
+     ],
+     steps:['豆腐切2cm小块，开水加盐，下豆腐焯水1分钟捞出。','锅中热油，下猪肉末炒至变色，加郫县豆瓣酱炒出红油。','加入姜蒜末炒香，加适量水烧开。','下入豆腐小火炖5分钟，水淀粉勾芡。','出锅撒葱花和花椒粉。']},
+    {id:3, name:'番茄炒蛋', cuisine:'中餐', mealType:'正餐', time:15, image:null,
+     ingredients:[
+       {name:'番茄',  amount:'2个',   opt:false, store:'99大华'},
+       {name:'鸡蛋',  amount:'3个',   opt:false, store:'99大华'},
+       {name:'白糖',  amount:'1小勺', opt:true,  store:"Trader Joe's"},
+       {name:'食盐',  amount:'适量',  opt:false, store:"Trader Joe's"},
+       {name:'花生油',amount:'适量',  opt:false, store:"Trader Joe's"},
+       {name:'葱',    amount:'适量',  opt:true,  store:'99大华'},
+     ],
+     steps:['番茄切块，鸡蛋打散加少许盐搅匀。','热锅热油，鸡蛋液下锅炒至半熟盛出。','加少许油，下番茄翻炒出汁，加盐和少许糖调味。','倒入鸡蛋翻炒均匀，撒葱花出锅。']},
+    {id:4, name:'帕火番茄布里吐司', cuisine:'西餐', mealType:'Brunch', time:15, image:null,
+     ingredients:[
+       {name:'酸种面包',   amount:'2片',  opt:false, store:'Whole Foods'},
+       {name:'布里芝士',   amount:'适量', opt:false, store:'Whole Foods'},
+       {name:'小番茄',     amount:'4-5颗',opt:false, store:'Whole Foods'},
+       {name:'帕尔马火腿', amount:'2片',  opt:false, store:'Whole Foods'},
+       {name:'蜂蜜',       amount:'少许', opt:false, store:"Trader Joe's"},
+       {name:'花椒油',     amount:'少许', opt:true,  store:"Trader Joe's"},
+       {name:'核桃',       amount:'适量', opt:true,  store:"Trader Joe's"},
+       {name:'柠檬',       amount:'适量', opt:true,  store:'Whole Foods'},
+     ],
+     steps:['面包放入烤箱180°C烤3-4分钟至酥脆。','布里芝士切片铺在热吐司上，余温让芝士微微融化。','小番茄对半切开，铺上帕尔马火腿。','淋上蜂蜜，按喜好加辣椒碎、核桃和柠檬汁。']},
+    {id:5, name:'烤青提Burrata法棍', cuisine:'西餐', mealType:'Brunch', time:25, image:null,
+     ingredients:[
+       {name:'法棍面包', amount:'半根',  opt:false, store:'Whole Foods'},
+       {name:'Burrata',  amount:'1个',   opt:false, store:'Whole Foods'},
+       {name:'青提',     amount:'100g',  opt:false, store:'Whole Foods'},
+       {name:'橄榄油',   amount:'适量',  opt:false, store:"Trader Joe's"},
+       {name:'蜂蜜',     amount:'少许',  opt:true,  store:"Trader Joe's"},
+       {name:'食盐',     amount:'少许',  opt:false, store:"Trader Joe's"},
+     ],
+     steps:['青提铺烤盘，淋橄榄油和盐，200°C烤15分钟至微皱出汁。','法棍斜切，与青提同烤至金黄酥脆。','烤好的法棍上放Burrata，撕开让奶油流出。','铺上烤青提，淋蜂蜜享用。']},
+  ],
+  stores: [
+    {id:'tj', name:"Trader Joe's", groups:[
+      {id:'g1a', label:'调味干货', type:'pantry', items:[
+        {id:1,name:'八角',note:'买干品，香气足',freq:'补货频率：半年以上',checked:false},
+        {id:2,name:'桂皮',note:'与八角同买',freq:'补货频率：半年以上',checked:false},
+        {id:3,name:'花椒',note:'',freq:'补货频率：半年以上',checked:false},
+        {id:4,name:'生抽',note:'',freq:'补货频率：每月',checked:false},
+        {id:5,name:'老抽',note:'上色用',freq:'',checked:false},
+        {id:6,name:'冰糖',note:'',freq:'',checked:false},
+        {id:7,name:'料酒',note:'',freq:'',checked:false},
+        {id:8,name:'蜂蜜',note:'',freq:'',checked:false},
+        {id:9,name:'花生油',note:'',freq:'',checked:false},
+        {id:10,name:'橄榄油',note:'',freq:'',checked:false},
+        {id:11,name:'食盐',note:'',freq:'',checked:false},
+        {id:12,name:'白糖',note:'',freq:'',checked:false},
+      ]}
+    ]},
+    {id:'wf', name:'Whole Foods', groups:[
+      {id:'g2a', label:'新鲜食材', type:'fresh', items:[
+        {id:20,name:'酸种面包',note:'2片',freq:'',checked:false},
+        {id:21,name:'布里芝士 Brie',note:'适量',freq:'',checked:false},
+        {id:22,name:'小番茄',note:'4-5颗',freq:'',checked:false},
+        {id:23,name:'帕尔马火腿',note:'2片',freq:'',checked:false},
+        {id:24,name:'柠檬',note:'多买几个',freq:'',checked:false},
+        {id:25,name:'Burrata',note:'',freq:'',checked:false},
+        {id:26,name:'法棍面包',note:'',freq:'',checked:false},
+        {id:27,name:'青提',note:'',freq:'',checked:false},
+      ]}
+    ]},
+    {id:'rm', name:'99大华', groups:[
+      {id:'g3a', label:'肉蛋豆腐', type:'fresh', items:[
+        {id:30,name:'五花肉',note:'选带皮的',freq:'',checked:false},
+        {id:31,name:'猪肉末',note:'',freq:'',checked:false},
+        {id:32,name:'鸡蛋',note:'',freq:'',checked:false},
+        {id:33,name:'嫩豆腐',note:'',freq:'',checked:false},
+      ]},
+      {id:'g3b', label:'蔬菜调料', type:'fresh', items:[
+        {id:34,name:'番茄',note:'',freq:'',checked:false},
+        {id:35,name:'葱',note:'',freq:'',checked:false},
+        {id:36,name:'姜',note:'',freq:'',checked:false},
+        {id:37,name:'蒜',note:'',freq:'',checked:false},
+        {id:38,name:'郫县豆瓣酱',note:'',freq:'',checked:false},
+      ]}
+    ]},
+  ]
+};
+
+// ════════════════════════════════════
+//  CONFIG
+// ════════════════════════════════════
+const SUPABASE_URL = 'https://hxtposcpzibqyidcjwpj.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dHBvc2NwemlicXlpZGNqd3BqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1Nzg1NDYsImV4cCI6MjA5MzE1NDU0Nn0.jDwYvspi5pdIijuewNgJpb1dyDYxxNsd8SOWANw4N54';
+const PASSWORD = '1107';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ════════════════════════════════════
+//  STATE
+// ════════════════════════════════════
+let S = JSON.parse(JSON.stringify(DEF));
+let nid = 300;
+let saveTimer = null;
+let syncChannel = null;
+
+// ════════════════════════════════════
+//  SYNC
+// ════════════════════════════════════
+async function loadFromCloud() {
+  try {
+    const { data, error } = await sb.from('kitchen_data').select('data').eq('id','main').single();
+    if (error || !data) return false;
+    S = { ...JSON.parse(JSON.stringify(DEF)), ...data.data };
+    return true;
+  } catch(e) { return false; }
+}
+
+async function saveToCloud() {
+  try {
+    await sb.from('kitchen_data').upsert({ id: 'main', data: S, updated_at: new Date().toISOString() });
+    setSyncStatus('ok');
+  } catch(e) {
+    setSyncStatus('err');
+  }
+}
+
+function save() {
+  setSyncStatus('saving');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToCloud, 800);
+}
+
+function setSyncStatus(state) {
+  const dot = document.getElementById('sync-dot');
+  const txt = document.getElementById('sync-txt');
+  if (!dot) return;
+  if (state === 'ok')     { dot.style.background='#5a8a5e'; txt.textContent='已同步'; }
+  if (state === 'saving') { dot.style.background='#c97b3a'; txt.textContent='同步中…'; }
+  if (state === 'err')    { dot.style.background='#c0392b'; txt.textContent='同步失败'; }
+}
+
+// Real-time: when another device saves, refresh
+function startRealtime() {
+  if (syncChannel) syncChannel.unsubscribe();
+  syncChannel = sb.channel('kitchen-changes')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'kitchen_data' }, async () => {
+      const ok = await loadFromCloud();
+      if (ok) { applyBg(); go(S.view || 'recipes'); }
+    })
+    .subscribe();
+}
+
+// ════════════════════════════════════
+//  PASSWORD GATE
+// ════════════════════════════════════
+function checkSavedLogin() {
+  return localStorage.getItem('kitchen_auth') === 'ok';
+}
+
+async function doLogin() {
+  const pwd = document.getElementById('gate-pwd').value.trim();
+  const btn = document.getElementById('gate-btn');
+  const err = document.getElementById('gate-err');
+  if (!pwd) { err.textContent = '请输入密码'; return; }
+  if (pwd !== PASSWORD) {
+    err.textContent = '密码错误，请重试';
+    document.getElementById('gate-pwd').select();
+    return;
+  }
+  btn.disabled = true; btn.textContent = '加载中…'; err.textContent = '';
+  localStorage.setItem('kitchen_auth', 'ok');
+  await enterApp();
+}
+
+function doLogout() {
+  if (!confirm('确定退出？下次需要重新输入密码')) return;
+  localStorage.removeItem('kitchen_auth');
+  location.reload();
+}
+
+async function enterApp() {
+  setSyncStatus('saving');
+  const ok = await loadFromCloud();
+  if (!ok) {
+    // First time — push default data
+    await saveToCloud();
+  }
+  document.getElementById('gate').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  applyBg();
+  go(S.view || 'recipes');
+  setSyncStatus('ok');
+  startRealtime();
+}
+
+// ════════════════════════════════════
+//  INIT
+// ════════════════════════════════════
+if (checkSavedLogin()) {
+  // Already logged in on this device
+  enterApp();
+} else {
+  document.getElementById('gate').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+// ════════════════════════════════════
+function uploadBg(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image(), u = URL.createObjectURL(f);
+  img.onload = () => {
+    const c = document.createElement('canvas');
+    let w = img.width, h = img.height, MAX = 1920;
+    if (w > MAX) { h = Math.round(h*MAX/w); w = MAX; }
+    c.width = w; c.height = h;
+    c.getContext('2d').drawImage(img, 0, 0, w, h);
+    S.bgImage = c.toDataURL('image/jpeg', 0.82);
+    URL.revokeObjectURL(u); save(); applyBg();
+  };
+  img.src = u; e.target.value = '';
+}
+function clearBg() { S.bgImage = null; save(); applyBg(); }
+function applyBg() {
+  const bl = document.getElementById('bg-layer');
+  const btn = document.getElementById('clear-bg-btn');
+  const app = document.getElementById('app');
+  if (S.bgImage) {
+    bl.style.backgroundImage = `url(${S.bgImage})`;
+    bl.style.background = `url(${S.bgImage}) center/cover no-repeat`;
+    app.classList.add('glass');
+    btn.style.display = 'flex';
+  } else {
+    bl.style.background = 'linear-gradient(135deg,#e8e2d5 0%,#d5ccbe 100%)';
+    app.classList.remove('glass');
+    btn.style.display = 'none';
+  }
+}
+
+// ════════════════════════════════════
+//  NAVIGATION
+// ════════════════════════════════════
+function go(view) {
+  S.view = view;
+  document.querySelectorAll('.nav').forEach(n => n.classList.toggle('on', n.dataset.v === view));
+  const panels = { shopping: 'mid-shopping', ingredients: 'mid-ing', recipes: 'mid-recipes' };
+  Object.entries(panels).forEach(([v, id]) => {
+    document.getElementById(id).style.display = v === view ? 'flex' : 'none';
+  });
+  save();
+  if (view === 'shopping') renderShopping();
+  else if (view === 'ingredients') renderIngredients();
+  else if (view === 'recipes') renderRecipes();
+}
+
+// ════════════════════════════════════
+//  INGREDIENTS
+// ════════════════════════════════════
+function dotColor(d) { return d==='green'?'#5a8a5e':d==='orange'?'#c97b3a':'#7c6baa'; }
+
+function ingUsedIn(name) { return S.recipes.filter(r=>r.ingredients.some(i=>i.name===name)).length; }
+
+function renderIngredients() {
+  const all = S.ingredients.length;
+  const long = S.ingredients.filter(i=>i.type==='long').length;
+  const short = S.ingredients.filter(i=>i.type==='short').length;
+  document.getElementById('ing-count-txt').textContent = ` (${all})`;
+  document.getElementById('tn-all').textContent = all;
+  document.getElementById('tn-long').textContent = long;
+  document.getElementById('tn-short').textContent = short;
+  document.querySelectorAll('.itab').forEach(t => t.classList.toggle('on', t.dataset.t === S.ingTab));
+
+  const filtered = S.ingTab==='all' ? S.ingredients : S.ingredients.filter(i=>i.type===S.ingTab);
+  const wrap = document.getElementById('ing-rows');
+  wrap.innerHTML = '';
+  filtered.forEach(ing => {
+    const used = ingUsedIn(ing.name);
+    const el = document.createElement('div');
+    el.className = 'ing-row' + (S.activeIngId===ing.id?' on':'');
+    const thumbInner = ing.image
+      ? `<img src="${ing.image}" style="width:100%;height:100%;object-fit:cover;border-radius:9px;">`
+      : ing.icon;
+    el.innerHTML = `
+      <div class="ing-thumb">${thumbInner}</div>
+      <div class="ing-info">
+        <div class="ing-n-row">
+          <div class="idot" style="background:${dotColor(ing.dot)}"></div>
+          <div class="ing-n">${ing.name}</div>
+        </div>
+        <div class="ing-m">${ing.store} · ${ing.freq} · 用于${used}道菜</div>
+      </div>`;
+    el.onclick = () => { S.activeIngId = ing.id; save(); renderIngredients(); renderIngDetail(); };
+    wrap.appendChild(el);
+  });
+  renderIngDetail();
+}
+
+function setIngTab(t) { S.ingTab = t; save(); renderIngredients(); }
+
+function renderIngDetail() {
+  const panel = document.getElementById('right');
+  if (!S.activeIngId) {
+    panel.innerHTML = `<div class="ph"><div class="ph-icon">🛒</div><div class="ph-text">选择原料查看详情</div></div>`;
+    return;
+  }
+  const ing = S.ingredients.find(i=>i.id===S.activeIngId);
+  if (!ing) { panel.innerHTML = `<div class="ph"><div class="ph-icon">🛒</div><div class="ph-text">选择原料查看详情</div></div>`; return; }
+  const used = ingUsedIn(ing.name);
+  const usedRecipes = S.recipes.filter(r=>r.ingredients.some(i=>i.name===ing.name));
+  const recipeChips = usedRecipes.length
+    ? usedRecipes.map(r=>`<div class="chip link" onclick="goRecipe(${r.id})">${r.name}</div>`).join('')
+    : '<div class="chip">暂无菜谱使用此原料</div>';
+
+  const imgHtml = ing.image
+    ? `<img src="${ing.image}" style="width:100%;height:100%;object-fit:cover;">`
+    : `<div class="rimg-ph"><div class="rimg-ph-icon">${ing.icon}</div><span>点击右下角添加图片</span></div>`;
+
+  panel.innerHTML = `
+    <div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+      <div class="rimg-area" style="height:180px;flex-shrink:0;">${imgHtml}
+        <button class="rimg-btn" onclick="trigIngImg(${ing.id})">+ 添加图片</button>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 26px 10px;border-bottom:1px solid var(--border-light);flex-shrink:0;">
+        <div style="font-size:16px;font-weight:600;">${ing.name}</div>
+        <div style="display:flex;gap:7px;">
+          <button class="icon-act" onclick="openEditIng(${ing.id})">✏️ 编辑</button>
+          <button class="icon-act del" onclick="delIng(${ing.id})">🗑</button>
+        </div>
+      </div>
+      <div class="ing-det">
+        <div class="det-body">
+          <div class="det-name">${ing.name}</div>
+          <div class="badge ${ing.type==='long'?'long':'short'}">${ing.type==='long'?'🔒 长期储备':'🌿 短期新鲜'}</div>
+          <div class="sec-t">基本信息</div>
+          <div class="chip-row">
+            <div class="chip">🛒 ${ing.store}</div>
+            <div class="chip">⏱ ${ing.freq}</div>
+            <div class="chip">🍳 用于${used}道菜</div>
+          </div>
+          <div class="sec-t">使用此原料的菜谱</div>
+          <div class="chip-row">${recipeChips}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function goRecipe(id) { S.activeRecipeId = id; go('recipes'); }
+
+function trigIngImg(id) {
+  document.getElementById('iimg-inp').dataset.iid = id;
+  document.getElementById('iimg-inp').click();
+}
+function onIngImg(e) {
+  const id = parseInt(document.getElementById('iimg-inp').dataset.iid);
+  const f = e.target.files[0]; if (!f||!id) return;
+  const img = new Image(), u = URL.createObjectURL(f);
+  img.onload = () => {
+    const c = document.createElement('canvas');
+    let w = img.width, h = img.height, MAX = 900;
+    if (w > MAX) { h = Math.round(h*MAX/w); w = MAX; }
+    c.width = w; c.height = h;
+    c.getContext('2d').drawImage(img, 0, 0, w, h);
+    const ing = S.ingredients.find(i=>i.id===id); if (!ing) return;
+    ing.image = c.toDataURL('image/jpeg', 0.82);
+    URL.revokeObjectURL(u); save(); renderIngredients(); renderIngDetail();
+  };
+  img.src = u; e.target.value = '';
+}
+
+function delIng(id) {
+  if (!confirm('确定删除这个原料？')) return;
+  S.ingredients = S.ingredients.filter(i=>i.id!==id);
+  S.activeIngId = null; save(); renderIngredients();
+}
+
+function openEditIng(id) {
+  const ing = S.ingredients.find(i=>i.id===id); if (!ing) return;
+  document.getElementById('ei-id').value = id;
+  document.getElementById('ei-name').value = ing.name;
+  document.getElementById('ei-icon').value = ing.icon;
+  document.getElementById('ei-store').value = ing.store;
+  document.getElementById('ei-freq').value = ing.freq;
+  document.getElementById('ei-type').value = ing.type;
+  openModal('edit-ing');
+}
+function saveIngEdit() {
+  const id = parseInt(document.getElementById('ei-id').value);
+  const ing = S.ingredients.find(i=>i.id===id); if (!ing) return;
+  ing.name = document.getElementById('ei-name').value.trim() || ing.name;
+  ing.icon = document.getElementById('ei-icon').value.trim() || ing.icon;
+  ing.store = document.getElementById('ei-store').value.trim() || ing.store;
+  ing.freq = document.getElementById('ei-freq').value.trim() || ing.freq;
+  ing.type = document.getElementById('ei-type').value;
+  ing.dot = ing.type==='short'?'green':'purple';
+  save(); closeModal(); renderIngredients();
+}
+function addIngredient() {
+  const name = document.getElementById('mi-name').value.trim(); if (!name) return;
+  const type = document.getElementById('mi-type').value;
+  S.ingredients.push({
+    id: nid++,
+    name,
+    icon: document.getElementById('mi-icon').value.trim() || (type==='short'?'🥬':'🧴'),
+    store: document.getElementById('mi-store').value,
+    freq: document.getElementById('mi-freq').value.trim() || '按需',
+    type,
+    dot: type==='short'?'green':'purple'
+  });
+  save(); closeModal(); renderIngredients();
+}
+
+// ════════════════════════════════════
+//  RECIPES
+// ════════════════════════════════════
+const MEAL_TYPES = ['全部','正餐','Brunch','甜品'];
+const CUISINES = ['全部','中餐','西餐','轻食'];
+const BADGE_CLASSES = {正餐:'meal',早餐:'break',Brunch:'brunch',甜品:'dessert',宵夜:'late'};
+
+function renderRecipes() {
+  // Filters
+  const fr = document.getElementById('recipe-filter-rows');
+  fr.innerHTML = `
+    <div class="rfrow">${MEAL_TYPES.map(t=>`<div class="rtag${S.rfType===t?' on':''}" onclick="setRF('type','${t}')">${t}</div>`).join('')}</div>
+    <div class="rfrow">${CUISINES.map(c=>`<div class="rtag${S.rfCuisine===c?' on':''}" onclick="setRF('cuisine','${c}')">${c}</div>`).join('')}</div>`;
+
+  // Recipe list
+  const filtered = S.recipes.filter(r => {
+    const tok = S.rfType==='全部'||r.mealType===S.rfType;
+    const cok = S.rfCuisine==='全部'||r.cuisine===S.rfCuisine||r.cuisine.includes(S.rfCuisine);
+    return tok && cok;
+  });
+  document.getElementById('recipe-count-txt').textContent = ` (${filtered.length}/${S.recipes.length})`;
+  const wrap = document.getElementById('recipe-rows');
+  wrap.innerHTML = '';
+  filtered.forEach(r => {
+    const el = document.createElement('div');
+    el.className = 'rrow' + (S.activeRecipeId===r.id?' on':'');
+    const thumb = r.image ? `<div class="rthumb"><img src="${r.image}"></div>` : `<div class="rthumb">🍽</div>`;
+    el.innerHTML = `${thumb}<div><div class="rn">${r.name}</div><div class="rm">${r.cuisine}·${r.mealType}·${r.time}分钟</div></div>`;
+    el.onclick = () => { S.activeRecipeId = r.id; save(); renderRecipes(); renderRecipeDetail(); };
+    wrap.appendChild(el);
+  });
+  renderRecipeDetail();
+}
+
+function setRF(k, v) {
+  if (k==='type') S.rfType = v; else S.rfCuisine = v;
+  save(); renderRecipes();
+}
+
+function renderRecipeDetail() {
+  const panel = document.getElementById('right');
+  if (!S.activeRecipeId) {
+    panel.innerHTML = `<div class="ph"><div class="ph-icon">📖</div><div class="ph-text">选择菜谱查看详情</div></div>`;
+    return;
+  }
+  const r = S.recipes.find(r=>r.id===S.activeRecipeId);
+  if (!r) { panel.innerHTML = `<div class="ph"><div class="ph-icon">📖</div><div class="ph-text">选择菜谱查看详情</div></div>`; return; }
+
+  // Store grouping
+  const sm = {};
+  r.ingredients.forEach(i => { if (!sm[i.store]) sm[i.store] = []; sm[i.store].push(i); });
+  const storeSecs = Object.entries(sm).map(([st, ings]) => {
+    const hasFresh = ings.some(i => { const d = S.ingredients.find(x=>x.name===i.name); return d&&d.type==='short'; });
+    const tags = ings.map(i=>`<div class="stag${i.opt?' opt':''}">${i.name} <span class="sopt">${i.amount}${i.opt?' 可选':''}</span></div>`).join('');
+    return `<div class="store-sec"><div class="store-sec-h"><span>🛒</span>${st}${hasFresh?'<span class="fresh-badge">含生鲜</span>':''}</div><div class="store-tags">${tags}</div></div>`;
+  }).join('');
+
+  const allTags = r.ingredients.map(i=>`<div class="itag${i.opt?' opt':''}">${i.name} <span class="iamt">${i.amount}${i.opt?' 可选':''}</span></div>`).join('');
+  const steps = r.steps.map((s,i)=>`<li class="step-li"><div class="snum">${i+1}</div><div class="stxt">${s}</div></li>`).join('');
+  const bc = BADGE_CLASSES[r.mealType] || 'meal';
+  const imgHtml = r.image ? `<img src="${r.image}">` : `<div class="rimg-ph"><div class="rimg-ph-icon">🍽</div><span>点击右下角添加图片</span></div>`;
+
+  panel.innerHTML = `
+    <div class="rdet">
+      <div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+        <div class="rimg-area" style="flex-shrink:0;">${imgHtml}
+          <button class="rimg-btn" onclick="trigRImg(${r.id})">+ 添加图片</button>
+        </div>
+        <div style="flex:1;overflow-y:auto;" class="rdet-inner">
+          <div class="rdet-body">
+            <div class="act-row">
+              <button class="icon-act" onclick="openEditRecipe(${r.id})">✏️ 编辑</button>
+              <button class="icon-act del" onclick="delRecipe(${r.id})">🗑</button>
+            </div>
+            <div class="rdet-title-row">
+              <div class="rdet-name">${r.name}</div>
+              <div class="badge ${bc}">${r.mealType}</div>
+            </div>
+            <div class="rdet-meta">${r.cuisine} · <span>⏱ ${r.time}分钟</span></div>
+            <div class="sec-t">所需原料</div>
+            <div class="itags">${allTags}</div>
+            <div class="sec-t">需要去哪里买</div>
+            ${storeSecs}
+            <div class="sec-t" style="margin-top:20px;">烹饪步骤</div>
+            <ul class="steps-ul">${steps}</ul>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  // Fix inner scroll height
+  const rdet = panel.querySelector('.rdet');
+  if (rdet) rdet.style.cssText = 'flex:1;overflow:hidden;display:flex;flex-direction:column;';
+}
+
+function trigRImg(id) {
+  document.getElementById('rimg-inp').dataset.rid = id;
+  document.getElementById('rimg-inp').click();
+}
+function onRecipeImg(e) {
+  const id = parseInt(document.getElementById('rimg-inp').dataset.rid);
+  const f = e.target.files[0]; if (!f||!id) return;
+  const img = new Image(), u = URL.createObjectURL(f);
+  img.onload = () => {
+    const c = document.createElement('canvas');
+    let w = img.width, h = img.height, MAX = 900;
+    if (w > MAX) { h = Math.round(h*MAX/w); w = MAX; }
+    c.width = w; c.height = h;
+    c.getContext('2d').drawImage(img, 0, 0, w, h);
+    const r = S.recipes.find(r=>r.id===id); if (!r) return;
+    r.image = c.toDataURL('image/jpeg', 0.82);
+    URL.revokeObjectURL(u); save();
+    renderRecipes(); renderRecipeDetail();
+  };
+  img.src = u; e.target.value = '';
+}
+
+function delRecipe(id) {
+  if (!confirm('确定删除这个菜谱？')) return;
+  S.recipes = S.recipes.filter(r=>r.id!==id);
+  S.activeRecipeId = null; save(); renderRecipes();
+}
+function openEditRecipe(id) {
+  const r = S.recipes.find(r=>r.id===id); if (!r) return;
+  document.getElementById('er-id').value = id;
+  document.getElementById('er-name').value = r.name;
+  document.getElementById('er-cuisine').value = r.cuisine;
+  document.getElementById('er-meal').value = r.mealType;
+  document.getElementById('er-time').value = r.time;
+  document.getElementById('er-steps').value = r.steps.join('\n');
+  openModal('edit-recipe');
+}
+function saveRecipeEdit() {
+  const id = parseInt(document.getElementById('er-id').value);
+  const r = S.recipes.find(r=>r.id===id); if (!r) return;
+  r.name = document.getElementById('er-name').value.trim() || r.name;
+  r.cuisine = document.getElementById('er-cuisine').value.trim() || r.cuisine;
+  r.mealType = document.getElementById('er-meal').value;
+  r.time = parseInt(document.getElementById('er-time').value) || r.time;
+  r.steps = document.getElementById('er-steps').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  save(); closeModal(); renderRecipes(); renderRecipeDetail();
+}
+function addRecipe() {
+  const name = document.getElementById('mr-name').value.trim(); if (!name) return;
+  const r = {
+    id: nid++, name,
+    cuisine: document.getElementById('mr-cuisine').value,
+    mealType: document.getElementById('mr-meal').value,
+    time: parseInt(document.getElementById('mr-time').value)||30,
+    image: null, ingredients: [],
+    steps: document.getElementById('mr-steps').value.split('\n').map(s=>s.trim()).filter(Boolean)
+  };
+  S.recipes.push(r); S.activeRecipeId = r.id;
+  save(); closeModal(); renderRecipes();
+}
+
+// ════════════════════════════════════
+//  SHOPPING
+// ════════════════════════════════════
+function renderShopping() {
+  // Store list
+  const sw = document.getElementById('store-rows');
+  sw.innerHTML = '';
+  S.stores.forEach(st => {
+    const tot = st.groups.reduce((s,g)=>s+g.items.length, 0);
+    const el = document.createElement('div');
+    el.className = 'srow' + (S.activeStoreId===st.id?' on':'');
+    el.innerHTML = `<div class="sn">${st.name}</div><div class="sc">${tot} 件</div>`;
+    el.onclick = () => { S.activeStoreId = st.id; save(); renderShopping(); };
+    sw.appendChild(el);
+  });
+  // Items panel
+  const store = S.stores.find(s=>s.id===S.activeStoreId);
+  let tot = 0, ck = 0;
+  if (store) store.groups.forEach(g=>g.items.forEach(i=>{tot++;if(i.checked)ck++;}));
+  const pct = tot ? Math.round((ck/tot)*100) : 0;
+
+  document.getElementById('right').innerHTML = `
+    <div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+      <div class="rp-head">
+        <div class="rp-title"><span>🛒</span>${store?store.name:'—'}</div>
+        <button class="icon-act" onclick="clearCk()">清空勾选</button>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-meta">${ck}/${tot}</div>
+        <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="item-list" id="item-list-inner"></div>
+      <div class="add-bar">
+        <input class="ai" id="ni-name" placeholder="添加商品…" onkeydown="if(event.key==='Enter')addShop()">
+        <input class="ai" id="ni-note" placeholder="备注" style="max-width:130px;" onkeydown="if(event.key==='Enter')addShop()">
+        <button class="add-btn" onclick="addShop()">添加</button>
+      </div>
+    </div>`;
+
+  const inner = document.getElementById('item-list-inner');
+  if (!store||tot===0) {
+    inner.innerHTML = `<div class="ph"><div class="ph-icon">🛒</div><div class="ph-text">还没有商品</div></div>`;
+    return;
+  }
+  store.groups.forEach(g => {
+    if (g.items.length===0) return;
+    const dotC = g.type==='fresh'?'#5a8a5e':'#7c6baa';
+    const h = document.createElement('div');
+    h.className = 'grp-head';
+    h.innerHTML = `<div class="gdot" style="background:${dotC}"></div><span>🔒</span><span>${g.label}（${g.items.length}件）</span>`;
+    inner.appendChild(h);
+    g.items.forEach(item => {
+      const c = document.createElement('div');
+      c.className = 'item-card'+(item.checked?' ck':'');
+      c.innerHTML = `
+        <div class="cb">
+          <svg class="chk" width="12" height="9" viewBox="0 0 12 9" fill="none">
+            <path d="M1.5 4.5L4.5 7.5L10.5 1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="iname">${item.name}</div>
+          ${item.note?`<div class="inote">${item.note}</div>`:''}
+          ${item.freq?`<div class="ifreq">${item.freq}</div>`:''}
+        </div>`;
+      c.onclick = () => { item.checked = !item.checked; save(); renderShopping(); };
+      inner.appendChild(c);
+    });
+  });
+}
+
+function clearCk() {
+  const st = S.stores.find(s=>s.id===S.activeStoreId); if (!st) return;
+  st.groups.forEach(g=>g.items.forEach(i=>i.checked=false));
+  save(); renderShopping();
+}
+function addShop() {
+  const ne = document.getElementById('ni-name');
+  const n = ne.value.trim(); if (!n) { ne.focus(); return; }
+  const st = S.stores.find(s=>s.id===S.activeStoreId); if (!st) return;
+  let g = st.groups[0];
+  if (!g) { g = {id:'gd',label:'待分类',type:'pantry',items:[]}; st.groups.push(g); }
+  g.items.push({id:nid++,name:n,note:document.getElementById('ni-note').value.trim(),freq:'',checked:false});
+  ne.value = ''; document.getElementById('ni-note').value = ''; ne.focus();
+  save(); renderShopping();
+}
+
+// ════════════════════════════════════
+//  MODAL
+// ════════════════════════════════════
+let currentModal = null;
+function openModal(name) {
+  document.getElementById('modal-overlay').style.display = 'flex';
+  ['add-ing','edit-ing','add-recipe','edit-recipe'].forEach(id => {
+    document.getElementById('modal-'+id).style.display = id===name?'block':'none';
+  });
+  currentModal = name;
+}
+function closeModal(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').style.display = 'none';
+  currentModal = null;
+}
+document.addEventListener('keydown', e => { if (e.key==='Escape') { document.getElementById('modal-overlay').style.display='none'; } });
+
+// ════════════════════════════════════
+//  INIT — Firebase auth handles it
+// ════════════════════════════════════
+</script>
+</body>
+</html>
