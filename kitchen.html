@@ -573,8 +573,7 @@ body {
 </head>
 <body>
 
-<!-- PASSWORD GATE -->
-<div id="gate">
+<div id="gate" style="display:none">
   <div class="gate-card">
     <div class="gate-logo">🍳</div>
     <div class="gate-title">我的厨房</div>
@@ -590,7 +589,7 @@ body {
 
 <div id="bg-layer"></div>
 
-<div class="app" id="app" style="display:none">
+<div class="app" id="app">
 
   <!-- SIDEBAR -->
   <aside class="sidebar">
@@ -944,7 +943,13 @@ const DEF = {
 const SUPABASE_URL = 'https://hxtposcpzibqyidcjwpj.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh4dHBvc2NwemlicXlpZGNqd3BqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1Nzg1NDYsImV4cCI6MjA5MzE1NDU0Nn0.jDwYvspi5pdIijuewNgJpb1dyDYxxNsd8SOWANw4N54';
 const PASSWORD = '1107';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let sb = null;
+try {
+  if (typeof supabase !== 'undefined') {
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
+} catch(e) { console.warn('Supabase init failed:', e); }
 
 // ════════════════════════════════════
 //  STATE
@@ -958,6 +963,7 @@ let syncChannel = null;
 //  SYNC
 // ════════════════════════════════════
 async function loadFromCloud() {
+  if (!sb) return false;
   try {
     const { data, error } = await sb.from('kitchen_data').select('data').eq('id','main').single();
     if (error || !data) return false;
@@ -967,15 +973,17 @@ async function loadFromCloud() {
 }
 
 async function saveToCloud() {
+  if (!sb) return;
   try {
     await sb.from('kitchen_data').upsert({ id: 'main', data: S, updated_at: new Date().toISOString() });
     setSyncStatus('ok');
-  } catch(e) {
-    setSyncStatus('err');
-  }
+  } catch(e) { setSyncStatus('err'); }
 }
 
 function save() {
+  // Always save to localStorage as backup
+  try { localStorage.setItem('kitchen_local', JSON.stringify(S)); } catch(e) {}
+  if (!sb) return;
   setSyncStatus('saving');
   clearTimeout(saveTimer);
   saveTimer = setTimeout(saveToCloud, 800);
@@ -988,17 +996,20 @@ function setSyncStatus(state) {
   if (state === 'ok')     { dot.style.background='#5a8a5e'; txt.textContent='已同步'; }
   if (state === 'saving') { dot.style.background='#c97b3a'; txt.textContent='同步中…'; }
   if (state === 'err')    { dot.style.background='#c0392b'; txt.textContent='同步失败'; }
+  if (state === 'local')  { dot.style.background='#b0a499'; txt.textContent='本地模式'; }
 }
 
-// Real-time: when another device saves, refresh
 function startRealtime() {
-  if (syncChannel) syncChannel.unsubscribe();
-  syncChannel = sb.channel('kitchen-changes')
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'kitchen_data' }, async () => {
-      const ok = await loadFromCloud();
-      if (ok) { applyBg(); go(S.view || 'recipes'); }
-    })
-    .subscribe();
+  if (!sb) return;
+  try {
+    if (syncChannel) syncChannel.unsubscribe();
+    syncChannel = sb.channel('kitchen-changes')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'kitchen_data' }, async () => {
+        const ok = await loadFromCloud();
+        if (ok) { applyBg(); go(S.view || 'recipes'); }
+      })
+      .subscribe();
+  } catch(e) {}
 }
 
 // ════════════════════════════════════
@@ -1008,9 +1019,8 @@ function checkSavedLogin() {
   return localStorage.getItem('kitchen_auth') === 'ok';
 }
 
-async function doLogin() {
+function doLogin() {
   const pwd = document.getElementById('gate-pwd').value.trim();
-  const btn = document.getElementById('gate-btn');
   const err = document.getElementById('gate-err');
   if (!pwd) { err.textContent = '请输入密码'; return; }
   if (pwd !== PASSWORD) {
@@ -1018,9 +1028,8 @@ async function doLogin() {
     document.getElementById('gate-pwd').select();
     return;
   }
-  btn.disabled = true; btn.textContent = '加载中…'; err.textContent = '';
   localStorage.setItem('kitchen_auth', 'ok');
-  await enterApp();
+  enterApp();
 }
 
 function doLogout() {
@@ -1029,31 +1038,53 @@ function doLogout() {
   location.reload();
 }
 
-async function enterApp() {
-  setSyncStatus('saving');
-  const ok = await loadFromCloud();
-  if (!ok) {
-    // First time — push default data
-    await saveToCloud();
-  }
+function enterApp() {
+  // Always start with default data so there's something to see
+  S = JSON.parse(JSON.stringify(DEF));
+
+  // Try to restore from localStorage backup (instant, no network)
+  try {
+    const local = localStorage.getItem('kitchen_local');
+    if (local) {
+      const parsed = JSON.parse(local);
+      if (parsed && parsed.ingredients) S = { ...S, ...parsed };
+    }
+  } catch(e) {}
+
+  // Show app immediately with whatever data we have
   document.getElementById('gate').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   applyBg();
   go(S.view || 'recipes');
-  setSyncStatus('ok');
-  startRealtime();
+  setSyncStatus('saving');
+
+  // Sync with cloud in background
+  loadFromCloud().then(ok => {
+    if (ok) {
+      applyBg(); go(S.view || 'recipes'); setSyncStatus('ok');
+      startRealtime();
+    } else {
+      // First time or offline — push default data to cloud
+      saveToCloud().catch(()=>{});
+      setSyncStatus('err');
+    }
+  }).catch(() => setSyncStatus('err'));
 }
 
 // ════════════════════════════════════
 //  INIT
 // ════════════════════════════════════
 if (checkSavedLogin()) {
-  // Already logged in on this device
   enterApp();
 } else {
   document.getElementById('gate').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
 }
+
+// ════════════════════════════════════
+//  INIT — load directly, no gate
+// ════════════════════════════════════
+enterApp();
 
 // ════════════════════════════════════
 function uploadBg(e) {
@@ -1473,42 +1504,11 @@ function openAddRecipeModal() {
   document.getElementById('mr-ing-list').innerHTML = '';
   openModal('add-recipe');
 }
+
+function delRecipe(id) {
   if (!confirm('确定删除这个菜谱？')) return;
   S.recipes = S.recipes.filter(r=>r.id!==id);
   S.activeRecipeId = null; save(); renderRecipes();
-}
-function openEditRecipe(id) {
-  const r = S.recipes.find(r=>r.id===id); if (!r) return;
-  document.getElementById('er-id').value = id;
-  document.getElementById('er-name').value = r.name;
-  document.getElementById('er-cuisine').value = r.cuisine;
-  document.getElementById('er-meal').value = r.mealType;
-  document.getElementById('er-time').value = r.time;
-  document.getElementById('er-steps').value = r.steps.join('\n');
-  openModal('edit-recipe');
-}
-function saveRecipeEdit() {
-  const id = parseInt(document.getElementById('er-id').value);
-  const r = S.recipes.find(r=>r.id===id); if (!r) return;
-  r.name = document.getElementById('er-name').value.trim() || r.name;
-  r.cuisine = document.getElementById('er-cuisine').value.trim() || r.cuisine;
-  r.mealType = document.getElementById('er-meal').value;
-  r.time = parseInt(document.getElementById('er-time').value) || r.time;
-  r.steps = document.getElementById('er-steps').value.split('\n').map(s=>s.trim()).filter(Boolean);
-  save(); closeModal(); renderRecipes(); renderRecipeDetail();
-}
-function addRecipe() {
-  const name = document.getElementById('mr-name').value.trim(); if (!name) return;
-  const r = {
-    id: nid++, name,
-    cuisine: document.getElementById('mr-cuisine').value,
-    mealType: document.getElementById('mr-meal').value,
-    time: parseInt(document.getElementById('mr-time').value)||30,
-    image: null, ingredients: [],
-    steps: document.getElementById('mr-steps').value.split('\n').map(s=>s.trim()).filter(Boolean)
-  };
-  S.recipes.push(r); S.activeRecipeId = r.id;
-  save(); closeModal(); renderRecipes();
 }
 
 // ════════════════════════════════════
