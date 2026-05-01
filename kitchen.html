@@ -958,6 +958,7 @@ let S = JSON.parse(JSON.stringify(DEF));
 let nid = 300;
 let saveTimer = null;
 let syncChannel = null;
+let appReady = false; // blocks cloud writes until cloud data is loaded
 
 // ════════════════════════════════════
 //  SYNC
@@ -973,7 +974,7 @@ async function loadFromCloud() {
 }
 
 async function saveToCloud() {
-  if (!sb) return;
+  if (!sb || !appReady) return; // never write before cloud data is confirmed loaded
   try {
     await sb.from('kitchen_data').upsert({ id: 'main', data: S, updated_at: new Date().toISOString() });
     setSyncStatus('ok');
@@ -981,12 +982,12 @@ async function saveToCloud() {
 }
 
 function save() {
-  // Always save to localStorage as backup
+  // Always write local backup instantly — safe at any time
   try { localStorage.setItem('kitchen_local', JSON.stringify(S)); } catch(e) {}
-  if (!sb) return;
+  if (!appReady) return; // don't touch cloud during init
   setSyncStatus('saving');
   clearTimeout(saveTimer);
-  saveTimer = setTimeout(saveToCloud, 800);
+  saveTimer = setTimeout(saveToCloud, 1000);
 }
 
 function setSyncStatus(state) {
@@ -1039,7 +1040,9 @@ function doLogout() {
 }
 
 function enterApp() {
-  // Start with default, then overlay local backup (instant)
+  appReady = false; // block cloud writes during init
+
+  // Load local backup first for instant display
   S = JSON.parse(JSON.stringify(DEF));
   try {
     const local = localStorage.getItem('kitchen_local');
@@ -1049,25 +1052,41 @@ function enterApp() {
     }
   } catch(e) {}
 
-  // Show app immediately
+  // Show app with local data immediately
   document.getElementById('gate').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   applyBg();
-  go(S.view || 'recipes');
+  renderAll();
   setSyncStatus('saving');
 
-  // Sync with cloud in background — NEVER overwrite cloud if load fails
+  // Load cloud data — only AFTER this completes do we allow saves
   loadFromCloud().then(ok => {
     if (ok) {
-      // Save a local backup too
+      // Cloud data loaded successfully — write local backup and unlock saves
       try { localStorage.setItem('kitchen_local', JSON.stringify(S)); } catch(e) {}
-      applyBg(); go(S.view || 'recipes'); setSyncStatus('ok');
+      appReady = true;
+      applyBg();
+      renderAll();
+      setSyncStatus('ok');
       startRealtime();
     } else {
-      // Cloud load failed — just stay with local data, don't overwrite cloud
+      // Cloud failed — use local data, allow saves in case user edits
+      appReady = true;
       setSyncStatus('err');
     }
-  }).catch(() => setSyncStatus('err'));
+  }).catch(() => { appReady = true; setSyncStatus('err'); });
+}
+
+function renderAll() {
+  const v = S.view || 'recipes';
+  document.querySelectorAll('.nav').forEach(n => n.classList.toggle('on', n.dataset.v === v));
+  const panels = { shopping: 'mid-shopping', ingredients: 'mid-ing', recipes: 'mid-recipes' };
+  Object.entries(panels).forEach(([view, id]) => {
+    document.getElementById(id).style.display = view === v ? 'flex' : 'none';
+  });
+  if (v === 'shopping') renderShopping();
+  else if (v === 'ingredients') renderIngredients();
+  else renderRecipes();
 }
 
 // ════════════════════════════════════
@@ -1123,7 +1142,8 @@ function go(view) {
   Object.entries(panels).forEach(([v, id]) => {
     document.getElementById(id).style.display = v === view ? 'flex' : 'none';
   });
-  save();
+  // Only save view preference if app is fully loaded
+  if (appReady) save();
   if (view === 'shopping') renderShopping();
   else if (view === 'ingredients') renderIngredients();
   else if (view === 'recipes') renderRecipes();
