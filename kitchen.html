@@ -1039,10 +1039,8 @@ function doLogout() {
 }
 
 function enterApp() {
-  // Always start with default data so there's something to see
+  // Start with default, then overlay local backup (instant)
   S = JSON.parse(JSON.stringify(DEF));
-
-  // Try to restore from localStorage backup (instant, no network)
   try {
     const local = localStorage.getItem('kitchen_local');
     if (local) {
@@ -1051,21 +1049,22 @@ function enterApp() {
     }
   } catch(e) {}
 
-  // Show app immediately with whatever data we have
+  // Show app immediately
   document.getElementById('gate').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
   applyBg();
   go(S.view || 'recipes');
   setSyncStatus('saving');
 
-  // Sync with cloud in background
+  // Sync with cloud in background — NEVER overwrite cloud if load fails
   loadFromCloud().then(ok => {
     if (ok) {
+      // Save a local backup too
+      try { localStorage.setItem('kitchen_local', JSON.stringify(S)); } catch(e) {}
       applyBg(); go(S.view || 'recipes'); setSyncStatus('ok');
       startRealtime();
     } else {
-      // First time or offline — push default data to cloud
-      saveToCloud().catch(()=>{});
+      // Cloud load failed — just stay with local data, don't overwrite cloud
       setSyncStatus('err');
     }
   }).catch(() => setSyncStatus('err'));
@@ -1075,16 +1074,12 @@ function enterApp() {
 //  INIT
 // ════════════════════════════════════
 if (checkSavedLogin()) {
+  document.getElementById('gate').style.display = 'none';
   enterApp();
 } else {
   document.getElementById('gate').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
 }
-
-// ════════════════════════════════════
-//  INIT — load directly, no gate
-// ════════════════════════════════════
-enterApp();
 
 // ════════════════════════════════════
 function uploadBg(e) {
