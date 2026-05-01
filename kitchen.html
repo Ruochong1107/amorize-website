@@ -490,6 +490,29 @@ body {
 .mbtn.cancel:hover { background: #eee; }
 .mbtn.confirm { background: var(--accent); border: 1px solid var(--accent); color: white; }
 .mbtn.confirm:hover { background: var(--accent-h); }
+.ing-row-entry {
+  display: grid;
+  grid-template-columns: 1fr 80px 120px 60px 22px;
+  gap: 5px; align-items: center;
+}
+.ing-row-entry input, .ing-row-entry select {
+  border: 1px solid var(--border); border-radius: 7px;
+  padding: 7px 9px; font-size: 12.5px; font-family: inherit;
+  background: var(--item-bg); color: var(--text); outline: none;
+  width: 100%;
+}
+.ing-row-entry input:focus, .ing-row-entry select:focus { border-color: var(--accent); }
+.ing-row-del {
+  background: none; border: none; color: var(--text3);
+  font-size: 16px; cursor: pointer; padding: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.ing-row-del:hover { color: var(--red); }
+.ing-row-head {
+  display: grid;
+  grid-template-columns: 1fr 80px 120px 60px 22px;
+  gap: 5px; font-size: 10.5px; color: var(--text3); margin-bottom: 3px; padding: 0 2px;
+}
 /* ── PASSWORD GATE ── */
 #gate {
   position: fixed; inset: 0; z-index: 999;
@@ -624,7 +647,7 @@ body {
           <span class="mid-title">菜谱</span>
           <span class="mid-subtitle" id="recipe-count-txt"></span>
         </div>
-        <button class="plus-btn" onclick="openModal('add-recipe')">+</button>
+        <button class="plus-btn" onclick="openAddRecipeModal()">+</button>
       </div>
       <div id="recipe-filter-rows"></div>
       <div class="scroll" id="recipe-rows"></div>
@@ -653,8 +676,9 @@ body {
     <div class="field-row">
       <div class="field"><label>购买地点</label>
         <select id="mi-store">
-          <option>超市</option><option>菜市场</option><option>盒马鲜生</option>
-          <option>调料铺</option><option>Whole Foods</option><option>其他</option>
+          <option value="Trader Joe's">Trader Joe's</option>
+          <option value="Whole Foods">Whole Foods</option>
+          <option value="99大华">99大华</option>
         </select>
       </div>
       <div class="field"><label>类型</label>
@@ -679,7 +703,13 @@ body {
       <div class="field"><label>图标</label><input id="ei-icon" style="width:70px;text-align:center;"></div>
     </div>
     <div class="field-row">
-      <div class="field"><label>购买地点</label><input id="ei-store"></div>
+      <div class="field"><label>购买地点</label>
+        <select id="ei-store">
+          <option value="Trader Joe's">Trader Joe's</option>
+          <option value="Whole Foods">Whole Foods</option>
+          <option value="99大华">99大华</option>
+        </select>
+      </div>
       <div class="field"><label>类型</label>
         <select id="ei-type">
           <option value="short">短期新鲜</option>
@@ -694,7 +724,7 @@ body {
     </div>
   </div>
   <!-- Add Recipe -->
-  <div class="modal" id="modal-add-recipe" style="display:none" onclick="event.stopPropagation()">
+  <div class="modal" id="modal-add-recipe" style="display:none;max-height:90vh;overflow-y:auto;" onclick="event.stopPropagation()">
     <div class="modal-title">添加菜谱</div>
     <div class="field"><label>菜谱名称</label><input id="mr-name" placeholder="例：麻婆豆腐"></div>
     <div class="field-row">
@@ -710,6 +740,13 @@ body {
       </div>
       <div class="field"><label>时间（分钟）</label><input id="mr-time" type="number" placeholder="20"></div>
     </div>
+    <div class="field">
+      <label style="display:flex;align-items:center;justify-content:space-between;">
+        原料
+        <button type="button" onclick="addIngRow('mr-ing-list')" style="font-size:11px;background:var(--accent-light);color:var(--accent);border:none;border-radius:6px;padding:3px 10px;cursor:pointer;">+ 添加原料</button>
+      </label>
+      <div id="mr-ing-list" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
+    </div>
     <div class="field"><label>烹饪步骤（每行一步）</label><textarea id="mr-steps" placeholder="第一步&#10;第二步&#10;第三步"></textarea></div>
     <div class="modal-btns">
       <button class="mbtn cancel" onclick="closeModal()">取消</button>
@@ -717,18 +754,29 @@ body {
     </div>
   </div>
   <!-- Edit Recipe -->
-  <div class="modal" id="modal-edit-recipe" style="display:none" onclick="event.stopPropagation()">
+  <div class="modal" id="modal-edit-recipe" style="display:none;max-height:90vh;overflow-y:auto;" onclick="event.stopPropagation()">
     <div class="modal-title">编辑菜谱</div>
     <input type="hidden" id="er-id">
     <div class="field"><label>菜谱名称</label><input id="er-name"></div>
     <div class="field-row">
-      <div class="field"><label>菜系</label><input id="er-cuisine"></div>
+      <div class="field"><label>菜系</label>
+        <select id="er-cuisine">
+          <option>中餐</option><option>西餐</option><option>轻食</option>
+        </select>
+      </div>
       <div class="field"><label>餐型</label>
         <select id="er-meal">
           <option>正餐</option><option>Brunch</option><option>甜品</option>
         </select>
       </div>
       <div class="field"><label>时间（分钟）</label><input id="er-time" type="number"></div>
+    </div>
+    <div class="field">
+      <label style="display:flex;align-items:center;justify-content:space-between;">
+        原料
+        <button type="button" onclick="addIngRow('er-ing-list')" style="font-size:11px;background:var(--accent-light);color:var(--accent);border:none;border-radius:6px;padding:3px 10px;cursor:pointer;">+ 添加原料</button>
+      </label>
+      <div id="er-ing-list" style="display:flex;flex-direction:column;gap:6px;margin-top:6px;"></div>
     </div>
     <div class="field"><label>烹饪步骤（每行一步）</label><textarea id="er-steps"></textarea></div>
     <div class="modal-btns">
@@ -748,7 +796,7 @@ const DEF = {
   ingTab: 'all',
   activeIngId: null,
   activeRecipeId: 4,
-  activeStoreId: 'wf',
+  activeStoreId: 'Whole Foods',
   rfType: '全部',
   rfCuisine: '全部',
   ingredients: [
@@ -1190,11 +1238,11 @@ function saveIngEdit() {
   const ing = S.ingredients.find(i=>i.id===id); if (!ing) return;
   ing.name = document.getElementById('ei-name').value.trim() || ing.name;
   ing.icon = document.getElementById('ei-icon').value.trim() || ing.icon;
-  ing.store = document.getElementById('ei-store').value.trim() || ing.store;
+  ing.store = document.getElementById('ei-store').value;
   ing.freq = document.getElementById('ei-freq').value.trim() || ing.freq;
   ing.type = document.getElementById('ei-type').value;
   ing.dot = ing.type==='short'?'green':'purple';
-  save(); closeModal(); renderIngredients();
+  save(); closeModal(); renderIngredients(); renderIngDetail();
 }
 function addIngredient() {
   const name = document.getElementById('mi-name').value.trim(); if (!name) return;
@@ -1328,7 +1376,103 @@ function onRecipeImg(e) {
   img.src = u; e.target.value = '';
 }
 
-function delRecipe(id) {
+// ────────────────────────────────────
+//  Ingredient row helper (for recipe modals)
+// ────────────────────────────────────
+function addIngRow(listId, ing) {
+  const list = document.getElementById(listId);
+  // Add header if first row
+  if (list.children.length === 0) {
+    const h = document.createElement('div');
+    h.className = 'ing-row-head';
+    h.innerHTML = '<span>原料名称</span><span>用量</span><span>购买地点</span><span>可选</span><span></span>';
+    list.appendChild(h);
+  }
+  const row = document.createElement('div');
+  row.className = 'ing-row-entry';
+  const storeOpts = ["Trader Joe's","Whole Foods","99大华"].map(s =>
+    `<option value="${s}"${ing&&ing.store===s?' selected':''}>${s}</option>`).join('');
+  row.innerHTML = `
+    <input type="text" placeholder="例：番茄" value="${ing?ing.name:''}">
+    <input type="text" placeholder="2个" value="${ing?ing.amount:''}">
+    <select>${storeOpts}</select>
+    <select>
+      <option value="false"${ing&&!ing.opt?' selected':''}>必须</option>
+      <option value="true"${ing&&ing.opt?' selected':''}>可选</option>
+    </select>
+    <button class="ing-row-del" type="button" onclick="this.parentElement.remove();cleanIngHead('${listId}')">×</button>`;
+  list.appendChild(row);
+}
+
+function cleanIngHead(listId) {
+  const list = document.getElementById(listId);
+  // Remove header if no data rows left
+  if (list.querySelectorAll('.ing-row-entry').length === 0) list.innerHTML = '';
+}
+
+function readIngRows(listId) {
+  return Array.from(document.querySelectorAll(`#${listId} .ing-row-entry`)).map(row => {
+    const inputs = row.querySelectorAll('input,select');
+    return {
+      name: inputs[0].value.trim(),
+      amount: inputs[1].value.trim() || '适量',
+      store: inputs[2].value,
+      opt: inputs[3].value === 'true'
+    };
+  }).filter(i => i.name);
+}
+
+// ────────────────────────────────────
+
+function addRecipe() {
+  const name = document.getElementById('mr-name').value.trim(); if (!name) return;
+  const r = {
+    id: nid++, name,
+    cuisine: document.getElementById('mr-cuisine').value,
+    mealType: document.getElementById('mr-meal').value,
+    time: parseInt(document.getElementById('mr-time').value)||30,
+    image: null,
+    ingredients: readIngRows('mr-ing-list'),
+    steps: document.getElementById('mr-steps').value.split('\n').map(s=>s.trim()).filter(Boolean)
+  };
+  S.recipes.push(r); S.activeRecipeId = r.id;
+  save(); closeModal(); renderRecipes();
+}
+
+function openEditRecipe(id) {
+  const r = S.recipes.find(r=>r.id===id); if (!r) return;
+  document.getElementById('er-id').value = id;
+  document.getElementById('er-name').value = r.name;
+  document.getElementById('er-cuisine').value = r.cuisine;
+  document.getElementById('er-meal').value = r.mealType;
+  document.getElementById('er-time').value = r.time;
+  document.getElementById('er-steps').value = r.steps.join('\n');
+  // Populate ingredient rows
+  const list = document.getElementById('er-ing-list');
+  list.innerHTML = '';
+  (r.ingredients||[]).forEach(ing => addIngRow('er-ing-list', ing));
+  openModal('edit-recipe');
+}
+function saveRecipeEdit() {
+  const id = parseInt(document.getElementById('er-id').value);
+  const r = S.recipes.find(r=>r.id===id); if (!r) return;
+  r.name = document.getElementById('er-name').value.trim() || r.name;
+  r.cuisine = document.getElementById('er-cuisine').value;
+  r.mealType = document.getElementById('er-meal').value;
+  r.time = parseInt(document.getElementById('er-time').value) || r.time;
+  r.ingredients = readIngRows('er-ing-list');
+  r.steps = document.getElementById('er-steps').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  save(); closeModal(); renderRecipes(); renderRecipeDetail();
+}
+
+// Clear ingredient rows when opening add modal
+function openAddRecipeModal() {
+  document.getElementById('mr-name').value = '';
+  document.getElementById('mr-time').value = '20';
+  document.getElementById('mr-steps').value = '';
+  document.getElementById('mr-ing-list').innerHTML = '';
+  openModal('add-recipe');
+}
   if (!confirm('确定删除这个菜谱？')) return;
   S.recipes = S.recipes.filter(r=>r.id!==id);
   S.activeRecipeId = null; save(); renderRecipes();
@@ -1368,59 +1512,73 @@ function addRecipe() {
 }
 
 // ════════════════════════════════════
-//  SHOPPING
+//  SHOPPING — dynamic from ingredients
 // ════════════════════════════════════
+const STORES = ["Trader Joe's", "Whole Foods", "99大华"];
+
 function renderShopping() {
+  // Init checked state if missing
+  if (!S.shoppingChecked) S.shoppingChecked = {};
+
+  // Group ingredients by store
+  const byStore = {};
+  STORES.forEach(s => byStore[s] = []);
+  S.ingredients.forEach(ing => {
+    if (byStore[ing.store] !== undefined) byStore[ing.store].push(ing);
+  });
+
   // Store list
   const sw = document.getElementById('store-rows');
   sw.innerHTML = '';
-  S.stores.forEach(st => {
-    const tot = st.groups.reduce((s,g)=>s+g.items.length, 0);
+  STORES.forEach(stName => {
+    const count = byStore[stName].length;
     const el = document.createElement('div');
-    el.className = 'srow' + (S.activeStoreId===st.id?' on':'');
-    el.innerHTML = `<div class="sn">${st.name}</div><div class="sc">${tot} 件</div>`;
-    el.onclick = () => { S.activeStoreId = st.id; save(); renderShopping(); };
+    el.className = 'srow' + (S.activeStoreId===stName?' on':'');
+    el.innerHTML = `<div class="sn">${stName}</div><div class="sc">${count} 件</div>`;
+    el.onclick = () => { S.activeStoreId = stName; save(); renderShopping(); };
     sw.appendChild(el);
   });
-  // Items panel
-  const store = S.stores.find(s=>s.id===S.activeStoreId);
-  let tot = 0, ck = 0;
-  if (store) store.groups.forEach(g=>g.items.forEach(i=>{tot++;if(i.checked)ck++;}));
+
+  // Items for active store
+  const activeStore = S.activeStoreId || STORES[0];
+  const items = byStore[activeStore] || [];
+  let ck = items.filter(i => S.shoppingChecked[i.id]).length;
+  const tot = items.length;
   const pct = tot ? Math.round((ck/tot)*100) : 0;
 
   document.getElementById('right').innerHTML = `
     <div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
       <div class="rp-head">
-        <div class="rp-title"><span>🛒</span>${store?store.name:'—'}</div>
-        <button class="icon-act" onclick="clearCk()">清空勾选</button>
+        <div class="rp-title"><span>🛒</span>${activeStore}</div>
+        <button class="icon-act" onclick="clearStoreChecked()">清空勾选</button>
       </div>
       <div class="prog-wrap">
         <div class="prog-meta">${ck}/${tot}</div>
         <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
       </div>
       <div class="item-list" id="item-list-inner"></div>
-      <div class="add-bar">
-        <input class="ai" id="ni-name" placeholder="添加商品…" onkeydown="if(event.key==='Enter')addShop()">
-        <input class="ai" id="ni-note" placeholder="备注" style="max-width:130px;" onkeydown="if(event.key==='Enter')addShop()">
-        <button class="add-btn" onclick="addShop()">添加</button>
-      </div>
     </div>`;
 
   const inner = document.getElementById('item-list-inner');
-  if (!store||tot===0) {
-    inner.innerHTML = `<div class="ph"><div class="ph-icon">🛒</div><div class="ph-text">还没有商品</div></div>`;
+  if (items.length === 0) {
+    inner.innerHTML = `<div class="ph"><div class="ph-icon">🛒</div><div class="ph-text">这家店还没有原料</div><div style="font-size:12px;color:var(--text3);margin-top:6px;">在「原料」页面添加并选择购买地点</div></div>`;
     return;
   }
-  store.groups.forEach(g => {
-    if (g.items.length===0) return;
-    const dotC = g.type==='fresh'?'#5a8a5e':'#7c6baa';
+
+  // Separate by type
+  const fresh = items.filter(i => i.type === 'short');
+  const pantry = items.filter(i => i.type === 'long');
+
+  function renderGroup(label, groupItems, dotColor) {
+    if (groupItems.length === 0) return;
     const h = document.createElement('div');
     h.className = 'grp-head';
-    h.innerHTML = `<div class="gdot" style="background:${dotC}"></div><span>🔒</span><span>${g.label}（${g.items.length}件）</span>`;
+    h.innerHTML = `<div class="gdot" style="background:${dotColor}"></div><span>${label}（${groupItems.length}件）</span>`;
     inner.appendChild(h);
-    g.items.forEach(item => {
+    groupItems.forEach(ing => {
+      const checked = !!S.shoppingChecked[ing.id];
       const c = document.createElement('div');
-      c.className = 'item-card'+(item.checked?' ck':'');
+      c.className = 'item-card' + (checked ? ' ck' : '');
       c.innerHTML = `
         <div class="cb">
           <svg class="chk" width="12" height="9" viewBox="0 0 12 9" fill="none">
@@ -1428,29 +1586,26 @@ function renderShopping() {
           </svg>
         </div>
         <div>
-          <div class="iname">${item.name}</div>
-          ${item.note?`<div class="inote">${item.note}</div>`:''}
-          ${item.freq?`<div class="ifreq">${item.freq}</div>`:''}
+          <div class="iname">${ing.icon} ${ing.name}</div>
+          ${ing.freq ? `<div class="ifreq">${ing.freq}</div>` : ''}
         </div>`;
-      c.onclick = () => { item.checked = !item.checked; save(); renderShopping(); };
+      c.onclick = () => {
+        S.shoppingChecked[ing.id] = !S.shoppingChecked[ing.id];
+        save(); renderShopping();
+      };
       inner.appendChild(c);
     });
-  });
+  }
+
+  renderGroup('新鲜食材', fresh, '#5a8a5e');
+  renderGroup('长期储备', pantry, '#7c6baa');
 }
 
-function clearCk() {
-  const st = S.stores.find(s=>s.id===S.activeStoreId); if (!st) return;
-  st.groups.forEach(g=>g.items.forEach(i=>i.checked=false));
-  save(); renderShopping();
-}
-function addShop() {
-  const ne = document.getElementById('ni-name');
-  const n = ne.value.trim(); if (!n) { ne.focus(); return; }
-  const st = S.stores.find(s=>s.id===S.activeStoreId); if (!st) return;
-  let g = st.groups[0];
-  if (!g) { g = {id:'gd',label:'待分类',type:'pantry',items:[]}; st.groups.push(g); }
-  g.items.push({id:nid++,name:n,note:document.getElementById('ni-note').value.trim(),freq:'',checked:false});
-  ne.value = ''; document.getElementById('ni-note').value = ''; ne.focus();
+function clearStoreChecked() {
+  const activeStore = S.activeStoreId || STORES[0];
+  S.ingredients.filter(i => i.store === activeStore).forEach(i => {
+    S.shoppingChecked[i.id] = false;
+  });
   save(); renderShopping();
 }
 
