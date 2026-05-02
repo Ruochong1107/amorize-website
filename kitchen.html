@@ -1047,8 +1047,16 @@ async function enterApp() {
   setSyncStatus('saving');
   const ok = await loadFromCloud();
   if (!ok) {
-    // First time — push default data
-    await saveToCloud();
+    // 加载失败：只在本地用默认数据，绝不覆盖云端
+    // 只有当云端完全没有记录时（真正的首次使用）才写入
+    try {
+      const { data } = await sb.from('kitchen_data').select('id').eq('id','main').single();
+      if (!data) {
+        // 确认云端真的没有这条记录，才推默认数据
+        await saveToCloud();
+      }
+      // 否则静默失败，保留云端数据不动
+    } catch(e) { /* 网络问题，什么都不做 */ }
   }
   document.getElementById('gate').style.display = 'none';
   document.getElementById('app').style.display = 'flex';
