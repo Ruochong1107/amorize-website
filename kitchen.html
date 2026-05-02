@@ -188,16 +188,14 @@ body {
 
 /* Recipe filter rows */
 .rfrow {
-  display: flex; gap: 6px; padding: 7px 10px;
-  flex-wrap: nowrap; overflow-x: auto;
+  display: flex; gap: 5px; padding: 6px 10px;
+  flex-wrap: nowrap; overflow: hidden;
   border-bottom: 1px solid var(--border-light); flex-shrink: 0;
-  scrollbar-width: none;
 }
-.rfrow::-webkit-scrollbar { display: none; }
 .rfrow:last-child { border-bottom: none; }
 .rtag {
-  padding: 5px 12px; border-radius: 99px; white-space: nowrap;
-  font-size: 12px; cursor: pointer; user-select: none;
+  padding: 4px 10px; border-radius: 99px; white-space: nowrap;
+  font-size: 11.5px; cursor: pointer; user-select: none;
   border: 1.5px solid rgba(160,140,120,0.45); color: var(--text2);
   transition: all 0.12s; background: rgba(255,255,255,0.35);
   flex-shrink: 0;
@@ -490,7 +488,38 @@ body {
 .mbtn.cancel:hover { background: #eee; }
 .mbtn.confirm { background: var(--accent); border: 1px solid var(--accent); color: white; }
 .mbtn.confirm:hover { background: var(--accent-h); }
-/* Modal scrollable & ingredient list */
+/* Plan basket button on recipe row */
+.plan-btn {
+  width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0;
+  border: 1.5px solid var(--border); background: none;
+  font-size: 14px; cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: all 0.12s; color: var(--text3);
+  margin-left: auto;
+}
+.plan-btn:hover { border-color: var(--accent); background: var(--accent-light); }
+.plan-btn.planned { background: var(--accent); border-color: var(--accent); color: white; }
+/* Plan store row */
+.srow-plan {
+  padding: 12px 16px; cursor: pointer;
+  border-left: 3px solid transparent; transition: background 0.12s;
+  background: var(--orange-bg);
+}
+.srow-plan:hover { background: var(--accent-light); }
+.srow-plan.on { background: var(--accent-light); border-left-color: var(--accent); }
+.srow-plan .sn { color: var(--accent); font-weight: 600; }
+/* Plan recipe badge in shopping */
+.plan-recipe-banner {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  padding: 10px 18px 6px;
+}
+.plan-rbadge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 11px; border-radius: 99px;
+  background: var(--accent-light); color: var(--accent);
+  font-size: 12px; font-weight: 500;
+}
+.plan-empty { padding: 18px; font-size: 13px; color: var(--text3); }
 .modal { max-height: 88vh; overflow-y: auto; }
 .tmp-ing-list {
   min-height: 38px; border: 1px solid var(--border-light);
@@ -811,8 +840,10 @@ const DEF = {
   activeIngId: null,
   activeRecipeId: 4,
   activeStoreId: 'wf',
-  rfType: '全部',
-  rfCuisine: '全部',
+  rfType: '🍽',
+  rfCuisine: '🍳',
+  plannedRecipeIds: [],
+  plannedChecked: {},
   ingredients: [
     {id:1, name:'五花肉',   store:"99大华", freq:'每周',    type:'short', icon:'🥩', dot:'green'},
     {id:2, name:'老抽',     store:"Trader Joe's", freq:'半年一次',type:'long',  icon:'🧴', dot:'purple'},
@@ -1309,8 +1340,8 @@ function addIngredient() {
 // ════════════════════════════════════
 //  RECIPES
 // ════════════════════════════════════
-const MEAL_TYPES = ['全部','正餐','Brunch','甜品'];
-const CUISINES = ['全部','中餐','西餐','轻食'];
+const MEAL_TYPES = ['🍽','正餐','Brunch','甜品'];
+const CUISINES = ['🍳','中餐','西餐','轻食'];
 const BADGE_CLASSES = {正餐:'meal',早餐:'break',Brunch:'brunch',甜品:'dessert',宵夜:'late'};
 
 function renderRecipes() {
@@ -1322,8 +1353,8 @@ function renderRecipes() {
 
   // Recipe list
   const filtered = S.recipes.filter(r => {
-    const tok = S.rfType==='全部'||r.mealType===S.rfType;
-    const cok = S.rfCuisine==='全部'||r.cuisine===S.rfCuisine||r.cuisine.includes(S.rfCuisine);
+    const tok = S.rfType==='🍽'||S.rfType==='全部'||r.mealType===S.rfType;
+    const cok = S.rfCuisine==='🍳'||S.rfCuisine==='全部'||r.cuisine===S.rfCuisine||r.cuisine.includes(S.rfCuisine);
     return tok && cok;
   });
   document.getElementById('recipe-count-txt').textContent = ` (${filtered.length}/${S.recipes.length})`;
@@ -1333,7 +1364,9 @@ function renderRecipes() {
     const el = document.createElement('div');
     el.className = 'rrow' + (S.activeRecipeId===r.id?' on':'');
     const thumb = r.image ? `<div class="rthumb"><img src="${r.image}"></div>` : `<div class="rthumb">🍽</div>`;
-    el.innerHTML = `${thumb}<div><div class="rn">${r.name}</div><div class="rm">${r.cuisine}·${r.mealType}·${r.time}分钟</div></div>`;
+    const planned = (S.plannedRecipeIds||[]).includes(r.id);
+    el.innerHTML = `${thumb}<div style="flex:1;min-width:0;"><div class="rn">${r.name}</div><div class="rm">${r.cuisine}·${r.mealType}·${r.time}分钟</div></div>
+      <button class="plan-btn${planned?' planned':''}" title="${planned?'移出菜单':'加入本周菜单'}" onclick="togglePlan(event,${r.id})">🧺</button>`;
     el.onclick = () => { S.activeRecipeId = r.id; save(); renderRecipes(); renderRecipeDetail(); };
     wrap.appendChild(el);
   });
@@ -1464,13 +1497,42 @@ function addRecipe() {
   save(); closeModal(); renderRecipes();
 }
 
+function togglePlan(e, id) {
+  e.stopPropagation();
+  if (!S.plannedRecipeIds) S.plannedRecipeIds = [];
+  if (!S.plannedChecked) S.plannedChecked = {};
+  const idx = S.plannedRecipeIds.indexOf(id);
+  if (idx === -1) {
+    S.plannedRecipeIds.push(id);
+  } else {
+    S.plannedRecipeIds.splice(idx, 1);
+    // clear checked state for this recipe's ingredients
+    const r = S.recipes.find(r=>r.id===id);
+    if (r) r.ingredients.forEach(i=>{ delete S.plannedChecked[id+'_'+i.name]; });
+  }
+  save(); renderRecipes();
+}
+
 // ════════════════════════════════════
 //  SHOPPING
 // ════════════════════════════════════
 function renderShopping() {
-  // Store list
+  if (!S.plannedRecipeIds) S.plannedRecipeIds = [];
+  if (!S.plannedChecked) S.plannedChecked = {};
   const sw = document.getElementById('store-rows');
   sw.innerHTML = '';
+
+  // Plan row at top
+  const planCount = S.plannedRecipeIds.reduce((n, rid) => {
+    const r = S.recipes.find(r=>r.id===rid); return n + (r ? r.ingredients.length : 0);
+  }, 0);
+  const planEl = document.createElement('div');
+  planEl.className = 'srow-plan' + (S.activeStoreId==='__plan__'?' on':'');
+  planEl.innerHTML = `<div class="sn">📋 本周菜单</div><div class="sc">${S.plannedRecipeIds.length} 道菜 · ${planCount} 种原料</div>`;
+  planEl.onclick = () => { S.activeStoreId = '__plan__'; save(); renderShopping(); };
+  sw.appendChild(planEl);
+
+  // Regular stores
   S.stores.forEach(st => {
     const tot = st.groups.reduce((s,g)=>s+g.items.length, 0);
     const el = document.createElement('div');
@@ -1479,7 +1541,96 @@ function renderShopping() {
     el.onclick = () => { S.activeStoreId = st.id; save(); renderShopping(); };
     sw.appendChild(el);
   });
-  // Items panel
+
+  // Right panel
+  if (S.activeStoreId === '__plan__') {
+    renderPlanPanel();
+  } else {
+    renderStorePanel();
+  }
+}
+
+function renderPlanPanel() {
+  const panel = document.getElementById('right');
+  if (!S.plannedRecipeIds || S.plannedRecipeIds.length === 0) {
+    panel.innerHTML = `
+      <div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+        <div class="rp-head"><div class="rp-title"><span>📋</span>本周菜单</div></div>
+        <div class="ph"><div class="ph-icon">🧺</div><div class="ph-text">在菜谱页点击 🧺 加入菜单</div></div>
+      </div>`;
+    return;
+  }
+
+  // Group ingredients by store
+  const byStore = {};
+  S.plannedRecipeIds.forEach(rid => {
+    const r = S.recipes.find(r=>r.id===rid); if (!r) return;
+    r.ingredients.forEach(ing => {
+      const key = rid+'_'+ing.name;
+      if (!byStore[ing.store]) byStore[ing.store] = [];
+      // avoid duplicates within same store
+      if (!byStore[ing.store].find(x=>x._key===key))
+        byStore[ing.store].push({...ing, _key:key, _rname:r.name});
+    });
+  });
+
+  const totalIngs = Object.values(byStore).reduce((n,arr)=>n+arr.length,0);
+  const checkedCount = Object.values(S.plannedChecked).filter(Boolean).length;
+  const pct = totalIngs ? Math.round((checkedCount/totalIngs)*100) : 0;
+
+  const plannedRecipes = S.plannedRecipeIds.map(rid=>S.recipes.find(r=>r.id===rid)).filter(Boolean);
+
+  panel.innerHTML = `
+    <div style="display:flex;flex-direction:column;height:100%;overflow:hidden;">
+      <div class="rp-head">
+        <div class="rp-title"><span>📋</span>本周菜单</div>
+        <button class="icon-act" onclick="clearPlanCk()">清空勾选</button>
+      </div>
+      <div class="plan-recipe-banner">${plannedRecipes.map(r=>`<div class="plan-rbadge">🍽 ${r.name}</div>`).join('')}</div>
+      <div class="prog-wrap">
+        <div class="prog-meta">${checkedCount}/${totalIngs}</div>
+        <div class="prog-track"><div class="prog-fill" style="width:${pct}%"></div></div>
+      </div>
+      <div class="item-list" id="item-list-inner"></div>
+    </div>`;
+
+  const inner = document.getElementById('item-list-inner');
+  if (totalIngs === 0) {
+    inner.innerHTML = `<div class="ph"><div class="ph-icon">🛒</div><div class="ph-text">选中的菜谱没有原料</div></div>`;
+    return;
+  }
+
+  Object.entries(byStore).forEach(([store, ings]) => {
+    const hasFresh = ings.some(i=>{ const d=S.ingredients.find(x=>x.name===i.name); return d&&d.type==='short'; });
+    const dotC = hasFresh ? '#5a8a5e' : '#7c6baa';
+    const h = document.createElement('div');
+    h.className = 'grp-head';
+    h.innerHTML = `<div class="gdot" style="background:${dotC}"></div><span>🛒 ${store}</span>`;
+    inner.appendChild(h);
+    ings.forEach(item => {
+      const ck = !!S.plannedChecked[item._key];
+      const c = document.createElement('div');
+      c.className = 'item-card'+(ck?' ck':'');
+      c.innerHTML = `
+        <div class="cb">
+          <svg class="chk" width="12" height="9" viewBox="0 0 12 9" fill="none">
+            <path d="M1.5 4.5L4.5 7.5L10.5 1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div style="flex:1;">
+          <div class="iname">${item.name}</div>
+          <div class="inote">${item.amount}${item.opt?' · 可选':''} · 来自《${item._rname}》</div>
+        </div>`;
+      c.onclick = () => {
+        S.plannedChecked[item._key] = !S.plannedChecked[item._key];
+        save(); renderPlanPanel();
+      };
+      inner.appendChild(c);
+    });
+  });
+}
+
+function renderStorePanel() {
   const store = S.stores.find(s=>s.id===S.activeStoreId);
   let tot = 0, ck = 0;
   if (store) store.groups.forEach(g=>g.items.forEach(i=>{tot++;if(i.checked)ck++;}));
@@ -1535,6 +1686,9 @@ function renderShopping() {
   });
 }
 
+function clearPlanCk() {
+  S.plannedChecked = {}; save(); renderPlanPanel();
+}
 function clearCk() {
   const st = S.stores.find(s=>s.id===S.activeStoreId); if (!st) return;
   st.groups.forEach(g=>g.items.forEach(i=>i.checked=false));
