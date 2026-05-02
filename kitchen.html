@@ -490,6 +490,40 @@ body {
 .mbtn.cancel:hover { background: #eee; }
 .mbtn.confirm { background: var(--accent); border: 1px solid var(--accent); color: white; }
 .mbtn.confirm:hover { background: var(--accent-h); }
+/* Modal scrollable & ingredient list */
+.modal { max-height: 88vh; overflow-y: auto; }
+.tmp-ing-list {
+  min-height: 38px; border: 1px solid var(--border-light);
+  border-radius: 8px; padding: 6px 10px; margin-bottom: 8px;
+  background: var(--item-bg);
+}
+.tmp-ing-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 0; border-bottom: 1px solid var(--border-light);
+  font-size: 12.5px; color: var(--text);
+}
+.tmp-ing-item:last-child { border-bottom: none; }
+.tmp-ing-name { flex: 1.5; font-weight: 500; }
+.tmp-ing-meta { color: var(--text3); font-size: 11.5px; flex: 1; }
+.tmp-ing-del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; padding: 0 2px; flex-shrink: 0; transition: color 0.12s; }
+.tmp-ing-del:hover { color: var(--red); }
+.tmp-ing-add-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.tmp-ing-add-row input, .tmp-ing-add-row select {
+  border: 1px solid var(--border); border-radius: 7px;
+  padding: 7px 9px; font-size: 12.5px; font-family: inherit;
+  color: var(--text); background: var(--item-bg); outline: none;
+  transition: border-color 0.15s;
+}
+.tmp-ing-add-row input:focus, .tmp-ing-add-row select:focus { border-color: var(--accent); }
+.opt-lbl { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text2); white-space: nowrap; cursor: pointer; }
+.add-ing-btn {
+  width: 30px; height: 30px; border-radius: 8px;
+  background: var(--accent); color: white; border: none;
+  font-size: 20px; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.12s;
+}
+.add-ing-btn:hover { background: var(--accent-h); }
 /* ── PASSWORD GATE ── */
 #gate {
   position: fixed; inset: 0; z-index: 999;
@@ -653,8 +687,9 @@ body {
     <div class="field-row">
       <div class="field"><label>购买地点</label>
         <select id="mi-store">
+          <option>99大华</option><option>Trader Joe's</option><option>Whole Foods</option>
           <option>超市</option><option>菜市场</option><option>盒马鲜生</option>
-          <option>调料铺</option><option>Whole Foods</option><option>其他</option>
+          <option>调料铺</option><option>其他</option>
         </select>
       </div>
       <div class="field"><label>类型</label>
@@ -679,7 +714,11 @@ body {
       <div class="field"><label>图标</label><input id="ei-icon" style="width:70px;text-align:center;"></div>
     </div>
     <div class="field-row">
-      <div class="field"><label>购买地点</label><input id="ei-store"></div>
+    <div class="field"><label>购买地点</label><select id="ei-store">
+          <option>99大华</option><option>Trader Joe's</option><option>Whole Foods</option>
+          <option>超市</option><option>菜市场</option><option>盒马鲜生</option>
+          <option>调料铺</option><option>其他</option>
+        </select></div>
       <div class="field"><label>类型</label>
         <select id="ei-type">
           <option value="short">短期新鲜</option>
@@ -711,6 +750,18 @@ body {
       <div class="field"><label>时间（分钟）</label><input id="mr-time" type="number" placeholder="20"></div>
     </div>
     <div class="field"><label>烹饪步骤（每行一步）</label><textarea id="mr-steps" placeholder="第一步&#10;第二步&#10;第三步"></textarea></div>
+    <div class="field">
+      <label>原料列表</label>
+      <div id="mr-ing-list" class="tmp-ing-list"><div style="color:var(--text3);font-size:12px;">暂无原料，在下方添加</div></div>
+      <div class="tmp-ing-add-row">
+        <input id="mr-ing-name" list="ing-name-dl" placeholder="原料名称" style="flex:2;min-width:80px;" oninput="autoFillStore('mr')" onchange="autoFillStore('mr')">
+        <input id="mr-ing-amt" placeholder="用量" style="flex:1;min-width:60px;">
+        <select id="mr-ing-store" style="flex:1.5;min-width:80px;"></select>
+        <label class="opt-lbl"><input type="checkbox" id="mr-ing-opt"> 可选</label>
+        <button class="add-ing-btn" onclick="addTmpIng('mr')">+</button>
+      </div>
+    </div>
+    <datalist id="ing-name-dl"></datalist>
     <div class="modal-btns">
       <button class="mbtn cancel" onclick="closeModal()">取消</button>
       <button class="mbtn confirm" onclick="addRecipe()">添加</button>
@@ -731,6 +782,17 @@ body {
       <div class="field"><label>时间（分钟）</label><input id="er-time" type="number"></div>
     </div>
     <div class="field"><label>烹饪步骤（每行一步）</label><textarea id="er-steps"></textarea></div>
+    <div class="field">
+      <label>原料列表</label>
+      <div id="er-ing-list" class="tmp-ing-list"><div style="color:var(--text3);font-size:12px;">暂无原料</div></div>
+      <div class="tmp-ing-add-row">
+        <input id="er-ing-name" list="ing-name-dl" placeholder="原料名称" style="flex:2;min-width:80px;" oninput="autoFillStore('er')" onchange="autoFillStore('er')">
+        <input id="er-ing-amt" placeholder="用量" style="flex:1;min-width:60px;">
+        <select id="er-ing-store" style="flex:1.5;min-width:80px;"></select>
+        <label class="opt-lbl"><input type="checkbox" id="er-ing-opt"> 可选</label>
+        <button class="add-ing-btn" onclick="addTmpIng('er')">+</button>
+      </div>
+    </div>
     <div class="modal-btns">
       <button class="mbtn cancel" onclick="closeModal()">取消</button>
       <button class="mbtn confirm" onclick="saveRecipeEdit()">保存</button>
@@ -1188,13 +1250,38 @@ function openEditIng(id) {
 function saveIngEdit() {
   const id = parseInt(document.getElementById('ei-id').value);
   const ing = S.ingredients.find(i=>i.id===id); if (!ing) return;
+  const oldStore = ing.store;
   ing.name = document.getElementById('ei-name').value.trim() || ing.name;
   ing.icon = document.getElementById('ei-icon').value.trim() || ing.icon;
-  ing.store = document.getElementById('ei-store').value.trim() || ing.store;
+  ing.store = document.getElementById('ei-store').value || ing.store;
   ing.freq = document.getElementById('ei-freq').value.trim() || ing.freq;
   ing.type = document.getElementById('ei-type').value;
   ing.dot = ing.type==='short'?'green':'purple';
+  // Sync shopping list if store changed
+  if (ing.store !== oldStore) syncIngStoreInShopping(ing.name, oldStore, ing.store);
   save(); closeModal(); renderIngredients();
+}
+
+function syncIngStoreInShopping(ingName, oldStore, newStore) {
+  let foundItem = null;
+  // Remove from old store
+  S.stores.forEach(st => {
+    st.groups.forEach(g => {
+      const idx = g.items.findIndex(i=>i.name===ingName);
+      if (idx !== -1) foundItem = g.items.splice(idx,1)[0];
+    });
+  });
+  if (!foundItem) return; // not in shopping list
+  // Find or create target store
+  let targetStore = S.stores.find(s=>s.name===newStore);
+  if (!targetStore) {
+    const sid = 'st_'+nid++;
+    targetStore = {id:sid, name:newStore, groups:[{id:'g_'+nid++, label:'待分类', type:'pantry', items:[]}]};
+    S.stores.push(targetStore);
+    if (S.activeStoreId === null) S.activeStoreId = sid;
+  }
+  if (targetStore.groups.length===0) targetStore.groups.push({id:'g_'+nid++, label:'待分类', type:'pantry', items:[]});
+  targetStore.groups[0].items.push(foundItem);
 }
 function addIngredient() {
   const name = document.getElementById('mi-name').value.trim(); if (!name) return;
@@ -1335,6 +1422,7 @@ function delRecipe(id) {
 }
 function openEditRecipe(id) {
   const r = S.recipes.find(r=>r.id===id); if (!r) return;
+  tmpIngs = r.ingredients.map(i=>({...i})); // copy
   document.getElementById('er-id').value = id;
   document.getElementById('er-name').value = r.name;
   document.getElementById('er-cuisine').value = r.cuisine;
@@ -1351,6 +1439,7 @@ function saveRecipeEdit() {
   r.mealType = document.getElementById('er-meal').value;
   r.time = parseInt(document.getElementById('er-time').value) || r.time;
   r.steps = document.getElementById('er-steps').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  r.ingredients = tmpIngs.slice();
   save(); closeModal(); renderRecipes(); renderRecipeDetail();
 }
 function addRecipe() {
@@ -1360,7 +1449,7 @@ function addRecipe() {
     cuisine: document.getElementById('mr-cuisine').value,
     mealType: document.getElementById('mr-meal').value,
     time: parseInt(document.getElementById('mr-time').value)||30,
-    image: null, ingredients: [],
+    image: null, ingredients: tmpIngs.slice(),
     steps: document.getElementById('mr-steps').value.split('\n').map(s=>s.trim()).filter(Boolean)
   };
   S.recipes.push(r); S.activeRecipeId = r.id;
@@ -1458,12 +1547,81 @@ function addShop() {
 //  MODAL
 // ════════════════════════════════════
 let currentModal = null;
+let tmpIngs = [];
+
+const STORE_OPTS = ["99大华","Trader Joe's","Whole Foods","超市","菜市场","盒马鲜生","调料铺","其他"];
+
+function buildStoreSelect(selId) {
+  const el = document.getElementById(selId); if (!el) return;
+  el.innerHTML = STORE_OPTS.map(s=>`<option value="${s}">${s}</option>`).join('');
+}
+
+function populateIngDatalist() {
+  const dl = document.getElementById('ing-name-dl'); if (!dl) return;
+  dl.innerHTML = S.ingredients.map(i=>`<option value="${i.name}">`).join('');
+}
+
+function autoFillStore(prefix) {
+  const nameEl = document.getElementById(prefix+'-ing-name'); if (!nameEl) return;
+  const name = nameEl.value.trim();
+  const ing = S.ingredients.find(i=>i.name===name);
+  if (ing) {
+    const sel = document.getElementById(prefix+'-ing-store');
+    if (sel) sel.value = ing.store;
+  }
+}
+
+function renderTmpIngs(prefix) {
+  const el = document.getElementById(prefix+'-ing-list'); if (!el) return;
+  if (tmpIngs.length === 0) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px;">暂无原料，在下方添加</div>';
+    return;
+  }
+  el.innerHTML = tmpIngs.map((ing,i)=>`
+    <div class="tmp-ing-item">
+      <span class="tmp-ing-name">${ing.name}</span>
+      <span class="tmp-ing-meta">${ing.amount}${ing.opt?' · 可选':''}</span>
+      <span class="tmp-ing-meta" style="flex:1.2;">🛒 ${ing.store}</span>
+      <button class="tmp-ing-del" onclick="removeTmpIng(${i},'${prefix}')">×</button>
+    </div>`).join('');
+}
+
+function addTmpIng(prefix) {
+  const nameEl = document.getElementById(prefix+'-ing-name');
+  const name = nameEl.value.trim(); if (!name) { nameEl.focus(); return; }
+  const amount = document.getElementById(prefix+'-ing-amt').value.trim() || '适量';
+  const opt = document.getElementById(prefix+'-ing-opt').checked;
+  const store = document.getElementById(prefix+'-ing-store').value || STORE_OPTS[0];
+  tmpIngs.push({name, amount, opt, store});
+  nameEl.value = '';
+  document.getElementById(prefix+'-ing-amt').value = '';
+  document.getElementById(prefix+'-ing-opt').checked = false;
+  nameEl.focus();
+  renderTmpIngs(prefix);
+}
+
+function removeTmpIng(i, prefix) {
+  tmpIngs.splice(i, 1);
+  renderTmpIngs(prefix);
+}
+
 function openModal(name) {
   document.getElementById('modal-overlay').style.display = 'flex';
   ['add-ing','edit-ing','add-recipe','edit-recipe'].forEach(id => {
     document.getElementById('modal-'+id).style.display = id===name?'block':'none';
   });
   currentModal = name;
+  if (name === 'add-recipe') {
+    tmpIngs = [];
+    buildStoreSelect('mr-ing-store');
+    populateIngDatalist();
+    renderTmpIngs('mr');
+  }
+  if (name === 'edit-recipe') {
+    buildStoreSelect('er-ing-store');
+    populateIngDatalist();
+    renderTmpIngs('er');
+  }
 }
 function closeModal(e) {
   if (e && e.target !== document.getElementById('modal-overlay')) return;
