@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+  <html lang="zh-CN">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>每日买菜助手 · Amorize</title>
+  <style>
+  :root { --green: #2e7d4f; --green-dark: #24633f; --bg: #f7f6f3; --card: #ffffff; --text: #2b2b28; --muted: #8a877f; --border: #e8e6e0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 20px 40px; }
+.wrap { width: 100%; max-width: 560px; }
+header { display: flex; align-items: baseline; justify-content: space-between; padding: 8px 4px 20px; }
+header h1 { font-size: 22px; font-weight: 700; letter-spacing: .5px; }
+header .brand { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+.hero { text-align: center; padding: 4px 0 18px; }
+.hero svg { width: 180px; height: auto; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px 24px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+.card .date { font-size: 15px; color: var(--muted); margin-bottom: 14px; }
+.btn { display: block; background: var(--green); color: #fff; text-decoration: none; font-size: 20px; font-weight: 600; padding: 18px 20px; border-radius: 12px; transition: background .15s; }
+.btn:active, .btn:hover { background: var(--green-dark); }
+.links { display: flex; gap: 10px; margin-top: 14px; }
+.links a { flex: 1; text-align: center; font-size: 14px; color: var(--green); text-decoration: none; padding: 12px 8px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; }
+footer { margin-top: auto; padding-top: 36px; font-size: 12px; color: var(--muted); text-align: center; line-height: 1.8; }
+footer a { color: var(--muted); }
+</style>
+  </head>
+  <body>
+  <div class="wrap">
+  <header>
+  <h1>🛒 每日买菜助手</h1>
+  <span class="brand">AMORIZE</span>
+  </header>
+  <div class="hero" aria-hidden="true">
+  <svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg">
+  <path d="M60 60 L160 60 L172 138 Q172 144 166 144 L54 144 Q48 144 48 138 Z" fill="#e7cfa5"/>
+  <path d="M60 60 L160 60 L163 80 L57 80 Z" fill="#dbbf8e"/>
+  <ellipse cx="78" cy="52" rx="16" ry="22" fill="#bfe3a0"/>
+  <path d="M70 34 Q78 48 74 70 M86 34 Q80 48 84 70" stroke="#8cc063" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="112" cy="50" r="15" fill="#e8604c"/>
+  <path d="M112 36 l-4 -6 M112 36 l4 -6 M112 36 l0 -8" stroke="#4d8b4d" stroke-width="3" stroke-linecap="round"/>
+  <path d="M142 30 Q152 52 146 62 Q138 54 134 34 Z" fill="#ef9440"/>
+  <path d="M140 28 l-6 -8 M142 28 l2 -10 M144 30 l8 -6" stroke="#5da356" stroke-width="3" stroke-linecap="round"/>
+  <path d="M158 58 Q178 34 186 26 Q192 32 188 40 Q176 56 164 66 Z" fill="#d9a35c"/>
+  <path d="M170 48 l6 4 M176 41 l6 4" stroke="#b97f3c" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="97" cy="108" r="3" fill="#8a6a3f"/>
+  <circle cx="123" cy="108" r="3" fill="#8a6a3f"/>
+  <path d="M96 120 Q110 130 124 120" stroke="#8a6a3f" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </svg>
+  </div>
+  <div class="card">
+  <div class="date" id="today"></div>
+  <a class="btn" href="https://app.notion.com/p/39ad5d93b05b8127b32bd2d27e593584">打开今天的清单 →</a>
+  <div class="links">
+  <a href="https://app.notion.com/p/120c2e9efa48483cb2b21ba2fa028b42">📦 食材库存</a>
+  <a href="https://app.notion.com/p/39ad5d93b05b818f903fe22a1afc37de">🍽 饮食偏好</a>
+  </div>
+  </div>
+  <footer>网页版 v0.2 · 建设中，清单暂在 Notion 打开<br><a href="https://www.amorize.us/">← Amorize 官网</a> · Amorize LLC</footer>
+  </div>
+  <script>
+  const d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Shanghai" }));
+const week = ["日","一","二","三","四","五","六"];
+document.getElementById("today").textContent = (d.getMonth()+1) + "月" + d.getDate() + "日 星期" + week[d.getDay()] + " · 北京时间";
+</script>
+</body>
+</html>
