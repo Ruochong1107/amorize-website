@@ -93,6 +93,13 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 .hrow .hb b { color: var(--green-dark); font-weight: 600; }
 .hrow .hn { font-style: normal; color: var(--faint); }
 .item.neg i { color: #b98a8a; }
+.addrow { display: flex; gap: 8px; margin-top: 12px; }
+.addrow input { flex: 1; border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font: inherit; font-size: 13.5px; background: #fff; outline: none; color: var(--text); }
+.addrow input:focus { border-color: var(--green); }
+.addrow button { width: 38px; height: 37px; flex: none; color: #fff; background: var(--green); border: 0; border-radius: 10px; cursor: pointer; font-size: 20px; line-height: 1; }
+.addrow button:active { background: var(--green-dark); }
+.selftag { display: inline-block; font-size: 10px; color: var(--green-dark); border: 1px solid var(--green); border-radius: 20px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
+.xdel { border: 0; background: none; color: var(--faint); cursor: pointer; font-size: 15px; margin-left: 4px; padding: 0 4px; }
 .tag { display: inline-block; font-size: 10.5px; color: var(--faint); border: 1px solid var(--border); border-radius: 20px; padding: 0 7px; margin-left: 7px; vertical-align: 1px; font-weight: 400; }
 </style>
 </head>
@@ -160,6 +167,8 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <label class="todo" data-meal="both"><input type="checkbox" data-k="s9"><span class="t">圆西葫芦 1个 <i>—— 素瓜豆用</i></span></label>
 <label class="todo" data-meal="both"><input type="checkbox" data-k="s10"><span class="t">青瓜 2根 <i>—— 凉拌用</i></span></label>
 <label class="todo" data-meal="both"><input type="checkbox" data-k="s11"><span class="t">鸡蛋 15个 <i>—— 全家 + 狗狗</i></span></label>
+<div id="extraBuys"></div>
+<div class="addrow"><input id="buyInp" placeholder="单子外买了什么？记一笔，会加进上面"><button id="buyAdd" aria-label="加入">＋</button></div>
 <details class="hist"><summary>🧾 全部采购记录（51 笔 · 7/15 起 · 用来看采购习惯）</summary>
 <div class="hrow"><span class="hd">7/15</span><span class="hb">牛油果 1个、西兰花 2份、紫苏叶 30g、菠菜苗 250g、油麦菜苗 250g、蓝莓 2盒、带筋猪前蹄 500g、冬瓜 800g、紫皮大蒜 250g、青蒜苗 300g、山药 500g、鲜花生 500g<i class="hn">（12 样 · 已送达）</i></span></div>
 <div class="hrow"><span class="hd">7/16</span><span class="hb">牛油果 2个、白玉北豆腐 385g、三文鱼厚脂鱼腩切片 300g<i class="hn">（3 样 · 已送达）</i></span></div>
@@ -181,6 +190,8 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <div class="meal" id="mealBrunch"><b>第一餐</b><br>老婆：三明治 + 美式咖啡 + 羊奶粉 + 半个牛油果 + 半根香蕉 + 半盒蓝莓（固定）<br>老公：白菜豆腐、卤牛肉、煮毛豆、煮花生、蒸山药、油条</div>
 <div class="meal" id="mealDinner"><b>第三餐</b><br>老婆、保姆：三文鱼、水煮菜心、苦瓜炒鹅蛋</div>
 <div class="meal"><b>补剂</b><span class="kcal">每天固定</span><br>姜黄粉×3、磷虾油×1、D3+K2×1、降血脂胶囊×1（两人）；老婆晚益生菌×1</div>
+<div id="extraEats"></div>
+<div class="addrow"><input id="eatInp" placeholder="额外吃了什么？记一笔，会加进上面"><button id="eatAdd" aria-label="加入">＋</button></div>
 <details class="hist"><summary>📅 全部菜单记录（8 天 · 7/15-7/22 · 含反馈）</summary>
 <div class="hrow"><span class="hd">7/15</span><span class="hb"><b>老公 第一餐</b>：山药、李子<br><b>老婆 第一餐</b>：三明治<br><b>老公 第三餐</b>：猪蹄黄豆、麻婆豆腐、煎带鱼<br><b>老婆 第三餐</b>：三文鱼、煮菠菜、冬瓜汤、豇豆饭</span></div>
 <div class="hrow"><span class="hd">7/16</span><span class="hb"><b>老公 第一餐</b>：蒸南瓜、豆粥、煮玉米、桃子、李子<br><b>老婆 第一餐</b>：三明治<br><b>老婆 第三餐</b>：三文鱼、炒油麦菜、紫苏叶、面包、苦瓜炒鹅蛋、豇豆炒西红柿</span></div>
@@ -477,6 +488,7 @@ function unlock() {
   var ifb = document.getElementById("invFbText");
   ifb.value = state.invFb || "";
   applyAway();
+  renderExtras();
 }
 var savedKey = null;
 try { savedKey = localStorage.getItem("mama-key"); } catch (e) {}
@@ -502,6 +514,47 @@ document.getElementById("fbSave").addEventListener("click", function () {
   save();
   document.getElementById("fbHint").textContent = "已保存 ✓";
 });
+function renderExtras() {
+  var eb = document.getElementById("extraBuys");
+  eb.innerHTML = "";
+  (state.extraBuys || []).forEach(function (it, i) {
+    var lab = document.createElement("label"); lab.className = "todo";
+    var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!it.c;
+    cb.addEventListener("change", function () { it.c = cb.checked; save(); });
+    var sp = document.createElement("span"); sp.className = "t"; sp.textContent = it.t;
+    var tg = document.createElement("span"); tg.className = "selftag"; tg.textContent = "自己加"; sp.appendChild(tg);
+    var x = document.createElement("button"); x.className = "xdel"; x.textContent = "×"; x.title = "删除";
+    x.addEventListener("click", function (e) { e.preventDefault(); state.extraBuys.splice(i, 1); save(); renderExtras(); });
+    lab.appendChild(cb); lab.appendChild(sp); lab.appendChild(x); eb.appendChild(lab);
+  });
+  var ee = document.getElementById("extraEats");
+  ee.innerHTML = "";
+  (state.extraEats || []).forEach(function (t, i) {
+    var d = document.createElement("div"); d.className = "meal";
+    var bb = document.createElement("b"); bb.textContent = "额外"; d.appendChild(bb);
+    d.appendChild(document.createTextNode("：" + t + " "));
+    var tg = document.createElement("span"); tg.className = "selftag"; tg.textContent = "自己加"; d.appendChild(tg);
+    var x = document.createElement("button"); x.className = "xdel"; x.textContent = "×"; x.title = "删除";
+    x.addEventListener("click", function () { state.extraEats.splice(i, 1); save(); renderExtras(); });
+    d.appendChild(x); ee.appendChild(d);
+  });
+}
+function addBuy() {
+  var inp = document.getElementById("buyInp");
+  var v = inp.value.trim(); if (!v) return;
+  (state.extraBuys = state.extraBuys || []).push({ t: v, c: true });
+  inp.value = ""; save(); renderExtras();
+}
+function addEat() {
+  var inp = document.getElementById("eatInp");
+  var v = inp.value.trim(); if (!v) return;
+  (state.extraEats = state.extraEats || []).push(v);
+  inp.value = ""; save(); renderExtras();
+}
+document.getElementById("buyAdd").addEventListener("click", addBuy);
+document.getElementById("buyInp").addEventListener("keydown", function (e) { if (e.key === "Enter") addBuy(); });
+document.getElementById("eatAdd").addEventListener("click", addEat);
+document.getElementById("eatInp").addEventListener("keydown", function (e) { if (e.key === "Enter") addEat(); });
 document.getElementById("invFbSave").addEventListener("click", function () {
   state.invFb = document.getElementById("invFbText").value;
   save();
