@@ -6,14 +6,14 @@
 <meta name="robots" content="noindex, nofollow">
 <title>每日买菜助手 · Amorize</title>
 <style>
-:root { --green: #a3b18a; --green-dark: #869873; --bg: #f7f6f3; --text: #2b2b28; --muted: #8a877f; --border: #e8e6e0; }
+:root { --green: #a3b18a; --green-dark: #869873; --bg: #f7f6f3; --card: #ffffff; --text: #2b2b28; --muted: #9a968c; --faint: #b5b1a6; --border: #eeece6; --warn: #c9a24b; }
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; }
-h1 { font-size: 26px; font-weight: 700; margin-top: 18px; }
-.date { font-size: 15px; color: var(--muted); margin-top: 10px; }
-.note { font-size: 13px; color: var(--muted); margin-top: 26px; }
-svg { width: 195px; height: auto; }
-footer { position: fixed; bottom: 18px; font-size: 12px; color: var(--muted); }
+body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; -webkit-font-smoothing: antialiased; }
+body.unlocked { justify-content: flex-start; padding: 20px 16px 44px; }
+body.unlocked #stage { transform: none; width: 100%; }
+svg.hero { width: 195px; height: auto; }
+footer { position: fixed; bottom: 18px; font-size: 11px; color: var(--faint); }
+body.unlocked footer { position: static; margin-top: 36px; }
 #stage { transform: translateY(-8vh); }
 #lock { margin-top: 30px; display: flex; gap: 10px; justify-content: center; }
 #pw { width: 180px; padding: 12px 14px; font-size: 16px; text-align: center; border: 1px solid var(--border); border-radius: 12px; background: #fff; outline: none; letter-spacing: 2px; }
@@ -24,11 +24,67 @@ footer { position: fixed; bottom: 18px; font-size: 12px; color: var(--muted); }
 .shake { animation: shake .4s; }
 @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-9px)} 40%{transform:translateX(9px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
 [hidden] { display: none !important; }
+.wrap { width: 100%; max-width: 540px; margin: 0 auto; text-align: left; }
+.cols { display: block; }
+@media (min-width: 900px) {
+  .wrap { max-width: 1020px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+}
+.top { display: flex; align-items: center; gap: 10px; padding: 0 6px; }
+.top .bag { width: 30px; height: auto; flex: none; }
+.top .date { font-size: 13.5px; color: var(--muted); flex: 1; }
+.nav { display: flex; gap: 6px; }
+.nav a { font-size: 12.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--border); background: #fff; border-radius: 20px; padding: 5px 11px; white-space: nowrap; }
+.nav a.back { color: var(--green-dark); }
+.card { background: var(--card); border-radius: 18px; margin-top: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.03); padding: 20px 20px 16px; }
+.card h2 { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.grp { font-size: 11.5px; color: var(--faint); letter-spacing: 1px; margin: 16px 0 2px; }
+.grp:first-of-type { margin-top: 12px; }
+.todo { display: flex; gap: 10px; align-items: flex-start; padding: 6.5px 0; }
+.todo input { margin-top: 2.5px; width: 17px; height: 17px; accent-color: var(--green); flex: none; }
+.todo .t { font-size: 14px; line-height: 1.55; }
+.todo .t i { font-style: normal; color: var(--muted); font-size: 12.5px; }
+.todo input:checked ~ .t { text-decoration: line-through; color: var(--faint); }
+.todo.off .t { text-decoration: line-through; color: var(--faint); }
+.todo.off input { opacity: .35; pointer-events: none; }
+.peek { background: #faf8f1; border-radius: 12px; padding: 10px 13px; font-size: 12.5px; line-height: 1.65; color: var(--muted); margin-top: 14px; }
+.have { font-size: 12.5px; color: var(--faint); line-height: 1.65; margin-top: 10px; }
+.away { display: flex; gap: 6px; margin-left: auto; }
+.away button { font: inherit; font-size: 11.5px; color: var(--muted); background: transparent; border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; cursor: pointer; white-space: nowrap; }
+.away button.on { background: var(--green); border-color: var(--green); color: #fff; }
+.meal { font-size: 13.5px; line-height: 1.75; margin-top: 11px; }
+.meal b { color: var(--green-dark); font-weight: 600; font-size: 13px; }
+.meal .kcal { font-size: 11px; color: var(--faint); margin-left: 4px; }
+.menu details { margin-top: 13px; border-top: 1px solid var(--border); padding-top: 11px; }
+.menu summary { font-size: 12.5px; color: var(--muted); cursor: pointer; list-style-position: inside; }
+.menu details p { font-size: 12.5px; color: var(--muted); line-height: 1.7; margin-top: 8px; }
+.fb { display: flex; gap: 8px; margin-top: 16px; align-items: flex-end; }
+.fb textarea { flex: 1; border: 1px solid var(--border); border-radius: 12px; padding: 9px 13px; font: inherit; font-size: 13.5px; height: 40px; resize: none; background: #fff; outline: none; transition: height .15s; color: var(--text); }
+.fb textarea:focus { height: 92px; border-color: var(--green); }
+.fb button { width: 40px; height: 40px; flex: none; color: #fff; background: var(--green); border: 0; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.fb button svg { width: 17px; height: 17px; }
+.fb button:active { background: var(--green-dark); }
+.hint { font-size: 11.5px; color: var(--faint); margin-top: 6px; text-align: right; min-height: 15px; }
+.item { display: flex; gap: 8px; align-items: baseline; padding: 5.5px 0; font-size: 13.5px; line-height: 1.55; }
+.item i { font-style: normal; color: var(--muted); font-size: 12px; margin-left: auto; white-space: nowrap; }
+.item .exp { color: var(--warn); }
+.prof { font-size: 13.5px; line-height: 1.8; color: var(--text); margin-top: 8px; }
+.prof b { color: var(--green-dark); font-weight: 600; }
+.recipe { border-top: 1px solid var(--border); padding: 12px 0 4px; margin-top: 12px; }
+.recipe:first-of-type { border-top: 0; margin-top: 4px; }
+.recipe h3 { font-size: 14px; font-weight: 600; }
+.recipe .ing { font-size: 12.5px; color: var(--muted); line-height: 1.7; margin-top: 4px; }
+.flow { margin-top: 14px; }
+.node { background: var(--card); border-radius: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.03); padding: 14px 16px; }
+.node h3 { font-size: 13.5px; font-weight: 600; display: flex; gap: 7px; align-items: center; }
+.node p { font-size: 12.5px; color: var(--muted); line-height: 1.65; margin-top: 5px; }
+.arrow { text-align: center; color: var(--faint); font-size: 15px; padding: 4px 0; }
+.tag { display: inline-block; font-size: 10.5px; color: var(--faint); border: 1px solid var(--border); border-radius: 20px; padding: 0 7px; margin-left: 7px; vertical-align: 1px; font-weight: 400; }
 </style>
 </head>
 <body>
 <div id="stage">
-<svg viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<svg class="hero" id="heroBag" viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <path d="M60 60 L160 60 L172 138 Q172 144 166 144 L54 144 Q48 144 48 138 Z" fill="#e7cfa5"/>
 <path d="M60 60 L160 60 L163 80 L57 80 Z" fill="#dbbf8e"/>
 <ellipse cx="78" cy="52" rx="16" ry="22" fill="#bfe3a0"/>
@@ -48,24 +104,233 @@ footer { position: fixed; bottom: 18px; font-size: 12px; color: var(--muted); }
 <button id="go" aria-label="进入"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 12h15M13 6l6 6-6 6" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 </div>
 <div id="main" hidden>
-<div class="date" id="today"></div>
-<div class="note">正在一点点搭建中</div>
+<div class="wrap">
+<div class="top">
+<svg class="bag" viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<path d="M60 60 L160 60 L172 138 Q172 144 166 144 L54 144 Q48 144 48 138 Z" fill="#e7cfa5"/>
+<path d="M60 60 L160 60 L163 80 L57 80 Z" fill="#dbbf8e"/>
+<ellipse cx="78" cy="52" rx="16" ry="22" fill="#bfe3a0"/>
+<circle cx="112" cy="50" r="15" fill="#e8604c"/>
+<path d="M142 30 Q152 52 146 62 Q138 54 134 34 Z" fill="#ef9440"/>
+<circle cx="97" cy="108" r="3" fill="#8a6a3f"/>
+<circle cx="123" cy="108" r="3" fill="#8a6a3f"/>
+<path d="M96 120 Q110 130 124 120" stroke="#8a6a3f" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>
+<span class="date" id="today"></span>
+<span class="nav" id="navHome">
+<a href="#" data-view="inv">📦 库存</a>
+<a href="#" data-view="rec">📖 菜谱库</a>
+<a href="#" data-view="prof">📋 档案</a>
+<a href="#" data-view="dash">🗺 仪表盘</a>
+</span>
+<span class="nav" id="navBack" hidden>
+<a href="#" class="back" data-view="home">← 返回</a>
+</span>
+</div>
+
+<!-- ===================== 主页 ===================== -->
+<section id="view-home">
+<div class="cols">
+<div class="card">
+<h2>🧾 采买清单</h2>
+<div class="grp">主料</div>
+<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t1"><span class="t">三文鱼（生食级）约300g <i>—— 晚餐三文鱼配紫苏叶</i></span></label>
+<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t2"><span class="t">羊杂拼盘 约500g <i>—— 晚餐羊杂汤用</i></span></label>
+<label class="todo" data-meal="brunch"><input type="checkbox" data-k="t3"><span class="t">牛肉糜 300g <i>—— 三明治肉饼，按天买</i></span></label>
+<label class="todo" data-meal="both"><input type="checkbox" data-k="t4"><span class="t">鸡蛋 10个 <i>—— 三明治 + 阿姨汤面 + 狗狗</i></span></label>
+<div class="grp">配菜与水果</div>
+<label class="todo" data-meal="brunch"><input type="checkbox" data-k="t5"><span class="t">西红柿 4个 <i>—— 三明治用</i></span></label>
+<label class="todo" data-meal="brunch"><input type="checkbox" data-k="t6"><span class="t">西兰花 1棵 <i>—— 早午餐蒸配菜</i></span></label>
+<label class="todo" data-meal="brunch"><input type="checkbox" data-k="t7"><span class="t">胡萝卜 2-3根 <i>—— 早午餐蒸配菜</i></span></label>
+<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t8"><span class="t">紫色青菜（紫苋菜/紫甘蓝）1把 <i>—— 晚餐</i></span></label>
+<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t9"><span class="t">绿色青菜（菠菜/油麦菜）1把 <i>—— 晚餐</i></span></label>
+<label class="todo" data-meal="both"><input type="checkbox" data-k="t10"><span class="t">香蕉 1把 <i>—— 每天1根当碳水</i></span></label>
+<label class="todo" data-meal="both"><input type="checkbox" data-k="t11"><span class="t">牛油果 2-3个 <i>—— 库存推算只剩2-3个，补货</i></span></label>
+<div class="grp">你点的菜 · 自动加购</div>
+<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t12"><span class="t">紫苏叶 <i>—— 配三文鱼，上次的应该吃完了</i></span></label>
+<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t13"><span class="t">白萝卜 1个 <i>—— 羊杂汤配菜</i></span></label>
+<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t14"><span class="t">小葱/姜 <i>—— 羊杂汤去膻，家里的快到期，不够再买</i></span></label>
+<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t15"><span class="t">白胡椒粉 <i>—— 羊杂汤调味，买前看一眼家里有没有</i></span></label>
+<div class="peek">🔍 买前看一眼家里有没有：<b>白菜、豆腐、面包、皮蛋/咸蛋、白胡椒粉</b>。有就不买，在反馈里说声还剩多少就行。</div>
+<div class="have">✅ 不用买：白蘑菇/口蘑（7/14到期，今晚进羊杂汤）；盐、料酒、酱料、蒜瓣都在库存里</div>
+</div>
+
+<div>
+<div class="card menu" style="margin-top: 16px;">
+<h2>🍽 今日菜谱
+<span class="away">
+<button id="awayBrunch">早午餐不在家</button>
+<button id="awayDinner">晚餐不在家</button>
+</span>
+</h2>
+<div class="meal" id="mealBrunch"><b>早午餐</b><span class="kcal">你600 / 老佰700千卡</span><br>你的三明治（牛肉饼+鸡蛋+酸黄瓜+西红柿+奶酪）+ 蒸西兰花、胡萝卜 + 美式咖啡；老佰豆浆 + 加量三明治；小朱阿姨汤面</div>
+<div class="meal" id="mealDinner"><b>晚餐</b><span class="kcal">你650 / 老佰1050千卡</span><br>三文鱼配紫苏叶、🧊羊杂汤（口蘑同炖，临期优先）、紫色青菜清炒、绿色青菜水煮、🧊白色青菜（用美团到的白菜）</div>
+<div class="meal"><b>加餐</b><span class="kcal">各200千卡</span><br>你的蓝莓；健身后椰子水；🧊老佰的桃子（库存量大优先吃）；半根香蕉；牛油果一人半个</div>
+<details>
+<summary>👩‍🍳 做法 & 为什么这么搭</summary>
+<p>西兰花胡萝卜隔水蒸8-10分钟保留脆度；羊杂先焯水去腥，加白萝卜块、姜片小火炖透，起锅撒白胡椒粉和香菜；青菜清水煮或少油快炒，西红柿丁吊味不用酱油；三文鱼冷藏解冻配紫苏叶。🧊 = 用家里现有库存，不用买。今天蔬果凑了 6 种颜色约 10 样，在 5-7-9 区间；羊杂汤是你点的，顺便清掉临期的口蘑和香菜。</p>
+</details>
+</div>
+
+<div class="fb">
+<textarea id="fbText" placeholder="✍️ 明天想吃什么、买到了什么、家里还剩什么……"></textarea>
+<button id="fbSave" aria-label="保存"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l5 5L20 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+</div>
+<div class="hint" id="fbHint"></div>
+</div>
+</div>
+</section>
+
+<!-- ===================== 库存 ===================== -->
+<section id="view-inv" hidden>
+<div class="card">
+<h2>📦 家里还有的<span class="tag">示例</span></h2>
+<div class="grp">🥬 冷藏</div>
+<div class="item">白蘑菇/口蘑 <i class="exp">7/14 到期 · 今晚进羊杂汤</i></div>
+<div class="item">香菜/小葱 <i class="exp">7/14 到期 · 羊杂汤用</i></div>
+<div class="item">蓝莓 <i>约剩 1 盒 · 明天要补</i></div>
+<div class="item">牛油果 <i>剩 2-3 个 · 已进今日清单</i></div>
+<div class="item">白菜（美团 7/11 到）<i>剩多少不确定</i></div>
+<div class="item">豆腐（美团 7/11 到）<i>剩多少不确定</i></div>
+<div class="grp">❄️ 冷冻</div>
+<div class="item">冻牛肉 <i>2-3 大块 · 充足</i></div>
+<div class="item">黄鱼 / 带鱼 / 虾仁 / 整鸡 / 鲍鱼 <i>都很足 · 近期不用买肉鱼虾</i></div>
+<div class="grp">🍞 常温</div>
+<div class="item">桃子 <i>10+ 个 · 量大优先吃</i></div>
+<div class="item">椰子水 <i>4 盒 · 这周够</i></div>
+<div class="item">面包（美团 7/11 到）<i>剩多少不确定</i></div>
+<div class="grp">🧂 调味</div>
+<div class="item">盐 / 料酒 / 酱油 / 蚝油 / 芝麻酱 / 豆瓣酱 / 蒜瓣 <i>齐全 ✅</i></div>
+<div class="fb">
+<textarea id="invFbText" placeholder="✍️ 谁送了什么、送出去了什么、哪样快没了……"></textarea>
+<button id="invFbSave" aria-label="保存"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l5 5L20 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+</div>
+<div class="hint" id="invFbHint"></div>
+</div>
+</section>
+
+<!-- ===================== 菜谱库 ===================== -->
+<section id="view-rec" hidden>
+<div class="card">
+<h2>📖 菜谱库<span class="tag">示例</span></h2>
+<div class="recipe">
+<h3>羊杂汤</h3>
+<div class="ing">食材：羊杂拼盘 500g · 白萝卜 1个 · 姜片 · 白胡椒粉 · 香菜<br>做法：羊杂焯水去腥，加白萝卜块、姜片小火炖透，起锅撒白胡椒粉和香菜</div>
+</div>
+<div class="recipe">
+<h3>你的三明治</h3>
+<div class="ing">食材：牛肉糜 150g（肉饼）· 鸡蛋 1个 · 酸黄瓜 · 西红柿 1个 · 奶酪 1片 · 面包 2片<br>做法：牛肉饼煎熟，按固定顺序叠，配美式咖啡</div>
+</div>
+<div class="recipe">
+<h3>三文鱼配紫苏叶</h3>
+<div class="ing">食材：三文鱼（生食级）300g · 紫苏叶<br>做法：冷藏解冻直接配紫苏叶生吃，或简单煎一下</div>
+</div>
+<div class="recipe">
+<h3>水煮青菜</h3>
+<div class="ing">食材：绿叶菜 1把 · 西红柿丁（吊味）<br>做法：清水煮或少油快炒，起锅用西红柿丁吊味，不用酱油</div>
+</div>
+</div>
+</section>
+
+<!-- ===================== 档案 ===================== -->
+<section id="view-prof" hidden>
+<div class="card">
+<h2>🎯 健康目标<span class="tag">示例</span></h2>
+<div class="prof"><b>你</b>：减脂期，每天 1400-1500 千卡；蛋白质优先，蔬果 5-7-9<br><b>老佰</b>：每天 1800-2000 千卡，羊杂汤三文鱼份量加大<br><b>狗狗×2</b>：份量从主食、鸡蛋、青菜、肉里一起算</div>
+</div>
+<div class="card">
+<h2>❤️ 饮食偏好</h2>
+<div class="prof">三文鱼配紫苏叶是固定搭配 · 青菜水煮或少油快炒、西红柿吊味不用酱油 · 喜欢凑颜色（紫/绿/白青菜）· 甜点减脂期不主动安排，想吃再点</div>
+</div>
+<div class="card">
+<h2>🔁 固定习惯</h2>
+<div class="prof">两餐制：早午餐 + 晚餐 · 你的早午餐固定三明治+美式咖啡 · 香蕉每天 1 根当碳水 · 健身后椰子水 · 小朱阿姨的汤面 · 美团下单为主，鲜肉按天买</div>
+</div>
+</section>
+
+<!-- ===================== 仪表盘 ===================== -->
+<section id="view-dash" hidden>
+<div class="flow">
+<div class="node">
+<h3>📋 家庭档案 <span class="tag">是谁在吃</span></h3>
+<p>你 1400-1500 千卡减脂 · 老佰 1800-2000 · 2 条狗 · 两餐制</p>
+</div>
+<div class="arrow">↓</div>
+<div class="node">
+<h3>🍽 今天吃什么 <span class="tag">Meal Plan</span></h3>
+<p>早午餐：三明治套餐 · 晚餐：三文鱼紫苏叶 + 羊杂汤 + 三色青菜 · 全天你约 1450 千卡</p>
+</div>
+<div class="arrow">↓</div>
+<div class="node">
+<h3>📖 拆成食材 <span class="tag">Recipe</span></h3>
+<p>羊杂汤 → 羊杂 500g + 白萝卜 + 姜 + 白胡椒粉 + 香菜 ｜ 三明治 → 牛肉糜 + 鸡蛋 + 西红柿 + 奶酪</p>
+</div>
+<div class="arrow">↓</div>
+<div class="node">
+<h3>📦 库存增减 <span class="tag">Inventory</span></h3>
+<p>今天消耗：口蘑、香菜（临期清掉 ✅）、白菜、蓝莓 1 盒 · 推算快没的：蓝莓、牛油果</p>
+</div>
+<div class="arrow">↓</div>
+<div class="node">
+<h3>🧾 明天买什么 <span class="tag">Shopping List</span></h3>
+<p>缺口自动生成：蓝莓、牛油果补货 + 明天菜单的主料 · 你的反馈（想吃什么）也会加进来</p>
+</div>
+</div>
+</section>
+
+</div>
 </div>
 </div>
 <footer>Amorize LLC</footer>
 <script>
 var KEY = "1a2nw1x";
 function hash(s){ var x = 5381; for (var i = 0; i < s.length; i++) { x = ((x * 33) ^ s.codePointAt(i)) >>> 0; } return x.toString(36); }
+var d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Shanghai" }));
+var dayKey = "mama-" + d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+var state = {};
+try { state = JSON.parse(localStorage.getItem(dayKey) || "{}"); } catch (e) {}
+function save() { try { localStorage.setItem(dayKey, JSON.stringify(state)); } catch (e) {} }
+function applyAway() {
+  document.getElementById("awayBrunch").classList.toggle("on", !!state.awayBrunch);
+  document.getElementById("awayDinner").classList.toggle("on", !!state.awayDinner);
+  document.getElementById("mealBrunch").hidden = !!state.awayBrunch;
+  document.getElementById("mealDinner").hidden = !!state.awayDinner;
+  document.querySelectorAll(".todo").forEach(function (el) {
+    var m = el.dataset.meal;
+    var off = (m === "brunch" && state.awayBrunch) || (m === "dinner" && state.awayDinner);
+    el.classList.toggle("off", off);
+  });
+}
+var VIEWS = ["home", "inv", "rec", "prof", "dash"];
+function show(v) {
+  VIEWS.forEach(function (x) { document.getElementById("view-" + x).hidden = (x !== v); });
+  document.getElementById("navHome").hidden = (v !== "home");
+  document.getElementById("navBack").hidden = (v === "home");
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll(".nav a").forEach(function (a) {
+  a.addEventListener("click", function (e) { e.preventDefault(); show(a.dataset.view); });
+});
 function unlock() {
   document.getElementById("lock").hidden = true;
+  document.getElementById("heroBag").hidden = true;
   document.getElementById("main").hidden = false;
-  var d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Shanghai" }));
+  document.body.classList.add("unlocked");
   var week = ["日","一","二","三","四","五","六"];
-  document.getElementById("today").textContent = (d.getMonth()+1) + "月" + d.getDate() + "日 星期" + week[d.getDay()] + " · 北京时间";
+  document.getElementById("today").textContent = (d.getMonth()+1) + "月" + d.getDate() + "日 星期" + week[d.getDay()];
+  document.querySelectorAll(".todo input").forEach(function (el) {
+    if (state[el.dataset.k]) el.checked = true;
+    el.addEventListener("change", function () { state[el.dataset.k] = el.checked; save(); });
+  });
+  var fb = document.getElementById("fbText");
+  fb.value = state.fb || "";
+  var ifb = document.getElementById("invFbText");
+  ifb.value = state.invFb || "";
+  applyAway();
 }
-var saved = null;
-try { saved = localStorage.getItem("mama-key"); } catch (e) {}
-if (saved === KEY) { unlock(); }
+var savedKey = null;
+try { savedKey = localStorage.getItem("mama-key"); } catch (e) {}
+if (savedKey === KEY) { unlock(); }
 function tryPw() {
   var pw = document.getElementById("pw");
   if (hash(pw.value.trim()) === KEY) {
@@ -80,6 +345,18 @@ function tryPw() {
 }
 document.getElementById("go").addEventListener("click", tryPw);
 document.getElementById("pw").addEventListener("keydown", function (e) { if (e.key === "Enter") tryPw(); });
+document.getElementById("awayBrunch").addEventListener("click", function () { state.awayBrunch = !state.awayBrunch; save(); applyAway(); });
+document.getElementById("awayDinner").addEventListener("click", function () { state.awayDinner = !state.awayDinner; save(); applyAway(); });
+document.getElementById("fbSave").addEventListener("click", function () {
+  state.fb = document.getElementById("fbText").value;
+  save();
+  document.getElementById("fbHint").textContent = "已保存 ✓";
+});
+document.getElementById("invFbSave").addEventListener("click", function () {
+  state.invFb = document.getElementById("invFbText").value;
+  save();
+  document.getElementById("invFbHint").textContent = "已保存 ✓";
+});
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
