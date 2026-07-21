@@ -13,7 +13,9 @@ body.unlocked { justify-content: flex-start; padding: 20px 16px 44px; }
 body.unlocked #stage { transform: none; width: 100%; }
 svg.hero { width: 195px; height: auto; }
 footer { position: fixed; bottom: 18px; font-size: 11px; color: var(--faint); }
-body.unlocked footer { position: static; margin-top: 36px; }
+body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,255,255,.85); border-radius: 10px; padding: 3px 10px; }
+#bg { position: fixed; inset: 0; z-index: -2; background: url(bg-blur.jpg) center/cover no-repeat; }
+#bgsharp { position: fixed; inset: 0; z-index: -1; background: url(bg-real.jpg) center/contain no-repeat; -webkit-mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, #000 62%, transparent 99%); mask-image: radial-gradient(ellipse 72% 68% at 50% 50%, #000 62%, transparent 99%); }
 #stage { transform: translateY(-8vh); }
 #lock { margin-top: 30px; display: flex; gap: 10px; justify-content: center; }
 #pw { width: 180px; padding: 12px 14px; font-size: 16px; text-align: center; border: 1px solid var(--border); border-radius: 12px; background: #fff; outline: none; letter-spacing: 2px; }
@@ -30,10 +32,11 @@ body.unlocked footer { position: static; margin-top: 36px; }
   .wrap { max-width: 1020px; }
   .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
 }
-.top { display: flex; align-items: center; gap: 10px; padding: 0 6px; }
-.top .bag { width: 30px; height: auto; flex: none; }
-.top .date { font-size: 13.5px; color: var(--muted); flex: 1; }
-.nav { display: flex; gap: 6px; }
+.top { display: flex; align-items: center; gap: 8px; padding: 0 6px; flex-wrap: wrap; }
+.top .bag { width: 44px; height: auto; flex: none; }
+.top .date { font-size: 13.5px; color: var(--text); white-space: nowrap; margin-right: auto; }
+.top { background: rgba(255,255,255,.92); border-radius: 14px; padding: 8px 12px; }
+.nav { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 .nav a { font-size: 12.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--border); background: #fff; border-radius: 20px; padding: 5px 11px; white-space: nowrap; }
 .nav a.back { color: var(--green-dark); }
 .card { background: var(--card); border-radius: 18px; margin-top: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.03); padding: 20px 20px 16px; }
@@ -73,16 +76,29 @@ body.unlocked footer { position: static; margin-top: 36px; }
 .recipe { border-top: 1px solid var(--border); padding: 12px 0 4px; margin-top: 12px; }
 .recipe:first-of-type { border-top: 0; margin-top: 4px; }
 .recipe h3 { font-size: 14px; font-weight: 600; }
+.recipe .rid { font-size: 10px; color: var(--faint); margin-left: 6px; font-weight: 400; }
+.recipe .ing b { color: var(--green-dark); font-weight: 600; }
 .recipe .ing { font-size: 12.5px; color: var(--muted); line-height: 1.7; margin-top: 4px; }
 .flow { margin-top: 14px; }
 .node { background: var(--card); border-radius: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.03); padding: 14px 16px; }
 .node h3 { font-size: 13.5px; font-weight: 600; display: flex; gap: 7px; align-items: center; }
 .node p { font-size: 12.5px; color: var(--muted); line-height: 1.65; margin-top: 5px; }
 .arrow { text-align: center; color: var(--faint); font-size: 15px; padding: 4px 0; }
+.hist { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 11px; }
+.hist summary { font-size: 12.5px; color: var(--muted); cursor: pointer; list-style-position: inside; }
+.hrow { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px dashed var(--border); font-size: 12.5px; line-height: 1.65; }
+.hrow:last-child { border-bottom: 0; }
+.hrow .hd { flex: none; width: 74px; color: var(--faint); }
+.hrow .hb { color: var(--muted); }
+.hrow .hb b { color: var(--green-dark); font-weight: 600; }
+.hrow .hn { font-style: normal; color: var(--faint); }
+.item.neg i { color: #b98a8a; }
 .tag { display: inline-block; font-size: 10.5px; color: var(--faint); border: 1px solid var(--border); border-radius: 20px; padding: 0 7px; margin-left: 7px; vertical-align: 1px; font-weight: 400; }
 </style>
 </head>
 <body>
+<div id="bg" aria-hidden="true"></div>
+<div id="bgsharp" aria-hidden="true"></div>
 <div id="stage">
 <svg class="hero" id="heroBag" viewBox="0 0 220 150" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <path d="M60 60 L160 60 L172 138 Q172 144 166 144 L54 144 Q48 144 48 138 Z" fill="#e7cfa5"/>
@@ -132,43 +148,48 @@ body.unlocked footer { position: static; margin-top: 36px; }
 <section id="view-home">
 <div class="cols">
 <div class="card">
-<h2>🧾 采买清单</h2>
-<div class="grp">主料</div>
-<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t1"><span class="t">三文鱼（生食级）约300g <i>—— 晚餐三文鱼配紫苏叶</i></span></label>
-<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t2"><span class="t">羊杂拼盘 约500g <i>—— 晚餐羊杂汤用</i></span></label>
-<label class="todo" data-meal="brunch"><input type="checkbox" data-k="t3"><span class="t">牛肉糜 300g <i>—— 三明治肉饼，按天买</i></span></label>
-<label class="todo" data-meal="both"><input type="checkbox" data-k="t4"><span class="t">鸡蛋 10个 <i>—— 三明治 + 阿姨汤面 + 狗狗</i></span></label>
-<div class="grp">配菜与水果</div>
-<label class="todo" data-meal="brunch"><input type="checkbox" data-k="t5"><span class="t">西红柿 4个 <i>—— 三明治用</i></span></label>
-<label class="todo" data-meal="brunch"><input type="checkbox" data-k="t6"><span class="t">西兰花 1棵 <i>—— 早午餐蒸配菜</i></span></label>
-<label class="todo" data-meal="brunch"><input type="checkbox" data-k="t7"><span class="t">胡萝卜 2-3根 <i>—— 早午餐蒸配菜</i></span></label>
-<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t8"><span class="t">紫色青菜（紫苋菜/紫甘蓝）1把 <i>—— 晚餐</i></span></label>
-<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t9"><span class="t">绿色青菜（菠菜/油麦菜）1把 <i>—— 晚餐</i></span></label>
-<label class="todo" data-meal="both"><input type="checkbox" data-k="t10"><span class="t">香蕉 1把 <i>—— 每天1根当碳水</i></span></label>
-<label class="todo" data-meal="both"><input type="checkbox" data-k="t11"><span class="t">牛油果 2-3个 <i>—— 库存推算只剩2-3个，补货</i></span></label>
-<div class="grp">你点的菜 · 自动加购</div>
-<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t12"><span class="t">紫苏叶 <i>—— 配三文鱼，上次的应该吃完了</i></span></label>
-<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t13"><span class="t">白萝卜 1个 <i>—— 羊杂汤配菜</i></span></label>
-<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t14"><span class="t">小葱/姜 <i>—— 羊杂汤去膻，家里的快到期，不够再买</i></span></label>
-<label class="todo" data-meal="dinner"><input type="checkbox" data-k="t15"><span class="t">白胡椒粉 <i>—— 羊杂汤调味，买前看一眼家里有没有</i></span></label>
-<div class="peek">🔍 买前看一眼家里有没有：<b>白菜、豆腐、面包、皮蛋/咸蛋、白胡椒粉</b>。有就不买，在反馈里说声还剩多少就行。</div>
-<div class="have">✅ 不用买：白蘑菇/口蘑（7/14到期，今晚进羊杂汤）；盐、料酒、酱料、蒜瓣都在库存里</div>
+<h2>🧾 采买清单<span class="tag">7/21 数据</span></h2>
+<label class="todo" data-meal="both"><input type="checkbox" data-k="s1"><span class="t">鸡纵菌 1盒 <i>—— 鲜菌，看妈妈安排</i></span></label>
+<label class="todo" data-meal="dinner"><input type="checkbox" data-k="s2"><span class="t">菜心 500克 <i>—— 晚餐水煮菜心</i></span></label>
+<label class="todo" data-meal="brunch"><input type="checkbox" data-k="s3"><span class="t">白菜 1颗 <i>—— 第一餐白菜豆腐</i></span></label>
+<label class="todo" data-meal="brunch"><input type="checkbox" data-k="s4"><span class="t">毛豆 500克 <i>—— 第一餐煮毛豆</i></span></label>
+<label class="todo" data-meal="brunch"><input type="checkbox" data-k="s5"><span class="t">鲜花生 500克 <i>—— 第一餐煮花生</i></span></label>
+<label class="todo" data-meal="both"><input type="checkbox" data-k="s6"><span class="t">茄子 500克 <i>—— 备菜</i></span></label>
+<label class="todo" data-meal="both"><input type="checkbox" data-k="s7"><span class="t">猪耳豆角 500克 <i>—— 备菜（素瓜豆等）</i></span></label>
+<label class="todo" data-meal="both"><input type="checkbox" data-k="s8"><span class="t">青尖椒 500克 <i>—— 炒菜配椒</i></span></label>
+<label class="todo" data-meal="both"><input type="checkbox" data-k="s9"><span class="t">圆西葫芦 1个 <i>—— 素瓜豆用</i></span></label>
+<label class="todo" data-meal="both"><input type="checkbox" data-k="s10"><span class="t">青瓜 2根 <i>—— 凉拌用</i></span></label>
+<label class="todo" data-meal="both"><input type="checkbox" data-k="s11"><span class="t">鸡蛋 15个 <i>—— 全家 + 狗狗</i></span></label>
+<details class="hist"><summary>🧾 全部采购记录（51 笔 · 7/15 起 · 用来看采购习惯）</summary>
+<div class="hrow"><span class="hd">7/15</span><span class="hb">牛油果 1个、西兰花 2份、紫苏叶 30g、菠菜苗 250g、油麦菜苗 250g、蓝莓 2盒、带筋猪前蹄 500g、冬瓜 800g、紫皮大蒜 250g、青蒜苗 300g、山药 500g、鲜花生 500g<i class="hn">（12 样 · 已送达）</i></span></div>
+<div class="hrow"><span class="hd">7/16</span><span class="hb">牛油果 2个、白玉北豆腐 385g、三文鱼厚脂鱼腩切片 300g<i class="hn">（3 样 · 已送达）</i></span></div>
+<div class="hrow"><span class="hd">7/18</span><span class="hb">牛油果 2个、蓝莓 3盒、西兰花 3份、红苋菜苗 250g、冬瓜 800g、芹菜苗 250g、罗马生菜 500g<i class="hn">（7 样 · 已送达）</i></span></div>
+<div class="hrow"><span class="hd">7/19</span><span class="hb">草莓番茄 400g、鸡毛菜 250g、油麦菜苗 250g、冬瓜 800g、香豆干 120g、卤猪蹄 200g<i class="hn">（6 样 · 已送达）</i></span></div>
+<div class="hrow"><span class="hd">7/20</span><span class="hb">紫苏叶 30g、牛油果 2个、西兰花 550g、蓝莓 2盒、胡萝卜 600g、冬瓜 800g、三文鱼 300g、菠菜苗 250g、黑麦贝果 2个、白玉北豆腐 385g、谷饲黄牛肉馅 180g、黄洋葱 650g<i class="hn">（12 样 · 已送达）</i></span></div>
+<div class="hrow"><span class="hd">7/21</span><span class="hb">鸡纵菌 1盒、菜心 500克、白菜 1颗、毛豆 500克、鲜花生 500克、茄子 500克、猪耳豆角 500克、青尖椒 500克、圆西葫芦 1个、青瓜 2根、鸡蛋 15个<i class="hn">（11 样 · 已送达）</i></span></div>
+</details>
 </div>
 
 <div>
 <div class="card menu" style="margin-top: 16px;">
-<h2>🍽 今日菜谱
+<h2>🍽 今日菜谱<span class="tag">7/21 数据</span>
 <span class="away">
-<button id="awayBrunch">早午餐不在家</button>
-<button id="awayDinner">晚餐不在家</button>
+<button id="awayBrunch">第一餐不在家</button>
+<button id="awayDinner">第三餐不在家</button>
 </span>
 </h2>
-<div class="meal" id="mealBrunch"><b>早午餐</b><span class="kcal">你600 / 老佰700千卡</span><br>你的三明治（牛肉饼+鸡蛋+酸黄瓜+西红柿+奶酪）+ 蒸西兰花、胡萝卜 + 美式咖啡；老佰豆浆 + 加量三明治；小朱阿姨汤面</div>
-<div class="meal" id="mealDinner"><b>晚餐</b><span class="kcal">你650 / 老佰1050千卡</span><br>三文鱼配紫苏叶、🧊羊杂汤（口蘑同炖，临期优先）、紫色青菜清炒、绿色青菜水煮、🧊白色青菜（用美团到的白菜）</div>
-<div class="meal"><b>加餐</b><span class="kcal">各200千卡</span><br>你的蓝莓；健身后椰子水；🧊老佰的桃子（库存量大优先吃）；半根香蕉；牛油果一人半个</div>
-<details>
-<summary>👩‍🍳 做法 & 为什么这么搭</summary>
-<p>西兰花胡萝卜隔水蒸8-10分钟保留脆度；羊杂先焯水去腥，加白萝卜块、姜片小火炖透，起锅撒白胡椒粉和香菜；青菜清水煮或少油快炒，西红柿丁吊味不用酱油；三文鱼冷藏解冻配紫苏叶。🧊 = 用家里现有库存，不用买。今天蔬果凑了 6 种颜色约 10 样，在 5-7-9 区间；羊杂汤是你点的，顺便清掉临期的口蘑和香菜。</p>
+<div class="meal" id="mealBrunch"><b>第一餐</b><br>老婆：三明治 + 美式咖啡 + 羊奶粉 + 半个牛油果 + 半根香蕉 + 半盒蓝莓（固定）<br>老公：白菜豆腐、卤牛肉、煮毛豆、煮花生、蒸山药、油条</div>
+<div class="meal" id="mealDinner"><b>第三餐</b><br>老婆、保姆：三文鱼、水煮菜心、苦瓜炒鹅蛋</div>
+<div class="meal"><b>补剂</b><span class="kcal">每天固定</span><br>姜黄粉×3、磷虾油×1、D3+K2×1、降血脂胶囊×1（两人）；老婆晚益生菌×1</div>
+<details class="hist"><summary>📅 全部菜单记录（8 天 · 7/15-7/22 · 含反馈）</summary>
+<div class="hrow"><span class="hd">7/15</span><span class="hb"><b>老公 第一餐</b>：山药、李子<br><b>老婆 第一餐</b>：三明治<br><b>老公 第三餐</b>：猪蹄黄豆、麻婆豆腐、煎带鱼<br><b>老婆 第三餐</b>：三文鱼、煮菠菜、冬瓜汤、豇豆饭</span></div>
+<div class="hrow"><span class="hd">7/16</span><span class="hb"><b>老公 第一餐</b>：蒸南瓜、豆粥、煮玉米、桃子、李子<br><b>老婆 第一餐</b>：三明治<br><b>老婆 第三餐</b>：三文鱼、炒油麦菜、紫苏叶、面包、苦瓜炒鹅蛋、豇豆炒西红柿</span></div>
+<div class="hrow"><span class="hd">7/17</span><span class="hb"><b>老婆 第一餐</b>：荷包蛋青菜面<br><b>老公 第一餐</b>：蒸南瓜、豆粥、煮玉米、桃子、李子</span></div>
+<div class="hrow"><span class="hd">7/18</span><span class="hb"><b>老婆 第三餐</b>：蒸蛏子、海螺冬瓜汤、三文鱼、煮苋菜、燕窝粥</span></div>
+<div class="hrow"><span class="hd">7/19</span><span class="hb"><b>老公 第二餐</b>：煮鸡毛菜、炒豆干、卤猪蹄、腊肠<br><b>老婆 第三餐</b>：蒸螃蟹、水煮虾、水煮油麦菜苗<br><b>老公 第三餐</b>：回锅肉、冬瓜汤、炒豆角、凉拌莜面、炒牛肉芹菜</span></div>
+<div class="hrow"><span class="hd">7/20</span><span class="hb"><b>老公 第一餐</b>：豆浆（不喜欢·连续喝好几天了）、水煮花生（喜欢·儿时味道）<br><b>老婆 第三餐</b>：三文鱼、林蛙油羹<br><b>老婆、保姆 第三餐</b>：煮菠菜、苦瓜炒鹅蛋、冬瓜汤、凉拌莜面</span></div>
+<div class="hrow"><span class="hd">7/21</span><span class="hb"><b>老公 第一餐</b>：白菜豆腐、卤牛肉、煮毛豆、煮花生、蒸山药、油条<br><b>老婆、保姆 第三餐</b>：三文鱼、水煮菜心、苦瓜炒鹅蛋</span></div>
+<div class="hrow"><span class="hd">7/22</span><span class="hb"><b>老婆、保姆 第三餐</b>：面包</span></div>
 </details>
 </div>
 
@@ -184,23 +205,111 @@ body.unlocked footer { position: static; margin-top: 36px; }
 <!-- ===================== 库存 ===================== -->
 <section id="view-inv" hidden>
 <div class="card">
-<h2>📦 家里还有的<span class="tag">示例</span></h2>
-<div class="grp">🥬 冷藏</div>
-<div class="item">白蘑菇/口蘑 <i class="exp">7/14 到期 · 今晚进羊杂汤</i></div>
-<div class="item">香菜/小葱 <i class="exp">7/14 到期 · 羊杂汤用</i></div>
-<div class="item">蓝莓 <i>约剩 1 盒 · 明天要补</i></div>
-<div class="item">牛油果 <i>剩 2-3 个 · 已进今日清单</i></div>
-<div class="item">白菜（美团 7/11 到）<i>剩多少不确定</i></div>
-<div class="item">豆腐（美团 7/11 到）<i>剩多少不确定</i></div>
-<div class="grp">❄️ 冷冻</div>
-<div class="item">冻牛肉 <i>2-3 大块 · 充足</i></div>
-<div class="item">黄鱼 / 带鱼 / 虾仁 / 整鸡 / 鲍鱼 <i>都很足 · 近期不用买肉鱼虾</i></div>
-<div class="grp">🍞 常温</div>
-<div class="item">桃子 <i>10+ 个 · 量大优先吃</i></div>
-<div class="item">椰子水 <i>4 盒 · 这周够</i></div>
-<div class="item">面包（美团 7/11 到）<i>剩多少不确定</i></div>
-<div class="grp">🧂 调味</div>
-<div class="item">盐 / 料酒 / 酱油 / 蚝油 / 芝麻酱 / 豆瓣酱 / 蒜瓣 <i>齐全 ✅</i></div>
+<h2>📦 家里还有的<span class="tag">7/21 数据</span></h2>
+<div class="grp">🥬 蔬菜</div>
+<div class="item">紫苏叶 <i>60g</i></div>
+<div class="item">西兰花 <i>1110g</i></div>
+<div class="item">胡萝卜 <i>1200g</i></div>
+<div class="item">冬瓜 <i>4800g</i></div>
+<div class="item">菠菜苗 <i>500g</i></div>
+<div class="item">黄洋葱 <i>1300g</i></div>
+<div class="item">草莓番茄 <i>800g</i></div>
+<div class="item">鸡毛菜 <i>250g</i></div>
+<div class="item">油麦菜苗 <i>500g</i></div>
+<div class="item">红苋菜苗 <i>500g</i></div>
+<div class="item">芹菜苗 <i>500g</i></div>
+<div class="item">罗马生菜 <i>900g</i></div>
+<div class="item">紫皮大蒜 <i>500g</i></div>
+<div class="item">青蒜苗 <i>600g</i></div>
+<div class="item">山药 <i>990g</i></div>
+<div class="grp">🍓 水果</div>
+<div class="item">牛油果 <i>14个</i></div>
+<div class="item">蓝莓 <i>14盒</i></div>
+<div class="grp">🥩 肉蛋豆制品</div>
+<div class="item">白玉北豆腐 <i>1540g</i></div>
+<div class="item">谷饲黄牛肉馅 <i>360g</i></div>
+<div class="item">香豆干 <i>240g</i></div>
+<div class="item">卤猪蹄 <i>200g</i></div>
+<div class="item">三文鱼厚脂鱼腩切片 <i>600g</i></div>
+<div class="item">带筋猪前蹄 <i>500g</i></div>
+<div class="grp">🍞 主食与其他</div>
+<div class="item">黑麦贝果 <i>4个</i></div>
+<div class="item">鲜花生 <i>1000g</i></div>
+<details class="hist"><summary>⚠️ 待盘点（65 项 · 用掉了但没有初始库存记录，显示为负数）</summary>
+<div class="item neg">三文鱼 <i>0g</i></div>
+<div class="item neg">黄豆 <i>-65g</i></div>
+<div class="item neg">黑豆 <i>-47g</i></div>
+<div class="item neg">红豆 <i>-45g</i></div>
+<div class="item neg">绿豆 <i>-49g</i></div>
+<div class="item neg">花生 <i>-250g</i></div>
+<div class="item neg">辣根 <i>-20g</i></div>
+<div class="item neg">寿司酱油 <i>-60ml</i></div>
+<div class="item neg">苦瓜 <i>-2个</i></div>
+<div class="item neg">鹅蛋 <i>-2个</i></div>
+<div class="item neg">虾米 <i>-45g</i></div>
+<div class="item neg">莜面 <i>-400g</i></div>
+<div class="item neg">青瓜 <i>-2根</i></div>
+<div class="item neg">香菜 <i>-30g</i></div>
+<div class="item neg">小葱 <i>-45g</i></div>
+<div class="item neg">蒜末 <i>-60g</i></div>
+<div class="item neg">林蛙油 <i>-15g</i></div>
+<div class="item neg">大枣 <i>-2个</i></div>
+<div class="item neg">枸杞 <i>-30g</i></div>
+<div class="item neg">姜 <i>-45g</i></div>
+<div class="item neg">李子 <i>-3个</i></div>
+<div class="item neg">牛肉 <i>-100g</i></div>
+<div class="item neg">蛋 <i>-2个</i></div>
+<div class="item neg">西红柿 <i>-2.5个</i></div>
+<div class="item neg">奶酪片 <i>-2片</i></div>
+<div class="item neg">酸黄瓜 <i>-4根</i></div>
+<div class="item neg">洋葱 <i>-30g</i></div>
+<div class="item neg">豆腐 <i>-1块</i></div>
+<div class="item neg">牛肉糜 <i>-50g</i></div>
+<div class="item neg">火锅调料 <i>-30g</i></div>
+<div class="item neg">煎带鱼 <i>-0.5条</i></div>
+<div class="item neg">米饭 <i>-300g</i></div>
+<div class="item neg">豇豆 <i>-200g</i></div>
+<div class="item neg">腊肉丁 <i>-50g</i></div>
+<div class="item neg">贝贝南瓜 <i>-2个</i></div>
+<div class="item neg">薏米 <i>-36g</i></div>
+<div class="item neg">大花红豆 <i>-38g</i></div>
+<div class="item neg">莲子 <i>-40g</i></div>
+<div class="item neg">小米 <i>-42g</i></div>
+<div class="item neg">煮玉米 <i>-2个</i></div>
+<div class="item neg">桃子 <i>-2个</i></div>
+<div class="item neg">豆豉 <i>-30g</i></div>
+<div class="item neg">面包 <i>-50g</i></div>
+<div class="item neg">面条 <i>-500g</i></div>
+<div class="item neg">青菜任意 <i>-100g</i></div>
+<div class="item neg">鸡蛋 <i>-1个</i></div>
+<div class="item neg">蒸蛏子 <i>-500g</i></div>
+<div class="item neg">海螺 <i>-200g</i></div>
+<div class="item neg">苋菜 <i>-250g</i></div>
+<div class="item neg">燕窝 <i>-1个</i></div>
+<div class="item neg">水豆豉 <i>-30g</i></div>
+<div class="item neg">折耳根 <i>-15g</i></div>
+<div class="item neg">豆干 <i>-120g</i></div>
+<div class="item neg">青辣椒 <i>-4个</i></div>
+<div class="item neg">干豆豉 <i>-30g</i></div>
+<div class="item neg">贵州腊肠 <i>-100g</i></div>
+<div class="item neg">螃蟹 <i>-1个</i></div>
+<div class="item neg">虾 <i>-200g</i></div>
+<div class="item neg">五花肉 <i>-200g</i></div>
+<div class="item neg">豆角 <i>-250g</i></div>
+<div class="item neg">牛肉末 <i>-100g</i></div>
+<div class="item neg">芹菜 <i>-250g</i></div>
+<div class="item neg">糟辣椒 <i>-15g</i></div>
+<div class="item neg">葱 <i>-15g</i></div>
+<div class="item neg">蒜 <i>-15g</i></div>
+</details>
+<details class="hist"><summary>📜 全部出入库流水（154 条）</summary>
+<div class="hrow"><span class="hd">7/15 ⬇️ 入库</span><span class="hb">牛油果 1个、西兰花 2份、紫苏叶 30g、菠菜苗 250g、油麦菜苗 250g、蓝莓 2盒、带筋猪前蹄 500g、冬瓜 800g、紫皮大蒜 250g、青蒜苗 300g、山药 500g、鲜花生 500g、牛油果 1个、西兰花 2份、紫苏叶 30g、菠菜苗 250g、油麦菜苗 250g、蓝莓 2盒、带筋猪前蹄 500g、冬瓜 800g、紫皮大蒜 250g、青蒜苗 300g、山药 500g、鲜花生 500g</span></div>
+<div class="hrow"><span class="hd">7/16 ⬇️ 入库</span><span class="hb">牛油果 2个、白玉北豆腐 385g、三文鱼厚脂鱼腩切片 300g、牛油果 2个、白玉北豆腐 385g、三文鱼厚脂鱼腩切片 300g</span></div>
+<div class="hrow"><span class="hd">7/18 ⬇️ 入库</span><span class="hb">牛油果 2个、蓝莓 3盒、西兰花 3份、红苋菜苗 250g、冬瓜 800g、芹菜苗 250g、罗马生菜 500g、牛油果 2个、蓝莓 3盒、西兰花 3份、红苋菜苗 250g、冬瓜 800g、芹菜苗 250g、罗马生菜 500g</span></div>
+<div class="hrow"><span class="hd">7/19 ⬇️ 入库</span><span class="hb">草莓番茄 400g、鸡毛菜 250g、油麦菜苗 250g、冬瓜 800g、香豆干 120g、卤猪蹄 200g、草莓番茄 400g、鸡毛菜 250g、油麦菜苗 250g、冬瓜 800g、香豆干 120g、卤猪蹄 200g</span></div>
+<div class="hrow"><span class="hd">7/20 ⬇️ 入库</span><span class="hb">紫苏叶 30g、牛油果 2个、西兰花 550g、蓝莓 2盒、胡萝卜 600g、冬瓜 800g、三文鱼 300g、菠菜苗 250g、黑麦贝果 2个、白玉北豆腐 385g、谷饲黄牛肉馅 180g、黄洋葱 650g、紫苏叶 30g、牛油果 2个、西兰花 550g、蓝莓 2盒、胡萝卜 600g、冬瓜 800g、三文鱼 300g、菠菜苗 250g、黑麦贝果 2个、白玉北豆腐 385g、谷饲黄牛肉馅 180g、黄洋葱 650g</span></div>
+<div class="hrow"><span class="hd">7/20 ⬆️ 消耗</span><span class="hb">黄豆 65g、黑豆 47g、红豆 45g、绿豆 49g、花生 250g、三文鱼 600g、紫苏叶 60g、辣根 20g、寿司酱油 60ml、菠菜苗 500g、苦瓜 2个、鹅蛋 2个、冬瓜 1600g、虾米 45g、莜面 400g、青瓜 2根、香菜 30g、小葱 45g、蒜末 60g、林蛙油 15g、大枣 2个、枸杞 30g、姜 45g、山药 10厘米、李子 3个、牛肉 100g、蛋 2个、罗马生菜 100g、西红柿 2.5个、奶酪片 2片、酸黄瓜 4根、洋葱 30g、带筋猪前蹄 500g、豆腐 1块、牛肉糜 50g、火锅调料 30g、煎带鱼 0.5条、米饭 300g、豇豆 200g、腊肉丁 50g、贝贝南瓜 2个、薏米 36g、大花红豆 38g、莲子 40g、小米 42g、煮玉米 2个、桃子 2个、油麦菜苗 500g、豆豉 30g、面包 50g、面条 500g、青菜任意 100g、鸡蛋 1个、蒸蛏子 500g、海螺 200g、苋菜 250g、燕窝 1个、鸡毛菜 250g、水豆豉 30g、折耳根 15g、豆干 120g、青辣椒 4个、干豆豉 30g、卤猪蹄 200g、贵州腊肠 100g、螃蟹 1个、虾 200g、五花肉 200g、豆角 250g、牛肉末 100g、芹菜 250g、糟辣椒 15g、葱 15g、蒜 15g</span></div>
+</details>
 <div class="fb">
 <textarea id="invFbText" placeholder="✍️ 谁送了什么、送出去了什么、哪样快没了……"></textarea>
 <button id="invFbSave" aria-label="保存"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l5 5L20 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -212,71 +321,112 @@ body.unlocked footer { position: static; margin-top: 36px; }
 <!-- ===================== 菜谱库 ===================== -->
 <section id="view-rec" hidden>
 <div class="card">
-<h2>📖 菜谱库<span class="tag">示例</span></h2>
-<div class="recipe">
-<h3>羊杂汤</h3>
-<div class="ing">食材：羊杂拼盘 500g · 白萝卜 1个 · 姜片 · 白胡椒粉 · 香菜<br>做法：羊杂焯水去腥，加白萝卜块、姜片小火炖透，起锅撒白胡椒粉和香菜</div>
-</div>
-<div class="recipe">
-<h3>你的三明治</h3>
-<div class="ing">食材：牛肉糜 150g（肉饼）· 鸡蛋 1个 · 酸黄瓜 · 西红柿 1个 · 奶酪 1片 · 面包 2片<br>做法：牛肉饼煎熟，按固定顺序叠，配美式咖啡</div>
-</div>
-<div class="recipe">
-<h3>三文鱼配紫苏叶</h3>
-<div class="ing">食材：三文鱼（生食级）300g · 紫苏叶<br>做法：冷藏解冻直接配紫苏叶生吃，或简单煎一下</div>
-</div>
-<div class="recipe">
-<h3>水煮青菜</h3>
-<div class="ing">食材：绿叶菜 1把 · 西红柿丁（吊味）<br>做法：清水煮或少油快炒，起锅用西红柿丁吊味，不用酱油</div>
-</div>
+<h2>📖 菜谱库<span class="tag">46 道 · 7/21 数据</span></h2>
+<div class="recipe"><h3>山药<span class="rid">R001</span></h3><div class="ing"><b>主料</b>：山药 10厘米</div></div>
+<div class="recipe"><h3>李子<span class="rid">R002</span></h3><div class="ing"><b>主料</b>：李子 1个</div></div>
+<div class="recipe"><h3>三明治<span class="rid">R003</span></h3><div class="ing"><b>主料</b>：牛肉 50g、蛋 1个 ｜ <b>配料</b>：罗马生菜 50g、西红柿 0.5个、奶酪片 1片、酸黄瓜 2根、洋葱 15g</div></div>
+<div class="recipe"><h3>猪蹄黄豆<span class="rid">R004</span></h3><div class="ing"><b>主料</b>：带筋猪前蹄 500g ｜ <b>配料</b>：黄豆 50g ｜ <b>调味料</b>：小葱 15g、蒜末 15g、姜 15g</div></div>
+<div class="recipe"><h3>麻婆豆腐<span class="rid">R005</span></h3><div class="ing"><b>主料</b>：豆腐 1块、牛肉糜 50g ｜ <b>调味料</b>：火锅调料 15g</div></div>
+<div class="recipe"><h3>煎带鱼<span class="rid">R006</span></h3><div class="ing"><b>主料</b>：煎带鱼 0.5条</div></div>
+<div class="recipe"><h3>三文鱼<span class="rid">R007</span></h3><div class="ing"><b>主料</b>：三文鱼 150g ｜ <b>配料</b>：紫苏叶 15g ｜ <b>调味料</b>：辣根 5g、寿司酱油 15ml</div></div>
+<div class="recipe"><h3>煮菠菜<span class="rid">R008</span></h3><div class="ing"><b>主料</b>：菠菜苗 250g</div></div>
+<div class="recipe"><h3>冬瓜汤<span class="rid">R009</span></h3><div class="ing"><b>主料</b>：冬瓜 400g ｜ <b>配料</b>：虾米 15g</div></div>
+<div class="recipe"><h3>豇豆饭<span class="rid">R011</span></h3><div class="ing"><b>主料</b>：米饭 300g ｜ <b>配料</b>：豇豆 100g、腊肉丁 50g</div></div>
+<div class="recipe"><h3>蒸南瓜<span class="rid">R012</span></h3><div class="ing"><b>主料</b>：贝贝南瓜 1个</div></div>
+<div class="recipe"><h3>豆粥<span class="rid">R013</span></h3><div class="ing"><b>主料</b>：红豆 15g、黑豆 16g、绿豆 17g、薏米 18g、大花红豆 19g、莲子 20g、小米 21g</div></div>
+<div class="recipe"><h3>煮玉米<span class="rid">R014</span></h3><div class="ing"><b>主料</b>：煮玉米 1个</div></div>
+<div class="recipe"><h3>桃子<span class="rid">R015</span></h3><div class="ing"><b>主料</b>：桃子 1个</div></div>
+<div class="recipe"><h3>炒油麦菜<span class="rid">R016</span></h3><div class="ing"><b>主料</b>：油麦菜苗 250g ｜ <b>配料</b>：西红柿 0.5个 ｜ <b>调味料</b>：豆豉 15g</div></div>
+<div class="recipe"><h3>面包<span class="rid">R017</span></h3><div class="ing"><b>主料</b>：面包 50g</div></div>
+<div class="recipe"><h3>苦瓜炒鹅蛋<span class="rid">R018</span></h3><div class="ing"><b>主料</b>：苦瓜 1个、鹅蛋 1个</div></div>
+<div class="recipe"><h3>豇豆炒西红柿<span class="rid">R019</span></h3><div class="ing"><b>主料</b>：豇豆 100g ｜ <b>配料</b>：西红柿 0.5个 ｜ <b>调味料</b>：豆豉 15g</div></div>
+<div class="recipe"><h3>荷包蛋青菜面<span class="rid">R020</span></h3><div class="ing"><b>主料</b>：面条 500g ｜ <b>配料</b>：青菜任意 100g、鸡蛋 1个</div></div>
+<div class="recipe"><h3>蒸蛏子<span class="rid">R021</span></h3><div class="ing"><b>主料</b>：蒸蛏子 500g</div></div>
+<div class="recipe"><h3>海螺冬瓜汤<span class="rid">R022</span></h3><div class="ing"><b>主料</b>：海螺 200g、冬瓜 400g</div></div>
+<div class="recipe"><h3>煮苋菜<span class="rid">R023</span></h3><div class="ing"><b>主料</b>：苋菜 250g</div></div>
+<div class="recipe"><h3>燕窝粥<span class="rid">R024</span></h3><div class="ing"><b>主料</b>：燕窝 1个 ｜ <b>配料</b>：大枣 1个、枸杞 15g</div></div>
+<div class="recipe"><h3>煮鸡毛菜<span class="rid">R025</span></h3><div class="ing"><b>主料</b>：鸡毛菜 250g ｜ <b>调味料</b>：水豆豉 30g、蒜末 15g、折耳根 15g</div></div>
+<div class="recipe"><h3>炒豆干<span class="rid">R026</span></h3><div class="ing"><b>主料</b>：豆干 120g ｜ <b>配料</b>：青辣椒 2个 ｜ <b>调味料</b>：干豆豉 15g</div></div>
+<div class="recipe"><h3>卤猪蹄<span class="rid">R027</span></h3><div class="ing"><b>主料</b>：卤猪蹄 200g</div></div>
+<div class="recipe"><h3>腊肠<span class="rid">R028</span></h3><div class="ing"><b>主料</b>：贵州腊肠 100g</div></div>
+<div class="recipe"><h3>蒸螃蟹<span class="rid">R029</span></h3><div class="ing"><b>主料</b>：螃蟹 1个</div></div>
+<div class="recipe"><h3>水煮虾<span class="rid">R030</span></h3><div class="ing"><b>主料</b>：虾 200g</div></div>
+<div class="recipe"><h3>水煮油麦菜苗<span class="rid">R031</span></h3><div class="ing"><b>主料</b>：油麦菜苗 250g</div></div>
+<div class="recipe"><h3>回锅肉<span class="rid">R032</span></h3><div class="ing"><b>主料</b>：五花肉 200g ｜ <b>配料</b>：青辣椒 2个</div></div>
+<div class="recipe"><h3>炒豆角<span class="rid">R033</span></h3><div class="ing"><b>主料</b>：豆角 250g ｜ <b>配料</b>：西红柿 0.5个 ｜ <b>调味料</b>：干豆豉 15g</div></div>
+<div class="recipe"><h3>凉拌莜面<span class="rid">R034</span></h3><div class="ing"><b>主料</b>：莜面 200g ｜ <b>配料</b>：青瓜 1根 ｜ <b>调味料</b>：香菜 15g、小葱 15g、蒜末 15g</div></div>
+<div class="recipe"><h3>炒牛肉芹菜<span class="rid">R035</span></h3><div class="ing"><b>主料</b>：牛肉末 100g ｜ <b>配料</b>：芹菜 250g ｜ <b>调味料</b>：糟辣椒 15g、葱 15g、姜 15g、蒜 15g</div></div>
+<div class="recipe"><h3>林蛙油羹<span class="rid">R036</span></h3><div class="ing"><b>主料</b>：林蛙油 15g ｜ <b>配料</b>：大枣 1个、枸杞 15g ｜ <b>调味料</b>：姜 15g</div></div>
+<div class="recipe"><h3>水煮花生<span class="rid">R037</span></h3><div class="ing"><b>主料</b>：花生 250g</div></div>
+<div class="recipe"><h3>豆浆<span class="rid">R038</span></h3><div class="ing"><b>主料</b>：黄豆 15g、黑豆 15g、红豆 15g、绿豆 15g</div></div>
+<div class="recipe"><h3>回锅肉<span class="rid">R039</span></h3><div class="ing"><b>主料</b>：五花肉 250g ｜ <b>配料</b>：辣椒 2个 ｜ <b>调味料</b>：火锅调料 15g</div></div>
+<div class="recipe"><h3>白菜豆腐<span class="rid">R040</span></h3><div class="ing"><b>主料</b>：白菜 250g ｜ <b>配料</b>：豆腐 0.5块</div></div>
+<div class="recipe"><h3>卤牛肉<span class="rid">R041</span></h3><div class="ing"><b>主料</b>：牛腱子肉 100g ｜ <b>调味料</b>：八角 15g、桂皮 15g、花椒 15g、香叶 15g、草果 15g、小茴香 15g、丁香 50ml、生抽 5ml、老抽 15g、冰糖 15g、盐 5g、料酒 15ml、豆瓣酱 30g</div></div>
+<div class="recipe"><h3>煮毛豆<span class="rid">R042</span></h3><div class="ing"><b>主料</b>：毛豆 250g</div></div>
+<div class="recipe"><h3>煮花生<span class="rid">R043</span></h3><div class="ing"><b>主料</b>：鲜花生 250g</div></div>
+<div class="recipe"><h3>蒸山药<span class="rid">R044</span></h3><div class="ing"><b>主料</b>：山药 10厘米</div></div>
+<div class="recipe"><h3>油条<span class="rid">R045</span></h3><div class="ing"><b>主料</b>：冷冻油条 1根</div></div>
+<div class="recipe"><h3>水煮菜心<span class="rid">R046</span></h3><div class="ing"><b>主料</b>：菜心 250g</div></div>
+<div class="recipe"><h3>素瓜豆<span class="rid">R047</span></h3><div class="ing"><b>主料</b>：圆西葫芦 0.5个、四季豆 100g</div></div>
 </div>
 </section>
 
 <!-- ===================== 档案 ===================== -->
 <section id="view-prof" hidden>
 <div class="card">
-<h2>🎯 健康目标<span class="tag">示例</span></h2>
-<div class="prof"><b>你</b>：减脂期，每天 1400-1500 千卡；蛋白质优先，蔬果 5-7-9<br><b>老佰</b>：每天 1800-2000 千卡，羊杂汤三文鱼份量加大<br><b>狗狗×2</b>：份量从主食、鸡蛋、青菜、肉里一起算</div>
+<h2>🎯 健康目标<span class="tag">7/20 数据</span></h2>
+<div class="prof"><b>老公</b>（63岁 · 170cm/75kg）：控糖、控制体重 · 1900千卡/天 · 肉30% 菜40% 果10% 主食20%<br>
+<b>老婆</b>（53岁 · 160cm/55kg）：增肌 · 1900千卡/天 · 肉40% 菜40% 果10% 主食10%<br>
+<b>保姆</b>（57岁 · 155cm/55kg）：普通健康饮食 · 1600千卡/天 · 肉35% 菜45% 果10% 主食10%<br>
+<b>淘淘</b>（4岁 · 31kg）、<b>鸡腿</b>（3岁 · 18kg）：宠物健康管理 · 肉30% 菜30% 果5% 主食35%</div>
 </div>
 <div class="card">
 <h2>❤️ 饮食偏好</h2>
-<div class="prof">三文鱼配紫苏叶是固定搭配 · 青菜水煮或少油快炒、西红柿吊味不用酱油 · 喜欢凑颜色（紫/绿/白青菜）· 甜点减脂期不主动安排，想吃再点</div>
+<div class="prof"><b>老公</b>：特别喜欢豆制品、猪蹄、羊杂、贵州腊肉腊肠（贵州家庭饮食习惯）<br>
+<b>老婆</b>：已调整为健康饮食模式（东北背景）· 少油少盐少加工（增肌目标）<br>
+<b>保姆</b>：四川口味 · 正在学习家庭健康饮食模式<br>
+<b>淘淘、鸡腿</b>：鲜食不吃狗粮，保姆制作</div>
 </div>
 <div class="card">
 <h2>🔁 固定习惯</h2>
-<div class="prof">两餐制：早午餐 + 晚餐 · 你的早午餐固定三明治+美式咖啡 · 香蕉每天 1 根当碳水 · 健身后椰子水 · 小朱阿姨的汤面 · 美团下单为主，鲜肉按天买</div>
+<div class="prof"><b>老婆第一餐</b>：咖啡1杯 + 羊奶粉1袋 + 三明治1个 + 牛油果半个 + 香蕉半根 + 蓝莓半盒<br>
+<b>老公第一餐</b>：豆浆1杯 + 鸡蛋1个 + 牛油果半个<br>
+<b>补剂（两人每天）</b>：姜黄粉3粒 · 磷虾油1粒 · D3+K2 1粒 · 降血脂胶囊1粒<br>
+<b>老婆第三餐</b>：益生菌1袋</div>
 </div>
 </section>
+
 
 <!-- ===================== 仪表盘 ===================== -->
 <section id="view-dash" hidden>
 <div class="flow">
 <div class="node">
 <h3>📋 家庭档案 <span class="tag">是谁在吃</span></h3>
-<p>你 1400-1500 千卡减脂 · 老佰 1800-2000 · 2 条狗 · 两餐制</p>
+<p>5 口人：老公（控糖 1900千卡）· 老婆（增肌 1900千卡）· 保姆（1600千卡）· 淘淘 + 鸡腿（鲜食不吃狗粮）</p>
 </div>
 <div class="arrow">↓</div>
 <div class="node">
-<h3>🍽 今天吃什么 <span class="tag">Meal Plan</span></h3>
-<p>早午餐：三明治套餐 · 晚餐：三文鱼紫苏叶 + 羊杂汤 + 三色青菜 · 全天你约 1450 千卡</p>
+<h3>🍽 今天吃什么 <span class="tag">Meal Plan · 7/21</span></h3>
+<p>第一餐：老公 白菜豆腐、卤牛肉、煮毛豆、蒸山药等 6 道 · 第三餐：老婆保姆 三文鱼、水煮菜心、苦瓜炒鹅蛋</p>
 </div>
 <div class="arrow">↓</div>
 <div class="node">
-<h3>📖 拆成食材 <span class="tag">Recipe</span></h3>
-<p>羊杂汤 → 羊杂 500g + 白萝卜 + 姜 + 白胡椒粉 + 香菜 ｜ 三明治 → 牛肉糜 + 鸡蛋 + 西红柿 + 奶酪</p>
+<h3>📖 拆成食材 <span class="tag">Recipe · 47 道已拆解</span></h3>
+<p>卤牛肉 → 牛腱子肉100g + 13味卤料 ｜ 三文鱼 → 鱼腩150g + 紫苏叶 + 辣根 ｜ 每道菜都有主料/配料/调味料</p>
 </div>
 <div class="arrow">↓</div>
 <div class="node">
-<h3>📦 库存增减 <span class="tag">Inventory</span></h3>
-<p>今天消耗：口蘑、香菜（临期清掉 ✅）、白菜、蓝莓 1 盒 · 推算快没的：蓝莓、牛油果</p>
+<h3>📦 库存增减 <span class="tag">Inventory · 154 条流水</span></h3>
+<p>25 项有存量（冬瓜4.8kg、蓝莓14盒、牛油果14个…）· 三文鱼刚用完 · 64 项负数待盘点校准</p>
 </div>
 <div class="arrow">↓</div>
 <div class="node">
 <h3>🧾 明天买什么 <span class="tag">Shopping List</span></h3>
-<p>缺口自动生成：蓝莓、牛油果补货 + 明天菜单的主料 · 你的反馈（想吃什么）也会加进来</p>
+<p>7/15-7/21 已购 51 笔全部送达 · 下一步：按菜单缺口 + 库存推算自动生成，反馈里点的菜自动加购</p>
 </div>
 </div>
 </section>
+
 
 </div>
 </div>
@@ -297,7 +447,7 @@ function applyAway() {
   document.getElementById("mealDinner").hidden = !!state.awayDinner;
   document.querySelectorAll(".todo").forEach(function (el) {
     var m = el.dataset.meal;
-    var off = (m === "brunch" && state.awayBrunch) || (m === "dinner" && state.awayDinner);
+    var off = !!((m === "brunch" && state.awayBrunch) || (m === "dinner" && state.awayDinner));
     el.classList.toggle("off", off);
   });
 }
@@ -313,7 +463,7 @@ document.querySelectorAll(".nav a").forEach(function (a) {
 });
 function unlock() {
   document.getElementById("lock").hidden = true;
-  document.getElementById("heroBag").hidden = true;
+  document.getElementById("heroBag").style.display = "none";
   document.getElementById("main").hidden = false;
   document.body.classList.add("unlocked");
   var week = ["日","一","二","三","四","五","六"];
