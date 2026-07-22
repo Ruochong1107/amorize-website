@@ -100,6 +100,18 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 .addrow button:active { background: var(--green-dark); }
 .selftag { display: inline-block; font-size: 10px; color: var(--green-dark); border: 1px solid var(--green); border-radius: 20px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
 .xdel { border: 0; background: none; color: var(--faint); cursor: pointer; font-size: 15px; margin-left: 4px; padding: 0 4px; }
+.invgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1px 18px; margin-top: 2px; }
+.iv { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; font-size: 13px; padding: 3.5px 0; }
+.iv i { font-style: normal; color: var(--muted); font-size: 12px; white-space: nowrap; }
+.iv.neg i { color: #b98a8a; }
+.iv .xdel { margin-left: 0; }
+.invadd { display: flex; gap: 8px; margin-top: 14px; }
+.invadd input { border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font: inherit; font-size: 13.5px; background: #fff; outline: none; color: var(--text); min-width: 0; }
+.invadd input:focus { border-color: var(--green); }
+.invadd .nm { flex: 1.4; }
+.invadd .qt { flex: 1; }
+.invadd button { width: 38px; height: 37px; flex: none; color: #fff; background: var(--green); border: 0; border-radius: 10px; cursor: pointer; font-size: 20px; line-height: 1; }
+.invadd button:active { background: var(--green-dark); }
 .tag { display: inline-block; font-size: 10.5px; color: var(--faint); border: 1px solid var(--border); border-radius: 20px; padding: 0 7px; margin-left: 7px; vertical-align: 1px; font-weight: 400; }
 </style>
 </head>
@@ -216,103 +228,122 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <!-- ===================== 库存 ===================== -->
 <section id="view-inv" hidden>
 <div class="card">
-<h2>📦 家里还有的<span class="tag">7/21 数据</span></h2>
+<h2>📦 家里还有的<span class="tag">7/21 数据 · 负数=待盘点</span></h2>
 <div class="grp">🥬 蔬菜</div>
-<div class="item">紫苏叶 <i>60g</i></div>
-<div class="item">西兰花 <i>1110g</i></div>
-<div class="item">胡萝卜 <i>1200g</i></div>
-<div class="item">冬瓜 <i>4800g</i></div>
-<div class="item">菠菜苗 <i>500g</i></div>
-<div class="item">黄洋葱 <i>1300g</i></div>
-<div class="item">草莓番茄 <i>800g</i></div>
-<div class="item">鸡毛菜 <i>250g</i></div>
-<div class="item">油麦菜苗 <i>500g</i></div>
-<div class="item">红苋菜苗 <i>500g</i></div>
-<div class="item">芹菜苗 <i>500g</i></div>
-<div class="item">罗马生菜 <i>900g</i></div>
-<div class="item">紫皮大蒜 <i>500g</i></div>
-<div class="item">青蒜苗 <i>600g</i></div>
-<div class="item">山药 <i>990g</i></div>
+<div class="invgrid">
+<div class="iv"><span>紫苏叶</span><i>60g</i></div>
+<div class="iv"><span>西兰花</span><i>1110g</i></div>
+<div class="iv"><span>胡萝卜</span><i>1200g</i></div>
+<div class="iv"><span>冬瓜</span><i>4800g</i></div>
+<div class="iv"><span>菠菜苗</span><i>500g</i></div>
+<div class="iv"><span>黄洋葱</span><i>1300g</i></div>
+<div class="iv"><span>草莓番茄</span><i>800g</i></div>
+<div class="iv"><span>鸡毛菜</span><i>250g</i></div>
+<div class="iv"><span>油麦菜苗</span><i>500g</i></div>
+<div class="iv"><span>红苋菜苗</span><i>500g</i></div>
+<div class="iv"><span>芹菜苗</span><i>500g</i></div>
+<div class="iv"><span>罗马生菜</span><i>900g</i></div>
+<div class="iv"><span>紫皮大蒜</span><i>500g</i></div>
+<div class="iv"><span>青蒜苗</span><i>600g</i></div>
+<div class="iv"><span>山药</span><i>990g</i></div>
+<div class="iv neg"><span>苦瓜</span><i>-2个</i></div>
+<div class="iv neg"><span>青瓜</span><i>-2根</i></div>
+<div class="iv neg"><span>西红柿</span><i>-2.5个</i></div>
+<div class="iv neg"><span>洋葱</span><i>-30g</i></div>
+<div class="iv neg"><span>豇豆</span><i>-200g</i></div>
+<div class="iv neg"><span>贝贝南瓜</span><i>-2个</i></div>
+<div class="iv neg"><span>青菜任意</span><i>-100g</i></div>
+<div class="iv neg"><span>苋菜</span><i>-250g</i></div>
+<div class="iv neg"><span>青辣椒</span><i>-4个</i></div>
+<div class="iv neg"><span>豆角</span><i>-250g</i></div>
+<div class="iv neg"><span>芹菜</span><i>-250g</i></div>
+</div>
 <div class="grp">🍓 水果</div>
-<div class="item">牛油果 <i>14个</i></div>
-<div class="item">蓝莓 <i>14盒</i></div>
-<div class="grp">🥩 肉蛋豆制品</div>
-<div class="item">白玉北豆腐 <i>1540g</i></div>
-<div class="item">谷饲黄牛肉馅 <i>360g</i></div>
-<div class="item">香豆干 <i>240g</i></div>
-<div class="item">卤猪蹄 <i>200g</i></div>
-<div class="item">三文鱼厚脂鱼腩切片 <i>600g</i></div>
-<div class="item">带筋猪前蹄 <i>500g</i></div>
-<div class="grp">🍞 主食与其他</div>
-<div class="item">黑麦贝果 <i>4个</i></div>
-<div class="item">鲜花生 <i>1000g</i></div>
-<details class="hist"><summary>⚠️ 待盘点（65 项 · 用掉了但没有初始库存记录，显示为负数）</summary>
-<div class="item neg">三文鱼 <i>0g</i></div>
-<div class="item neg">黄豆 <i>-65g</i></div>
-<div class="item neg">黑豆 <i>-47g</i></div>
-<div class="item neg">红豆 <i>-45g</i></div>
-<div class="item neg">绿豆 <i>-49g</i></div>
-<div class="item neg">花生 <i>-250g</i></div>
-<div class="item neg">辣根 <i>-20g</i></div>
-<div class="item neg">寿司酱油 <i>-60ml</i></div>
-<div class="item neg">苦瓜 <i>-2个</i></div>
-<div class="item neg">鹅蛋 <i>-2个</i></div>
-<div class="item neg">虾米 <i>-45g</i></div>
-<div class="item neg">莜面 <i>-400g</i></div>
-<div class="item neg">青瓜 <i>-2根</i></div>
-<div class="item neg">香菜 <i>-30g</i></div>
-<div class="item neg">小葱 <i>-45g</i></div>
-<div class="item neg">蒜末 <i>-60g</i></div>
-<div class="item neg">林蛙油 <i>-15g</i></div>
-<div class="item neg">大枣 <i>-2个</i></div>
-<div class="item neg">枸杞 <i>-30g</i></div>
-<div class="item neg">姜 <i>-45g</i></div>
-<div class="item neg">李子 <i>-3个</i></div>
-<div class="item neg">牛肉 <i>-100g</i></div>
-<div class="item neg">蛋 <i>-2个</i></div>
-<div class="item neg">西红柿 <i>-2.5个</i></div>
-<div class="item neg">奶酪片 <i>-2片</i></div>
-<div class="item neg">酸黄瓜 <i>-4根</i></div>
-<div class="item neg">洋葱 <i>-30g</i></div>
-<div class="item neg">豆腐 <i>-1块</i></div>
-<div class="item neg">牛肉糜 <i>-50g</i></div>
-<div class="item neg">火锅调料 <i>-30g</i></div>
-<div class="item neg">煎带鱼 <i>-0.5条</i></div>
-<div class="item neg">米饭 <i>-300g</i></div>
-<div class="item neg">豇豆 <i>-200g</i></div>
-<div class="item neg">腊肉丁 <i>-50g</i></div>
-<div class="item neg">贝贝南瓜 <i>-2个</i></div>
-<div class="item neg">薏米 <i>-36g</i></div>
-<div class="item neg">大花红豆 <i>-38g</i></div>
-<div class="item neg">莲子 <i>-40g</i></div>
-<div class="item neg">小米 <i>-42g</i></div>
-<div class="item neg">煮玉米 <i>-2个</i></div>
-<div class="item neg">桃子 <i>-2个</i></div>
-<div class="item neg">豆豉 <i>-30g</i></div>
-<div class="item neg">面包 <i>-50g</i></div>
-<div class="item neg">面条 <i>-500g</i></div>
-<div class="item neg">青菜任意 <i>-100g</i></div>
-<div class="item neg">鸡蛋 <i>-1个</i></div>
-<div class="item neg">蒸蛏子 <i>-500g</i></div>
-<div class="item neg">海螺 <i>-200g</i></div>
-<div class="item neg">苋菜 <i>-250g</i></div>
-<div class="item neg">燕窝 <i>-1个</i></div>
-<div class="item neg">水豆豉 <i>-30g</i></div>
-<div class="item neg">折耳根 <i>-15g</i></div>
-<div class="item neg">豆干 <i>-120g</i></div>
-<div class="item neg">青辣椒 <i>-4个</i></div>
-<div class="item neg">干豆豉 <i>-30g</i></div>
-<div class="item neg">贵州腊肠 <i>-100g</i></div>
-<div class="item neg">螃蟹 <i>-1个</i></div>
-<div class="item neg">虾 <i>-200g</i></div>
-<div class="item neg">五花肉 <i>-200g</i></div>
-<div class="item neg">豆角 <i>-250g</i></div>
-<div class="item neg">牛肉末 <i>-100g</i></div>
-<div class="item neg">芹菜 <i>-250g</i></div>
-<div class="item neg">糟辣椒 <i>-15g</i></div>
-<div class="item neg">葱 <i>-15g</i></div>
-<div class="item neg">蒜 <i>-15g</i></div>
-</details>
+<div class="invgrid">
+<div class="iv"><span>牛油果</span><i>14个</i></div>
+<div class="iv"><span>蓝莓</span><i>14盒</i></div>
+<div class="iv neg"><span>李子</span><i>-3个</i></div>
+<div class="iv neg"><span>桃子</span><i>-2个</i></div>
+</div>
+<div class="grp">🥩 肉蛋海鲜</div>
+<div class="invgrid">
+<div class="iv neg"><span>三文鱼</span><i>0g</i></div>
+<div class="iv"><span>谷饲黄牛肉馅</span><i>360g</i></div>
+<div class="iv"><span>卤猪蹄</span><i>200g</i></div>
+<div class="iv"><span>三文鱼厚脂鱼腩切片</span><i>600g</i></div>
+<div class="iv"><span>带筋猪前蹄</span><i>500g</i></div>
+<div class="iv neg"><span>鹅蛋</span><i>-2个</i></div>
+<div class="iv neg"><span>牛肉</span><i>-100g</i></div>
+<div class="iv neg"><span>蛋</span><i>-2个</i></div>
+<div class="iv neg"><span>奶酪片</span><i>-2片</i></div>
+<div class="iv neg"><span>牛肉糜</span><i>-50g</i></div>
+<div class="iv neg"><span>煎带鱼</span><i>-0.5条</i></div>
+<div class="iv neg"><span>腊肉丁</span><i>-50g</i></div>
+<div class="iv neg"><span>鸡蛋</span><i>-1个</i></div>
+<div class="iv neg"><span>蒸蛏子</span><i>-500g</i></div>
+<div class="iv neg"><span>海螺</span><i>-200g</i></div>
+<div class="iv neg"><span>贵州腊肠</span><i>-100g</i></div>
+<div class="iv neg"><span>螃蟹</span><i>-1个</i></div>
+<div class="iv neg"><span>虾</span><i>-200g</i></div>
+<div class="iv neg"><span>五花肉</span><i>-200g</i></div>
+<div class="iv neg"><span>牛肉末</span><i>-100g</i></div>
+</div>
+<div class="grp">🫘 豆类与杂粮</div>
+<div class="invgrid">
+<div class="iv"><span>白玉北豆腐</span><i>1540g</i></div>
+<div class="iv"><span>香豆干</span><i>240g</i></div>
+<div class="iv"><span>鲜花生</span><i>1000g</i></div>
+<div class="iv neg"><span>黄豆</span><i>-65g</i></div>
+<div class="iv neg"><span>黑豆</span><i>-47g</i></div>
+<div class="iv neg"><span>红豆</span><i>-45g</i></div>
+<div class="iv neg"><span>绿豆</span><i>-49g</i></div>
+<div class="iv neg"><span>花生</span><i>-250g</i></div>
+<div class="iv neg"><span>豆腐</span><i>-1块</i></div>
+<div class="iv neg"><span>薏米</span><i>-36g</i></div>
+<div class="iv neg"><span>大花红豆</span><i>-38g</i></div>
+<div class="iv neg"><span>莲子</span><i>-40g</i></div>
+<div class="iv neg"><span>小米</span><i>-42g</i></div>
+<div class="iv neg"><span>豆干</span><i>-120g</i></div>
+</div>
+<div class="grp">🍞 主食</div>
+<div class="invgrid">
+<div class="iv"><span>黑麦贝果</span><i>4个</i></div>
+<div class="iv neg"><span>莜面</span><i>-400g</i></div>
+<div class="iv neg"><span>米饭</span><i>-300g</i></div>
+<div class="iv neg"><span>煮玉米</span><i>-2个</i></div>
+<div class="iv neg"><span>面包</span><i>-50g</i></div>
+<div class="iv neg"><span>面条</span><i>-500g</i></div>
+</div>
+<div class="grp">🧂 调味与香料</div>
+<div class="invgrid">
+<div class="iv neg"><span>辣根</span><i>-20g</i></div>
+<div class="iv neg"><span>寿司酱油</span><i>-60ml</i></div>
+<div class="iv neg"><span>虾米</span><i>-45g</i></div>
+<div class="iv neg"><span>香菜</span><i>-30g</i></div>
+<div class="iv neg"><span>小葱</span><i>-45g</i></div>
+<div class="iv neg"><span>蒜末</span><i>-60g</i></div>
+<div class="iv neg"><span>姜</span><i>-45g</i></div>
+<div class="iv neg"><span>酸黄瓜</span><i>-4根</i></div>
+<div class="iv neg"><span>火锅调料</span><i>-30g</i></div>
+<div class="iv neg"><span>豆豉</span><i>-30g</i></div>
+<div class="iv neg"><span>水豆豉</span><i>-30g</i></div>
+<div class="iv neg"><span>干豆豉</span><i>-30g</i></div>
+<div class="iv neg"><span>糟辣椒</span><i>-15g</i></div>
+<div class="iv neg"><span>折耳根</span><i>-15g</i></div>
+<div class="iv neg"><span>葱</span><i>-15g</i></div>
+<div class="iv neg"><span>蒜</span><i>-15g</i></div>
+</div>
+<div class="grp">🪷 滋补</div>
+<div class="invgrid">
+<div class="iv neg"><span>林蛙油</span><i>-15g</i></div>
+<div class="iv neg"><span>大枣</span><i>-2个</i></div>
+<div class="iv neg"><span>枸杞</span><i>-30g</i></div>
+<div class="iv neg"><span>燕窝</span><i>-1个</i></div>
+</div>
+<div class="grp" id="invExtraGrp" hidden>📝 自己记的（送来 / 送出）</div>
+<div class="invgrid" id="invExtra"></div>
+<div class="invadd"><input class="nm" id="invName" placeholder="名称，如：黄鱼"><input class="qt" id="invQty" placeholder="数量，如：2条 / -1盒"><button id="invAdd" aria-label="加入">＋</button></div>
+<div class="hint">送来的写正数，送出去的写负数，会直接记进上面</div>
 <details class="hist"><summary>📜 全部出入库流水（154 条）</summary>
 <div class="hrow"><span class="hd">7/15 ⬇️ 入库</span><span class="hb">牛油果 1个、西兰花 2份、紫苏叶 30g、菠菜苗 250g、油麦菜苗 250g、蓝莓 2盒、带筋猪前蹄 500g、冬瓜 800g、紫皮大蒜 250g、青蒜苗 300g、山药 500g、鲜花生 500g、牛油果 1个、西兰花 2份、紫苏叶 30g、菠菜苗 250g、油麦菜苗 250g、蓝莓 2盒、带筋猪前蹄 500g、冬瓜 800g、紫皮大蒜 250g、青蒜苗 300g、山药 500g、鲜花生 500g</span></div>
 <div class="hrow"><span class="hd">7/16 ⬇️ 入库</span><span class="hb">牛油果 2个、白玉北豆腐 385g、三文鱼厚脂鱼腩切片 300g、牛油果 2个、白玉北豆腐 385g、三文鱼厚脂鱼腩切片 300g</span></div>
@@ -321,11 +352,6 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <div class="hrow"><span class="hd">7/20 ⬇️ 入库</span><span class="hb">紫苏叶 30g、牛油果 2个、西兰花 550g、蓝莓 2盒、胡萝卜 600g、冬瓜 800g、三文鱼 300g、菠菜苗 250g、黑麦贝果 2个、白玉北豆腐 385g、谷饲黄牛肉馅 180g、黄洋葱 650g、紫苏叶 30g、牛油果 2个、西兰花 550g、蓝莓 2盒、胡萝卜 600g、冬瓜 800g、三文鱼 300g、菠菜苗 250g、黑麦贝果 2个、白玉北豆腐 385g、谷饲黄牛肉馅 180g、黄洋葱 650g</span></div>
 <div class="hrow"><span class="hd">7/20 ⬆️ 消耗</span><span class="hb">黄豆 65g、黑豆 47g、红豆 45g、绿豆 49g、花生 250g、三文鱼 600g、紫苏叶 60g、辣根 20g、寿司酱油 60ml、菠菜苗 500g、苦瓜 2个、鹅蛋 2个、冬瓜 1600g、虾米 45g、莜面 400g、青瓜 2根、香菜 30g、小葱 45g、蒜末 60g、林蛙油 15g、大枣 2个、枸杞 30g、姜 45g、山药 10厘米、李子 3个、牛肉 100g、蛋 2个、罗马生菜 100g、西红柿 2.5个、奶酪片 2片、酸黄瓜 4根、洋葱 30g、带筋猪前蹄 500g、豆腐 1块、牛肉糜 50g、火锅调料 30g、煎带鱼 0.5条、米饭 300g、豇豆 200g、腊肉丁 50g、贝贝南瓜 2个、薏米 36g、大花红豆 38g、莲子 40g、小米 42g、煮玉米 2个、桃子 2个、油麦菜苗 500g、豆豉 30g、面包 50g、面条 500g、青菜任意 100g、鸡蛋 1个、蒸蛏子 500g、海螺 200g、苋菜 250g、燕窝 1个、鸡毛菜 250g、水豆豉 30g、折耳根 15g、豆干 120g、青辣椒 4个、干豆豉 30g、卤猪蹄 200g、贵州腊肠 100g、螃蟹 1个、虾 200g、五花肉 200g、豆角 250g、牛肉末 100g、芹菜 250g、糟辣椒 15g、葱 15g、蒜 15g</span></div>
 </details>
-<div class="fb">
-<textarea id="invFbText" placeholder="✍️ 谁送了什么、送出去了什么、哪样快没了……"></textarea>
-<button id="invFbSave" aria-label="保存"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l5 5L20 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-</div>
-<div class="hint" id="invFbHint"></div>
 </div>
 </section>
 
@@ -485,10 +511,9 @@ function unlock() {
   });
   var fb = document.getElementById("fbText");
   fb.value = state.fb || "";
-  var ifb = document.getElementById("invFbText");
-  ifb.value = state.invFb || "";
   applyAway();
   renderExtras();
+  renderInvExtras();
 }
 var savedKey = null;
 try { savedKey = localStorage.getItem("mama-key"); } catch (e) {}
@@ -555,11 +580,36 @@ document.getElementById("buyAdd").addEventListener("click", addBuy);
 document.getElementById("buyInp").addEventListener("keydown", function (e) { if (e.key === "Enter") addBuy(); });
 document.getElementById("eatAdd").addEventListener("click", addEat);
 document.getElementById("eatInp").addEventListener("keydown", function (e) { if (e.key === "Enter") addEat(); });
-document.getElementById("invFbSave").addEventListener("click", function () {
-  state.invFb = document.getElementById("invFbText").value;
-  save();
-  document.getElementById("invFbHint").textContent = "已保存 ✓";
-});
+var invStore = [];
+try { invStore = JSON.parse(localStorage.getItem("mama-inv-extra") || "[]"); } catch (e) {}
+function saveInv() { try { localStorage.setItem("mama-inv-extra", JSON.stringify(invStore)); } catch (e) {} }
+function renderInvExtras() {
+  var g = document.getElementById("invExtraGrp");
+  var box = document.getElementById("invExtra");
+  box.innerHTML = "";
+  g.hidden = !invStore.length;
+  invStore.forEach(function (it, i) {
+    var d = document.createElement("div"); d.className = "iv";
+    var s = document.createElement("span"); s.textContent = it.n;
+    var tg = document.createElement("span"); tg.className = "selftag"; tg.textContent = "自己加"; s.appendChild(tg);
+    var q = document.createElement("i"); q.textContent = it.q;
+    if ((it.q + "").trim().indexOf("-") === 0) d.className = "iv neg";
+    var x = document.createElement("button"); x.className = "xdel"; x.textContent = "×"; x.title = "删除";
+    x.addEventListener("click", function () { invStore.splice(i, 1); saveInv(); renderInvExtras(); });
+    d.appendChild(s); d.appendChild(q); d.appendChild(x); box.appendChild(d);
+  });
+}
+function addInv() {
+  var n = document.getElementById("invName");
+  var q = document.getElementById("invQty");
+  if (!n.value.trim()) return;
+  invStore.push({ n: n.value.trim(), q: q.value.trim() || "?" });
+  n.value = ""; q.value = ""; saveInv(); renderInvExtras();
+}
+document.getElementById("invAdd").addEventListener("click", addInv);
+document.getElementById("invQty").addEventListener("keydown", function (e) { if (e.key === "Enter") addInv(); });
+document.getElementById("invName").addEventListener("keydown", function (e) { if (e.key === "Enter") addInv(); });
+
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
