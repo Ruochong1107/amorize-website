@@ -548,9 +548,6 @@ function unlock() {
   renderInvExtras();
   cloudLoad();
 }
-var savedKey = null;
-try { savedKey = localStorage.getItem("mama-key"); } catch (e) {}
-if (savedKey === KEY) { unlock(); }
 function tryPw() {
   var pw = document.getElementById("pw");
   if (hash(pw.value.trim()) === KEY) {
@@ -642,6 +639,9 @@ function addInv() {
 document.getElementById("invAdd").addEventListener("click", addInv);
 document.getElementById("invQty").addEventListener("keydown", function (e) { if (e.key === "Enter") addInv(); });
 document.getElementById("invName").addEventListener("keydown", function (e) { if (e.key === "Enter") addInv(); });
+var savedKey = null;
+try { savedKey = localStorage.getItem("mama-key"); } catch (e) {}
+if (savedKey === KEY) { unlock(); }
 
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
