@@ -476,7 +476,39 @@ var d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Shanghai" 
 var dayKey = "mama-" + d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
 var state = {};
 try { state = JSON.parse(localStorage.getItem(dayKey) || "{}"); } catch (e) {}
-function save() { try { localStorage.setItem(dayKey, JSON.stringify(state)); } catch (e) {} }
+function save() { try { localStorage.setItem(dayKey, JSON.stringify(state)); } catch (e) {} cloudSave(); }
+var cloudTimer = null, cloudInvTimer = null;
+function cloudPost(key, data) {
+  try {
+    fetch("/api/state?key=" + key, { method: "POST", headers: { "content-type": "application/json", "x-auth": KEY }, body: JSON.stringify(data) }).catch(function () {});
+  } catch (e) {}
+}
+function cloudSave() { clearTimeout(cloudTimer); cloudTimer = setTimeout(function () { cloudPost(dayKey, state); }, 600); }
+function cloudSaveInv() { clearTimeout(cloudInvTimer); cloudInvTimer = setTimeout(function () { cloudPost("inv-extra", invStore); }, 600); }
+function applyLoaded() {
+  document.querySelectorAll(".todo input").forEach(function (el) { if (el.dataset.k) el.checked = !!state[el.dataset.k]; });
+  document.getElementById("fbText").value = state.fb || "";
+  applyAway();
+  renderExtras();
+}
+function cloudLoad() {
+  try {
+    fetch("/api/state?key=" + dayKey, { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d && d.ok && d.data && typeof d.data === "object") {
+        state = d.data;
+        try { localStorage.setItem(dayKey, JSON.stringify(state)); } catch (e) {}
+        applyLoaded();
+      }
+    }).catch(function () {});
+    fetch("/api/state?key=inv-extra", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (d) {
+      if (d && d.ok && Array.isArray(d.data)) {
+        invStore = d.data;
+        try { localStorage.setItem("mama-inv-extra", JSON.stringify(invStore)); } catch (e) {}
+        renderInvExtras();
+      }
+    }).catch(function () {});
+  } catch (e) {}
+}
 function applyAway() {
   document.getElementById("awayBrunch").classList.toggle("on", !!state.awayBrunch);
   document.getElementById("awayDinner").classList.toggle("on", !!state.awayDinner);
@@ -514,6 +546,7 @@ function unlock() {
   applyAway();
   renderExtras();
   renderInvExtras();
+  cloudLoad();
 }
 var savedKey = null;
 try { savedKey = localStorage.getItem("mama-key"); } catch (e) {}
@@ -582,7 +615,7 @@ document.getElementById("eatAdd").addEventListener("click", addEat);
 document.getElementById("eatInp").addEventListener("keydown", function (e) { if (e.key === "Enter") addEat(); });
 var invStore = [];
 try { invStore = JSON.parse(localStorage.getItem("mama-inv-extra") || "[]"); } catch (e) {}
-function saveInv() { try { localStorage.setItem("mama-inv-extra", JSON.stringify(invStore)); } catch (e) {} }
+function saveInv() { try { localStorage.setItem("mama-inv-extra", JSON.stringify(invStore)); } catch (e) {} cloudSaveInv(); }
 function renderInvExtras() {
   var g = document.getElementById("invExtraGrp");
   var box = document.getElementById("invExtra");
