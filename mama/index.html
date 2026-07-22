@@ -73,10 +73,13 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 .item .exp { color: var(--warn); }
 .prof { font-size: 13.5px; line-height: 1.8; color: var(--text); margin-top: 8px; }
 .prof b { color: var(--green-dark); font-weight: 600; }
-.recipe { border-top: 1px solid var(--border); padding: 12px 0 4px; margin-top: 12px; }
-.recipe:first-of-type { border-top: 0; margin-top: 4px; }
+.recgrid { display: block; }
+@media (min-width: 900px) { .recgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; } }
+.recipe { border-top: 1px solid var(--border); padding: 10px 0 6px; }
+.recipe h3 { display: flex; align-items: baseline; }
 .recipe h3 { font-size: 14px; font-weight: 600; }
 .recipe .rid { font-size: 10px; color: var(--faint); margin-left: 6px; font-weight: 400; }
+.recipe .kc { margin-left: auto; font-size: 11px; color: var(--green-dark); font-weight: 400; white-space: nowrap; }
 .recipe .ing b { color: var(--green-dark); font-weight: 600; }
 .recipe .ing { font-size: 12.5px; color: var(--muted); line-height: 1.7; margin-top: 4px; }
 .flow { margin-top: 14px; }
@@ -199,9 +202,10 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <button id="awayDinner">第三餐不在家</button>
 </span>
 </h2>
-<div class="meal" id="mealBrunch"><b>第一餐</b><br>老婆：三明治 + 美式咖啡 + 羊奶粉 + 半个牛油果 + 半根香蕉 + 半盒蓝莓（固定）<br>老公：白菜豆腐、卤牛肉、煮毛豆、煮花生、蒸山药、油条</div>
-<div class="meal" id="mealDinner"><b>第三餐</b><br>老婆、保姆：三文鱼、水煮菜心、苦瓜炒鹅蛋</div>
+<div class="meal" id="mealBrunch"><b>第一餐</b><br>老婆：三明治 + 美式咖啡 + 羊奶粉 + 半个牛油果 + 半根香蕉 + 半盒蓝莓（固定）<span class="kcal">约750千卡</span><br>老公：白菜豆腐、卤牛肉、煮毛豆、煮花生、蒸山药、油条<span class="kcal">整份约1450千卡</span></div>
+<div class="meal" id="mealDinner"><b>第三餐</b><br>老婆、保姆：三文鱼、水煮菜心、苦瓜炒鹅蛋<span class="kcal">共约640千卡 · 两人分约各320</span></div>
 <div class="meal"><b>补剂</b><span class="kcal">每天固定</span><br>姜黄粉×3、磷虾油×1、D3+K2×1、降血脂胶囊×1（两人）；老婆晚益生菌×1</div>
+<div class="meal"><b>全天估算</b><br>老婆 约750 + 320 ≈ <b>1070千卡</b>（目标1900，增肌期可加餐补足）；老公 约1450千卡（目标1900）<span class="kcal">卡路里为按整道菜估算，仅供参考</span></div>
 <div id="extraEats"></div>
 <div class="addrow"><input id="eatInp" placeholder="额外吃了什么？记一笔，会加进上面"><button id="eatAdd" aria-label="加入">＋</button></div>
 <details class="hist"><summary>📅 全部菜单记录（8 天 · 7/15-7/22 · 含反馈）</summary>
@@ -358,53 +362,74 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <!-- ===================== 菜谱库 ===================== -->
 <section id="view-rec" hidden>
 <div class="card">
-<h2>📖 菜谱库<span class="tag">46 道 · 7/21 数据</span></h2>
-<div class="recipe"><h3>山药<span class="rid">R001</span></h3><div class="ing"><b>主料</b>：山药 10厘米</div></div>
-<div class="recipe"><h3>李子<span class="rid">R002</span></h3><div class="ing"><b>主料</b>：李子 1个</div></div>
-<div class="recipe"><h3>三明治<span class="rid">R003</span></h3><div class="ing"><b>主料</b>：牛肉 50g、蛋 1个 ｜ <b>配料</b>：罗马生菜 50g、西红柿 0.5个、奶酪片 1片、酸黄瓜 2根、洋葱 15g</div></div>
-<div class="recipe"><h3>猪蹄黄豆<span class="rid">R004</span></h3><div class="ing"><b>主料</b>：带筋猪前蹄 500g ｜ <b>配料</b>：黄豆 50g ｜ <b>调味料</b>：小葱 15g、蒜末 15g、姜 15g</div></div>
-<div class="recipe"><h3>麻婆豆腐<span class="rid">R005</span></h3><div class="ing"><b>主料</b>：豆腐 1块、牛肉糜 50g ｜ <b>调味料</b>：火锅调料 15g</div></div>
-<div class="recipe"><h3>煎带鱼<span class="rid">R006</span></h3><div class="ing"><b>主料</b>：煎带鱼 0.5条</div></div>
-<div class="recipe"><h3>三文鱼<span class="rid">R007</span></h3><div class="ing"><b>主料</b>：三文鱼 150g ｜ <b>配料</b>：紫苏叶 15g ｜ <b>调味料</b>：辣根 5g、寿司酱油 15ml</div></div>
-<div class="recipe"><h3>煮菠菜<span class="rid">R008</span></h3><div class="ing"><b>主料</b>：菠菜苗 250g</div></div>
-<div class="recipe"><h3>冬瓜汤<span class="rid">R009</span></h3><div class="ing"><b>主料</b>：冬瓜 400g ｜ <b>配料</b>：虾米 15g</div></div>
-<div class="recipe"><h3>豇豆饭<span class="rid">R011</span></h3><div class="ing"><b>主料</b>：米饭 300g ｜ <b>配料</b>：豇豆 100g、腊肉丁 50g</div></div>
-<div class="recipe"><h3>蒸南瓜<span class="rid">R012</span></h3><div class="ing"><b>主料</b>：贝贝南瓜 1个</div></div>
-<div class="recipe"><h3>豆粥<span class="rid">R013</span></h3><div class="ing"><b>主料</b>：红豆 15g、黑豆 16g、绿豆 17g、薏米 18g、大花红豆 19g、莲子 20g、小米 21g</div></div>
-<div class="recipe"><h3>煮玉米<span class="rid">R014</span></h3><div class="ing"><b>主料</b>：煮玉米 1个</div></div>
-<div class="recipe"><h3>桃子<span class="rid">R015</span></h3><div class="ing"><b>主料</b>：桃子 1个</div></div>
-<div class="recipe"><h3>炒油麦菜<span class="rid">R016</span></h3><div class="ing"><b>主料</b>：油麦菜苗 250g ｜ <b>配料</b>：西红柿 0.5个 ｜ <b>调味料</b>：豆豉 15g</div></div>
-<div class="recipe"><h3>面包<span class="rid">R017</span></h3><div class="ing"><b>主料</b>：面包 50g</div></div>
-<div class="recipe"><h3>苦瓜炒鹅蛋<span class="rid">R018</span></h3><div class="ing"><b>主料</b>：苦瓜 1个、鹅蛋 1个</div></div>
-<div class="recipe"><h3>豇豆炒西红柿<span class="rid">R019</span></h3><div class="ing"><b>主料</b>：豇豆 100g ｜ <b>配料</b>：西红柿 0.5个 ｜ <b>调味料</b>：豆豉 15g</div></div>
-<div class="recipe"><h3>荷包蛋青菜面<span class="rid">R020</span></h3><div class="ing"><b>主料</b>：面条 500g ｜ <b>配料</b>：青菜任意 100g、鸡蛋 1个</div></div>
-<div class="recipe"><h3>蒸蛏子<span class="rid">R021</span></h3><div class="ing"><b>主料</b>：蒸蛏子 500g</div></div>
-<div class="recipe"><h3>海螺冬瓜汤<span class="rid">R022</span></h3><div class="ing"><b>主料</b>：海螺 200g、冬瓜 400g</div></div>
-<div class="recipe"><h3>煮苋菜<span class="rid">R023</span></h3><div class="ing"><b>主料</b>：苋菜 250g</div></div>
-<div class="recipe"><h3>燕窝粥<span class="rid">R024</span></h3><div class="ing"><b>主料</b>：燕窝 1个 ｜ <b>配料</b>：大枣 1个、枸杞 15g</div></div>
-<div class="recipe"><h3>煮鸡毛菜<span class="rid">R025</span></h3><div class="ing"><b>主料</b>：鸡毛菜 250g ｜ <b>调味料</b>：水豆豉 30g、蒜末 15g、折耳根 15g</div></div>
-<div class="recipe"><h3>炒豆干<span class="rid">R026</span></h3><div class="ing"><b>主料</b>：豆干 120g ｜ <b>配料</b>：青辣椒 2个 ｜ <b>调味料</b>：干豆豉 15g</div></div>
-<div class="recipe"><h3>卤猪蹄<span class="rid">R027</span></h3><div class="ing"><b>主料</b>：卤猪蹄 200g</div></div>
-<div class="recipe"><h3>腊肠<span class="rid">R028</span></h3><div class="ing"><b>主料</b>：贵州腊肠 100g</div></div>
-<div class="recipe"><h3>蒸螃蟹<span class="rid">R029</span></h3><div class="ing"><b>主料</b>：螃蟹 1个</div></div>
-<div class="recipe"><h3>水煮虾<span class="rid">R030</span></h3><div class="ing"><b>主料</b>：虾 200g</div></div>
-<div class="recipe"><h3>水煮油麦菜苗<span class="rid">R031</span></h3><div class="ing"><b>主料</b>：油麦菜苗 250g</div></div>
-<div class="recipe"><h3>回锅肉<span class="rid">R032</span></h3><div class="ing"><b>主料</b>：五花肉 200g ｜ <b>配料</b>：青辣椒 2个</div></div>
-<div class="recipe"><h3>炒豆角<span class="rid">R033</span></h3><div class="ing"><b>主料</b>：豆角 250g ｜ <b>配料</b>：西红柿 0.5个 ｜ <b>调味料</b>：干豆豉 15g</div></div>
-<div class="recipe"><h3>凉拌莜面<span class="rid">R034</span></h3><div class="ing"><b>主料</b>：莜面 200g ｜ <b>配料</b>：青瓜 1根 ｜ <b>调味料</b>：香菜 15g、小葱 15g、蒜末 15g</div></div>
-<div class="recipe"><h3>炒牛肉芹菜<span class="rid">R035</span></h3><div class="ing"><b>主料</b>：牛肉末 100g ｜ <b>配料</b>：芹菜 250g ｜ <b>调味料</b>：糟辣椒 15g、葱 15g、姜 15g、蒜 15g</div></div>
-<div class="recipe"><h3>林蛙油羹<span class="rid">R036</span></h3><div class="ing"><b>主料</b>：林蛙油 15g ｜ <b>配料</b>：大枣 1个、枸杞 15g ｜ <b>调味料</b>：姜 15g</div></div>
-<div class="recipe"><h3>水煮花生<span class="rid">R037</span></h3><div class="ing"><b>主料</b>：花生 250g</div></div>
-<div class="recipe"><h3>豆浆<span class="rid">R038</span></h3><div class="ing"><b>主料</b>：黄豆 15g、黑豆 15g、红豆 15g、绿豆 15g</div></div>
-<div class="recipe"><h3>回锅肉<span class="rid">R039</span></h3><div class="ing"><b>主料</b>：五花肉 250g ｜ <b>配料</b>：辣椒 2个 ｜ <b>调味料</b>：火锅调料 15g</div></div>
-<div class="recipe"><h3>白菜豆腐<span class="rid">R040</span></h3><div class="ing"><b>主料</b>：白菜 250g ｜ <b>配料</b>：豆腐 0.5块</div></div>
-<div class="recipe"><h3>卤牛肉<span class="rid">R041</span></h3><div class="ing"><b>主料</b>：牛腱子肉 100g ｜ <b>调味料</b>：八角 15g、桂皮 15g、花椒 15g、香叶 15g、草果 15g、小茴香 15g、丁香 50ml、生抽 5ml、老抽 15g、冰糖 15g、盐 5g、料酒 15ml、豆瓣酱 30g</div></div>
-<div class="recipe"><h3>煮毛豆<span class="rid">R042</span></h3><div class="ing"><b>主料</b>：毛豆 250g</div></div>
-<div class="recipe"><h3>煮花生<span class="rid">R043</span></h3><div class="ing"><b>主料</b>：鲜花生 250g</div></div>
-<div class="recipe"><h3>蒸山药<span class="rid">R044</span></h3><div class="ing"><b>主料</b>：山药 10厘米</div></div>
-<div class="recipe"><h3>油条<span class="rid">R045</span></h3><div class="ing"><b>主料</b>：冷冻油条 1根</div></div>
-<div class="recipe"><h3>水煮菜心<span class="rid">R046</span></h3><div class="ing"><b>主料</b>：菜心 250g</div></div>
-<div class="recipe"><h3>素瓜豆<span class="rid">R047</span></h3><div class="ing"><b>主料</b>：圆西葫芦 0.5个、四季豆 100g</div></div>
+<h2>📖 菜谱库<span class="tag">46 道 · 卡路里为估算</span></h2>
+<div class="grp">🥩 肉类 · 7 道</div>
+<div class="recgrid">
+<div class="recipe"><h3>猪蹄黄豆<span class="rid">R004</span><span class="kc">约1000千卡</span></h3><div class="ing">带筋猪前蹄 500g ｜ 配：黄豆 50g ｜ 调：小葱、蒜末、姜</div></div>
+<div class="recipe"><h3>卤猪蹄<span class="rid">R027</span><span class="kc">约500千卡</span></h3><div class="ing">卤猪蹄 200g</div></div>
+<div class="recipe"><h3>腊肠<span class="rid">R028</span><span class="kc">约420千卡</span></h3><div class="ing">贵州腊肠 100g</div></div>
+<div class="recipe"><h3>回锅肉<span class="rid">R032</span><span class="kc">约1000千卡</span></h3><div class="ing">五花肉 200g ｜ 配：青辣椒</div></div>
+<div class="recipe"><h3>炒牛肉芹菜<span class="rid">R035</span><span class="kc">约280千卡</span></h3><div class="ing">牛肉末 100g ｜ 配：芹菜 250g ｜ 调：糟辣椒、葱姜蒜</div></div>
+<div class="recipe"><h3>回锅肉（辣）<span class="rid">R039</span><span class="kc">约1200千卡</span></h3><div class="ing">五花肉 250g ｜ 配：辣椒 ｜ 调：火锅调料</div></div>
+<div class="recipe"><h3>卤牛肉<span class="rid">R041</span><span class="kc">约180千卡</span></h3><div class="ing">牛腱子肉 100g ｜ 调：八角桂皮花椒等 13 味卤料</div></div>
+</div>
+<div class="grp">🐟 鱼与海鲜 · 5 道</div>
+<div class="recgrid">
+<div class="recipe"><h3>煎带鱼<span class="rid">R006</span><span class="kc">约250千卡</span></h3><div class="ing">带鱼 0.5条</div></div>
+<div class="recipe"><h3>三文鱼<span class="rid">R007</span><span class="kc">约310千卡</span></h3><div class="ing">三文鱼 150g ｜ 配：紫苏叶 ｜ 调：辣根、寿司酱油</div></div>
+<div class="recipe"><h3>蒸蛏子<span class="rid">R021</span><span class="kc">约150千卡</span></h3><div class="ing">蛏子 500g</div></div>
+<div class="recipe"><h3>蒸螃蟹<span class="rid">R029</span><span class="kc">约100千卡</span></h3><div class="ing">螃蟹 1个</div></div>
+<div class="recipe"><h3>水煮虾<span class="rid">R030</span><span class="kc">约190千卡</span></h3><div class="ing">虾 200g</div></div>
+</div>
+<div class="grp">🥚 蛋与豆制品 · 8 道</div>
+<div class="recgrid">
+<div class="recipe"><h3>麻婆豆腐<span class="rid">R005</span><span class="kc">约450千卡</span></h3><div class="ing">豆腐 1块、牛肉糜 50g ｜ 调：火锅调料</div></div>
+<div class="recipe"><h3>苦瓜炒鹅蛋<span class="rid">R018</span><span class="kc">约280千卡</span></h3><div class="ing">苦瓜 1个、鹅蛋 1个</div></div>
+<div class="recipe"><h3>炒豆干<span class="rid">R026</span><span class="kc">约250千卡</span></h3><div class="ing">豆干 120g ｜ 配：青辣椒 ｜ 调：干豆豉</div></div>
+<div class="recipe"><h3>水煮花生<span class="rid">R037</span><span class="kc">约450千卡</span></h3><div class="ing">花生 250g</div></div>
+<div class="recipe"><h3>豆浆<span class="rid">R038</span><span class="kc">约230千卡</span></h3><div class="ing">黄豆、黑豆、红豆、绿豆 共 60g</div></div>
+<div class="recipe"><h3>白菜豆腐<span class="rid">R040</span><span class="kc">约150千卡</span></h3><div class="ing">白菜 250g ｜ 配：豆腐 0.5块</div></div>
+<div class="recipe"><h3>煮毛豆<span class="rid">R042</span><span class="kc">约330千卡</span></h3><div class="ing">毛豆 250g</div></div>
+<div class="recipe"><h3>煮花生<span class="rid">R043</span><span class="kc">约450千卡</span></h3><div class="ing">鲜花生 250g</div></div>
+</div>
+<div class="grp">🥬 蔬菜 · 9 道</div>
+<div class="recgrid">
+<div class="recipe"><h3>煮菠菜<span class="rid">R008</span><span class="kc">约60千卡</span></h3><div class="ing">菠菜苗 250g</div></div>
+<div class="recipe"><h3>炒油麦菜<span class="rid">R016</span><span class="kc">约90千卡</span></h3><div class="ing">油麦菜苗 250g ｜ 配：西红柿 ｜ 调：豆豉</div></div>
+<div class="recipe"><h3>豇豆炒西红柿<span class="rid">R019</span><span class="kc">约100千卡</span></h3><div class="ing">豇豆 100g ｜ 配：西红柿 ｜ 调：豆豉</div></div>
+<div class="recipe"><h3>煮苋菜<span class="rid">R023</span><span class="kc">约70千卡</span></h3><div class="ing">苋菜 250g</div></div>
+<div class="recipe"><h3>煮鸡毛菜<span class="rid">R025</span><span class="kc">约60千卡</span></h3><div class="ing">鸡毛菜 250g ｜ 调：水豆豉、蒜末、折耳根</div></div>
+<div class="recipe"><h3>水煮油麦菜苗<span class="rid">R031</span><span class="kc">约45千卡</span></h3><div class="ing">油麦菜苗 250g</div></div>
+<div class="recipe"><h3>炒豆角<span class="rid">R033</span><span class="kc">约130千卡</span></h3><div class="ing">豆角 250g ｜ 配：西红柿 ｜ 调：干豆豉</div></div>
+<div class="recipe"><h3>水煮菜心<span class="rid">R046</span><span class="kc">约50千卡</span></h3><div class="ing">菜心 250g</div></div>
+<div class="recipe"><h3>素瓜豆<span class="rid">R047</span><span class="kc">约80千卡</span></h3><div class="ing">圆西葫芦 0.5个、四季豆 100g</div></div>
+</div>
+<div class="grp">🍚 主食杂粮 · 11 道</div>
+<div class="recgrid">
+<div class="recipe"><h3>山药<span class="rid">R001</span><span class="kc">约85千卡</span></h3><div class="ing">山药 10厘米</div></div>
+<div class="recipe"><h3>三明治<span class="rid">R003</span><span class="kc">约400千卡</span></h3><div class="ing">牛肉 50g、蛋 1个 ｜ 配：罗马生菜、西红柿 0.5个、奶酪片、酸黄瓜、洋葱</div></div>
+<div class="recipe"><h3>豇豆饭<span class="rid">R011</span><span class="kc">约600千卡</span></h3><div class="ing">米饭 300g ｜ 配：豇豆 100g、腊肉丁 50g</div></div>
+<div class="recipe"><h3>蒸南瓜<span class="rid">R012</span><span class="kc">约150千卡</span></h3><div class="ing">贝贝南瓜 1个</div></div>
+<div class="recipe"><h3>豆粥<span class="rid">R013</span><span class="kc">约430千卡</span></h3><div class="ing">红豆、黑豆、绿豆、薏米、大花红豆、莲子、小米 共约126g</div></div>
+<div class="recipe"><h3>煮玉米<span class="rid">R014</span><span class="kc">约150千卡</span></h3><div class="ing">玉米 1个</div></div>
+<div class="recipe"><h3>面包<span class="rid">R017</span><span class="kc">约135千卡</span></h3><div class="ing">面包 50g</div></div>
+<div class="recipe"><h3>荷包蛋青菜面<span class="rid">R020</span><span class="kc">约700千卡</span></h3><div class="ing">面条 500g ｜ 配：青菜、鸡蛋 1个</div></div>
+<div class="recipe"><h3>凉拌莜面<span class="rid">R034</span><span class="kc">约700千卡</span></h3><div class="ing">莜面 200g ｜ 配：青瓜 ｜ 调：香菜、小葱、蒜末</div></div>
+<div class="recipe"><h3>蒸山药<span class="rid">R044</span><span class="kc">约85千卡</span></h3><div class="ing">山药 10厘米</div></div>
+<div class="recipe"><h3>油条<span class="rid">R045</span><span class="kc">约270千卡</span></h3><div class="ing">冷冻油条 1根</div></div>
+</div>
+<div class="grp">🥣 汤羹滋补 · 4 道</div>
+<div class="recgrid">
+<div class="recipe"><h3>冬瓜汤<span class="rid">R009</span><span class="kc">约60千卡</span></h3><div class="ing">冬瓜 400g ｜ 配：虾米</div></div>
+<div class="recipe"><h3>海螺冬瓜汤<span class="rid">R022</span><span class="kc">约150千卡</span></h3><div class="ing">海螺 200g、冬瓜 400g</div></div>
+<div class="recipe"><h3>燕窝粥<span class="rid">R024</span><span class="kc">约120千卡</span></h3><div class="ing">燕窝 ｜ 配：大枣、枸杞</div></div>
+<div class="recipe"><h3>林蛙油羹<span class="rid">R036</span><span class="kc">约80千卡</span></h3><div class="ing">林蛙油 ｜ 配：大枣、枸杞、姜</div></div>
+</div>
+<div class="grp">🍎 水果小食 · 2 道</div>
+<div class="recgrid">
+<div class="recipe"><h3>李子<span class="rid">R002</span><span class="kc">约30千卡</span></h3><div class="ing">李子 1个</div></div>
+<div class="recipe"><h3>桃子<span class="rid">R015</span><span class="kc">约50千卡</span></h3><div class="ing">桃子 1个</div></div>
+</div>
 </div>
 </section>
 
