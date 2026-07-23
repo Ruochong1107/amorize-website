@@ -89,6 +89,11 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 .arrow { text-align: center; color: var(--faint); font-size: 15px; padding: 4px 0; }
 .hist { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 11px; }
 .hist summary { font-size: 12.5px; color: var(--muted); cursor: pointer; list-style-position: inside; }
+.histlink { display: flex; align-items: center; justify-content: space-between; background: #faf9f6; padding: 11px 20px; margin: 14px -20px -16px; border-top: 1px solid var(--border); border-radius: 0 0 18px 18px; text-decoration: none; color: var(--text); font-size: 13px; cursor: pointer; }
+.histlink b { font-weight: 500; color: var(--muted); }
+.histlink .sub { color: var(--faint); font-size: 11px; margin-left: 6px; font-weight: 400; }
+.histlink .arrow { color: var(--faint); font-size: 14px; margin-left: 10px; }
+.histlink:active { background: #f3f1ea; }
 .hrow { display: flex; gap: 10px; padding: 7px 0; border-bottom: 1px dashed var(--border); font-size: 12.5px; line-height: 1.65; }
 .hrow:last-child { border-bottom: 0; }
 .hrow .hd { flex: none; width: 74px; color: var(--faint); }
@@ -184,14 +189,7 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <label class="todo" data-meal="both"><input type="checkbox" data-k="s11"><span class="t">鸡蛋 15个 <i>—— 全家 + 狗狗</i></span></label>
 <div id="extraBuys"></div>
 <div class="addrow"><input id="buyInp" placeholder="单子外买了什么？记一笔，会加进上面"><button id="buyAdd" aria-label="加入">＋</button></div>
-<details class="hist"><summary>🧾 全部采购记录（51 笔 · 7/15 起 · 用来看采购习惯）</summary>
-<div class="hrow"><span class="hd">7/15</span><span class="hb">牛油果 1个、西兰花 2份、紫苏叶 30g、菠菜苗 250g、油麦菜苗 250g、蓝莓 2盒、带筋猪前蹄 500g、冬瓜 800g、紫皮大蒜 250g、青蒜苗 300g、山药 500g、鲜花生 500g<i class="hn">（12 样 · 已送达）</i></span></div>
-<div class="hrow"><span class="hd">7/16</span><span class="hb">牛油果 2个、白玉北豆腐 385g、三文鱼厚脂鱼腩切片 300g<i class="hn">（3 样 · 已送达）</i></span></div>
-<div class="hrow"><span class="hd">7/18</span><span class="hb">牛油果 2个、蓝莓 3盒、西兰花 3份、红苋菜苗 250g、冬瓜 800g、芹菜苗 250g、罗马生菜 500g<i class="hn">（7 样 · 已送达）</i></span></div>
-<div class="hrow"><span class="hd">7/19</span><span class="hb">草莓番茄 400g、鸡毛菜 250g、油麦菜苗 250g、冬瓜 800g、香豆干 120g、卤猪蹄 200g<i class="hn">（6 样 · 已送达）</i></span></div>
-<div class="hrow"><span class="hd">7/20</span><span class="hb">紫苏叶 30g、牛油果 2个、西兰花 550g、蓝莓 2盒、胡萝卜 600g、冬瓜 800g、三文鱼 300g、菠菜苗 250g、黑麦贝果 2个、白玉北豆腐 385g、谷饲黄牛肉馅 180g、黄洋葱 650g<i class="hn">（12 样 · 已送达）</i></span></div>
-<div class="hrow"><span class="hd">7/21</span><span class="hb">鸡纵菌 1盒、菜心 500克、白菜 1颗、毛豆 500克、鲜花生 500克、茄子 500克、猪耳豆角 500克、青尖椒 500克、圆西葫芦 1个、青瓜 2根、鸡蛋 15个<i class="hn">（11 样 · 已送达）</i></span></div>
-</details>
+<a class="histlink" data-view="buyhist"><span><b>🧾 全部采购记录</b><span class="sub">51 笔 · 7/15 起</span></span><span class="arrow">→</span></a>
 </div>
 
 <div>
@@ -205,19 +203,13 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <div class="meal" id="mealBrunch"><b>第一餐</b><br>老婆：三明治 + 美式咖啡 + 羊奶粉 + 半个牛油果 + 半根香蕉 + 半盒蓝莓（固定）<span class="kcal">约750千卡</span><br>老公：白菜豆腐、卤牛肉、煮毛豆、煮花生、蒸山药、油条<span class="kcal">整份约1450千卡</span></div>
 <div class="meal" id="mealDinner"><b>第三餐</b><br>老婆、保姆：三文鱼、水煮菜心、苦瓜炒鹅蛋<span class="kcal">共约640千卡 · 两人分约各320</span></div>
 <div class="meal"><b>补剂</b><span class="kcal">每天固定</span><br>姜黄粉×3、磷虾油×1、D3+K2×1、降血脂胶囊×1（两人）；老婆晚益生菌×1</div>
-<div class="meal"><b>全天估算</b><br>老婆 约750 + 320 ≈ <b>1070千卡</b>（目标1900，增肌期可加餐补足）；老公 约1450千卡（目标1900）<span class="kcal">卡路里为按整道菜估算，仅供参考</span></div>
+<div class="meal"><b>全天估算</b><br>
+老婆 约750 + 320 ≈ <b>1070千卡</b>（目标1900，增肌期可加餐补足）<br>
+老公 约1450千卡（目标1900）
+<span class="kcal">卡路里为按整道菜估算，仅供参考</span></div>
 <div id="extraEats"></div>
 <div class="addrow"><input id="eatInp" placeholder="额外吃了什么？记一笔，会加进上面"><button id="eatAdd" aria-label="加入">＋</button></div>
-<details class="hist"><summary>📅 全部菜单记录（8 天 · 7/15-7/22 · 含反馈）</summary>
-<div class="hrow"><span class="hd">7/15</span><span class="hb"><b>老公 第一餐</b>：山药、李子<br><b>老婆 第一餐</b>：三明治<br><b>老公 第三餐</b>：猪蹄黄豆、麻婆豆腐、煎带鱼<br><b>老婆 第三餐</b>：三文鱼、煮菠菜、冬瓜汤、豇豆饭</span></div>
-<div class="hrow"><span class="hd">7/16</span><span class="hb"><b>老公 第一餐</b>：蒸南瓜、豆粥、煮玉米、桃子、李子<br><b>老婆 第一餐</b>：三明治<br><b>老婆 第三餐</b>：三文鱼、炒油麦菜、紫苏叶、面包、苦瓜炒鹅蛋、豇豆炒西红柿</span></div>
-<div class="hrow"><span class="hd">7/17</span><span class="hb"><b>老婆 第一餐</b>：荷包蛋青菜面<br><b>老公 第一餐</b>：蒸南瓜、豆粥、煮玉米、桃子、李子</span></div>
-<div class="hrow"><span class="hd">7/18</span><span class="hb"><b>老婆 第三餐</b>：蒸蛏子、海螺冬瓜汤、三文鱼、煮苋菜、燕窝粥</span></div>
-<div class="hrow"><span class="hd">7/19</span><span class="hb"><b>老公 第二餐</b>：煮鸡毛菜、炒豆干、卤猪蹄、腊肠<br><b>老婆 第三餐</b>：蒸螃蟹、水煮虾、水煮油麦菜苗<br><b>老公 第三餐</b>：回锅肉、冬瓜汤、炒豆角、凉拌莜面、炒牛肉芹菜</span></div>
-<div class="hrow"><span class="hd">7/20</span><span class="hb"><b>老公 第一餐</b>：豆浆（不喜欢·连续喝好几天了）、水煮花生（喜欢·儿时味道）<br><b>老婆 第三餐</b>：三文鱼、林蛙油羹<br><b>老婆、保姆 第三餐</b>：煮菠菜、苦瓜炒鹅蛋、冬瓜汤、凉拌莜面</span></div>
-<div class="hrow"><span class="hd">7/21</span><span class="hb"><b>老公 第一餐</b>：白菜豆腐、卤牛肉、煮毛豆、煮花生、蒸山药、油条<br><b>老婆、保姆 第三餐</b>：三文鱼、水煮菜心、苦瓜炒鹅蛋</span></div>
-<div class="hrow"><span class="hd">7/22</span><span class="hb"><b>老婆、保姆 第三餐</b>：面包</span></div>
-</details>
+<a class="histlink" data-view="eathist"><span><b>📅 全部菜单记录</b><span class="sub">8 天 · 7/15-7/22</span></span><span class="arrow">→</span></a>
 </div>
 
 <div class="fb">
@@ -489,6 +481,34 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 </div>
 </section>
 
+<!-- ===================== 全部采购记录 ===================== -->
+<section id="view-buyhist" hidden>
+<div class="card">
+<h2>🧾 全部采购记录<span class="tag">51 笔 · 7/15 起</span></h2>
+<div class="hrow"><span class="hd">7/15</span><span class="hb">牛油果 1个、西兰花 2份、紫苏叶 30g、菠菜苗 250g、油麦菜苗 250g、蓝莓 2盒、带筋猪前蹄 500g、冬瓜 800g、紫皮大蒜 250g、青蒜苗 300g、山药 500g、鲜花生 500g<i class="hn">（12 样 · 已送达）</i></span></div>
+<div class="hrow"><span class="hd">7/16</span><span class="hb">牛油果 2个、白玉北豆腐 385g、三文鱼厚脂鱼腩切片 300g<i class="hn">（3 样 · 已送达）</i></span></div>
+<div class="hrow"><span class="hd">7/18</span><span class="hb">牛油果 2个、蓝莓 3盒、西兰花 3份、红苋菜苗 250g、冬瓜 800g、芹菜苗 250g、罗马生菜 500g<i class="hn">（7 样 · 已送达）</i></span></div>
+<div class="hrow"><span class="hd">7/19</span><span class="hb">草莓番茄 400g、鸡毛菜 250g、油麦菜苗 250g、冬瓜 800g、香豆干 120g、卤猪蹄 200g<i class="hn">（6 样 · 已送达）</i></span></div>
+<div class="hrow"><span class="hd">7/20</span><span class="hb">紫苏叶 30g、牛油果 2个、西兰花 550g、蓝莓 2盒、胡萝卜 600g、冬瓜 800g、三文鱼 300g、菠菜苗 250g、黑麦贝果 2个、白玉北豆腐 385g、谷饲黄牛肉馅 180g、黄洋葱 650g<i class="hn">（12 样 · 已送达）</i></span></div>
+<div class="hrow"><span class="hd">7/21</span><span class="hb">鸡纵菌 1盒、菜心 500克、白菜 1颗、毛豆 500克、鲜花生 500克、茄子 500克、猪耳豆角 500克、青尖椒 500克、圆西葫芦 1个、青瓜 2根、鸡蛋 15个<i class="hn">（11 样 · 已送达）</i></span></div>
+</div>
+</section>
+
+<!-- ===================== 全部菜单记录 ===================== -->
+<section id="view-eathist" hidden>
+<div class="card">
+<h2>📅 全部菜单记录<span class="tag">8 天 · 7/15-7/22</span></h2>
+<div class="hrow"><span class="hd">7/15</span><span class="hb"><b>老公 第一餐</b>：山药、李子<br><b>老婆 第一餐</b>：三明治<br><b>老公 第三餐</b>：猪蹄黄豆、麻婆豆腐、煎带鱼<br><b>老婆 第三餐</b>：三文鱼、煮菠菜、冬瓜汤、豇豆饭</span></div>
+<div class="hrow"><span class="hd">7/16</span><span class="hb"><b>老公 第一餐</b>：蒸南瓜、豆粥、煮玉米、桃子、李子<br><b>老婆 第一餐</b>：三明治<br><b>老婆 第三餐</b>：三文鱼、炒油麦菜、紫苏叶、面包、苦瓜炒鹅蛋、豇豆炒西红柿</span></div>
+<div class="hrow"><span class="hd">7/17</span><span class="hb"><b>老婆 第一餐</b>：荷包蛋青菜面<br><b>老公 第一餐</b>：蒸南瓜、豆粥、煮玉米、桃子、李子</span></div>
+<div class="hrow"><span class="hd">7/18</span><span class="hb"><b>老婆 第三餐</b>：蒸蛏子、海螺冬瓜汤、三文鱼、煮苋菜、燕窝粥</span></div>
+<div class="hrow"><span class="hd">7/19</span><span class="hb"><b>老公 第二餐</b>：煮鸡毛菜、炒豆干、卤猪蹄、腊肠<br><b>老婆 第三餐</b>：蒸螃蟹、水煮虾、水煮油麦菜苗<br><b>老公 第三餐</b>：回锅肉、冬瓜汤、炒豆角、凉拌莜面、炒牛肉芹菜</span></div>
+<div class="hrow"><span class="hd">7/20</span><span class="hb"><b>老公 第一餐</b>：豆浆（不喜欢·连续喝好几天了）、水煮花生（喜欢·儿时味道）<br><b>老婆 第三餐</b>：三文鱼、林蛙油羹<br><b>老婆、保姆 第三餐</b>：煮菠菜、苦瓜炒鹅蛋、冬瓜汤、凉拌莜面</span></div>
+<div class="hrow"><span class="hd">7/21</span><span class="hb"><b>老公 第一餐</b>：白菜豆腐、卤牛肉、煮毛豆、煮花生、蒸山药、油条<br><b>老婆、保姆 第三餐</b>：三文鱼、水煮菜心、苦瓜炒鹅蛋</span></div>
+<div class="hrow"><span class="hd">7/22</span><span class="hb"><b>老婆、保姆 第三餐</b>：面包</span></div>
+</div>
+</section>
+
 
 </div>
 </div>
@@ -545,14 +565,14 @@ function applyAway() {
     el.classList.toggle("off", off);
   });
 }
-var VIEWS = ["home", "inv", "rec", "prof", "dash"];
+var VIEWS = ["home", "inv", "rec", "prof", "dash", "buyhist", "eathist"];
 function show(v) {
   VIEWS.forEach(function (x) { document.getElementById("view-" + x).hidden = (x !== v); });
   document.getElementById("navHome").hidden = (v !== "home");
   document.getElementById("navBack").hidden = (v === "home");
   window.scrollTo(0, 0);
 }
-document.querySelectorAll(".nav a").forEach(function (a) {
+document.querySelectorAll("[data-view]").forEach(function (a) {
   a.addEventListener("click", function (e) { e.preventDefault(); show(a.dataset.view); });
 });
 function unlock() {
