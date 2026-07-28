@@ -40,7 +40,7 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 .nav a { font-size: 12.5px; color: var(--muted); text-decoration: none; border: 1px solid var(--border); background: #fff; border-radius: 20px; padding: 5px 11px; white-space: nowrap; }
 .nav a.back { color: var(--green-dark); }
 .card { background: var(--card); border-radius: 18px; margin-top: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.03); padding: 20px 20px 16px; }
-.card h2 { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+.card h2 { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .grp { font-size: 11.5px; color: var(--faint); letter-spacing: 1px; margin: 16px 0 2px; }
 .grp:first-of-type { margin-top: 12px; }
 .todo { display: flex; gap: 10px; align-items: flex-start; padding: 6.5px 0; }
@@ -50,24 +50,39 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 .todo input:checked ~ .t { text-decoration: line-through; color: var(--faint); }
 .todo.off .t { text-decoration: line-through; color: var(--faint); }
 .todo.off input { opacity: .35; pointer-events: none; }
-.peek { background: #faf8f1; border-radius: 12px; padding: 10px 13px; font-size: 12.5px; line-height: 1.65; color: var(--muted); margin-top: 14px; }
-.have { font-size: 12.5px; color: var(--faint); line-height: 1.65; margin-top: 10px; }
 .away { display: flex; gap: 6px; margin-left: auto; }
 .away button { font: inherit; font-size: 11.5px; color: var(--muted); background: transparent; border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; cursor: pointer; white-space: nowrap; }
 .away button.on { background: var(--green); border-color: var(--green); color: #fff; }
 .meal { font-size: 13.5px; line-height: 1.75; margin-top: 11px; }
 .meal b { color: var(--green-dark); font-weight: 600; font-size: 13px; }
 .meal .kcal { font-size: 11px; color: var(--faint); margin-left: 4px; }
-.menu details { margin-top: 13px; border-top: 1px solid var(--border); padding-top: 11px; }
-.menu summary { font-size: 12.5px; color: var(--muted); cursor: pointer; list-style-position: inside; }
-.menu details p { font-size: 12.5px; color: var(--muted); line-height: 1.7; margin-top: 8px; }
+.mline { margin-top: 3px; }
+.mline .who { color: var(--muted); font-size: 13px; margin-right: 2px; }
+.dish { display: inline-flex; align-items: center; gap: 3px; background: #faf8f1; border-radius: 9px; padding: 1.5px 4px 1.5px 9px; margin: 2.5px 4px 2.5px 0; font-size: 13px; line-height: 1.5; }
+.dish.lkc { cursor: pointer; }
+.dish.lkc:active { background: #f1ede1; }
+.dish .go { font-size: 10.5px; color: var(--faint); margin-left: 1px; }
+.dish .dk { font-size: 10px; color: var(--faint); margin-left: 1px; }
+.dish .dx { border: 0; background: none; color: #c9b8b8; cursor: pointer; font-size: 14px; line-height: 1; padding: 2px 4px; border-radius: 6px; }
+.dish .dx:hover { color: #b98a8a; background: #f3ece6; }
+.dish.out { background: #fdf3e7; border: 1px dashed #ddb98a; color: #a97b3f; padding-left: 8px; }
+.dish.out .dk { color: #c4a06c; }
+.dish.out .dx { color: #d7bd9c; }
+.dish.out .dx:hover { color: #b98a8a; background: #f7e9d6; }
 .fb { display: flex; gap: 8px; margin-top: 16px; align-items: flex-end; }
 .fb textarea { flex: 1; border: 1px solid var(--border); border-radius: 12px; padding: 9px 13px; font: inherit; font-size: 13.5px; height: 40px; resize: none; background: #fff; outline: none; transition: height .15s; color: var(--text); }
 .fb textarea:focus { height: 92px; border-color: var(--green); }
 .fb button { width: 40px; height: 40px; flex: none; color: #fff; background: var(--green); border: 0; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .fb button svg { width: 17px; height: 17px; }
 .fb button:active { background: var(--green-dark); }
+.fb button.cam { background: #fff; color: var(--muted); border: 1px solid var(--border); font-size: 16px; }
+.fb button.cam:active { background: #f1ede1; }
+.fbimgs { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.fbimgs .im { position: relative; }
+.fbimgs img { width: 58px; height: 58px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); display: block; }
+.fbimgs .rm { position: absolute; top: -7px; right: -7px; width: 19px; height: 19px; border-radius: 50%; border: 0; background: #cbb; color: #fff; font-size: 12px; line-height: 1; cursor: pointer; }
 .hint { font-size: 11.5px; color: var(--faint); margin-top: 6px; text-align: right; min-height: 15px; }
+.hint.l { text-align: left; }
 .item { display: flex; gap: 8px; align-items: baseline; padding: 5.5px 0; font-size: 13.5px; line-height: 1.55; }
 .item i { font-style: normal; color: var(--muted); font-size: 12px; margin-left: auto; white-space: nowrap; }
 .item .exp { color: var(--warn); }
@@ -75,13 +90,25 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 .prof b { color: var(--green-dark); font-weight: 600; }
 .recgrid { display: block; }
 @media (min-width: 900px) { .recgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 26px; } }
-.recipe { border-top: 1px solid var(--border); padding: 10px 0 6px; }
-.recipe h3 { display: flex; align-items: baseline; }
-.recipe h3 { font-size: 14px; font-weight: 600; }
+.recipe { border-top: 1px solid var(--border); padding: 10px 0 6px; border-radius: 8px; cursor: pointer; }
+.recipe:active { background: #faf8f1; }
+.recipe h3 { display: flex; align-items: baseline; font-size: 14px; font-weight: 600; }
 .recipe .rid { font-size: 10px; color: var(--faint); margin-left: 6px; font-weight: 400; }
 .recipe .kc { margin-left: auto; font-size: 11px; color: var(--green-dark); font-weight: 400; white-space: nowrap; }
 .recipe .ing b { color: var(--green-dark); font-weight: 600; }
 .recipe .ing { font-size: 12.5px; color: var(--muted); line-height: 1.7; margin-top: 4px; }
+.recipe.flash { animation: flash 1.8s ease-out; }
+@keyframes flash { 0% { background: #f5efc9; } 100% { background: transparent; } }
+.recedit { border-top: 1px solid var(--border); padding: 10px 0; display: flex; flex-direction: column; gap: 6px; }
+.recedit input, .recedit textarea { border: 1px solid var(--green); border-radius: 8px; padding: 7px 10px; font: inherit; font-size: 12.5px; outline: none; background: #fff; resize: none; }
+.recedit .row { display: flex; gap: 6px; }
+.recedit .row .rn { flex: 1.6; min-width: 0; }
+.recedit .row .rk { flex: 1; min-width: 0; }
+.recedit .btns { display: flex; gap: 6px; justify-content: flex-end; }
+.recedit button { border: 0; border-radius: 8px; padding: 7px 12px; font: inherit; font-size: 12px; cursor: pointer; }
+.recedit .ok { background: var(--green); color: #fff; }
+.recedit .rm { background: #f3ece6; color: #b98a8a; }
+.recedit .cc { background: #f1f0ec; color: var(--muted); }
 .flow { margin-top: 14px; }
 .node { background: var(--card); border-radius: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.03); padding: 14px 16px; }
 .node h3 { font-size: 13.5px; font-weight: 600; display: flex; gap: 7px; align-items: center; }
@@ -100,26 +127,46 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 .hrow .hb { color: var(--muted); }
 .hrow .hb b { color: var(--green-dark); font-weight: 600; }
 .hrow .hn { font-style: normal; color: var(--faint); }
-.item.neg i { color: #b98a8a; }
 .addrow { display: flex; gap: 8px; margin-top: 12px; }
-.addrow input { flex: 1; border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font: inherit; font-size: 13.5px; background: #fff; outline: none; color: var(--text); }
-.addrow input:focus { border-color: var(--green); }
+.addrow input[type=text], .addrow input[type=number] { border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font: inherit; font-size: 13.5px; background: #fff; outline: none; color: var(--text); min-width: 0; }
+.addrow input[type=text] { flex: 1; }
+.addrow input:focus, .addrow select:focus { border-color: var(--green); }
+.addrow select { flex: none; border: 1px solid var(--border); border-radius: 10px; padding: 8px 6px; font: inherit; font-size: 12.5px; background: #fff; color: var(--muted); outline: none; cursor: pointer; }
+.addrow .kcin { flex: none; width: 96px; font-size: 12.5px; padding: 8px 10px; }
 .addrow button { width: 38px; height: 37px; flex: none; color: #fff; background: var(--green); border: 0; border-radius: 10px; cursor: pointer; font-size: 20px; line-height: 1; }
 .addrow button:active { background: var(--green-dark); }
+.addrow.sub { margin-top: 8px; justify-content: flex-end; flex-wrap: wrap; }
 .selftag { display: inline-block; font-size: 10px; color: var(--green-dark); border: 1px solid var(--green); border-radius: 20px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
+.mealtag { display: inline-block; font-size: 10px; color: var(--warn); border: 1px solid #e5d5ac; border-radius: 20px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
 .xdel { border: 0; background: none; color: var(--faint); cursor: pointer; font-size: 15px; margin-left: 4px; padding: 0 4px; }
-.invgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1px 18px; margin-top: 2px; }
-.iv { display: flex; justify-content: space-between; align-items: baseline; gap: 6px; font-size: 13px; padding: 3.5px 0; }
-.iv i { font-style: normal; color: var(--muted); font-size: 12px; white-space: nowrap; }
-.iv.neg i { color: #b98a8a; }
-.iv .xdel { margin-left: 0; }
-.invadd { display: flex; gap: 8px; margin-top: 14px; }
+.invgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 1px 18px; margin-top: 2px; }
+.iv { display: flex; align-items: baseline; gap: 6px; font-size: 13px; padding: 3.5px 0; border-radius: 8px; cursor: pointer; }
+.iv:active { background: #faf8f1; }
+.iv .qs { margin-left: auto; white-space: nowrap; font-size: 12px; }
+.iv .tm { font-style: normal; color: var(--muted); margin-left: 4px; }
+.iv .tm.plus { color: var(--green-dark); }
+.iv .tm.minus { color: #b98a8a; }
+.ivedit { grid-column: 1 / -1; display: flex; gap: 6px; padding: 6px 0; align-items: center; flex-wrap: wrap; }
+.ivedit input { border: 1px solid var(--green); border-radius: 8px; padding: 6px 9px; font: inherit; font-size: 12.5px; outline: none; background: #fff; min-width: 0; }
+.ivedit .en { flex: 1.2; }
+.ivedit .eq { flex: 1.6; }
+.ivedit button { border: 0; border-radius: 8px; padding: 7px 12px; font: inherit; font-size: 12px; cursor: pointer; }
+.ivedit .ok { background: var(--green); color: #fff; }
+.ivedit .rm { background: #f3ece6; color: #b98a8a; }
+.ivedit .cc { background: #f1f0ec; color: var(--muted); }
+.invadd { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; }
 .invadd input { border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; font: inherit; font-size: 13.5px; background: #fff; outline: none; color: var(--text); min-width: 0; }
-.invadd input:focus { border-color: var(--green); }
+.invadd input:focus, .invadd select:focus { border-color: var(--green); }
 .invadd .nm { flex: 1.4; }
 .invadd .qt { flex: 1; }
+.invadd select { flex: none; border: 1px solid var(--border); border-radius: 10px; padding: 8px 6px; font: inherit; font-size: 12.5px; background: #fff; color: var(--muted); outline: none; cursor: pointer; }
 .invadd button { width: 38px; height: 37px; flex: none; color: #fff; background: var(--green); border: 0; border-radius: 10px; cursor: pointer; font-size: 20px; line-height: 1; }
 .invadd button:active { background: var(--green-dark); }
+.inbox { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px dashed var(--border); font-size: 12.5px; }
+.inbox:last-child { border-bottom: 0; }
+.inbox img { width: 52px; height: 52px; object-fit: cover; border-radius: 8px; border: 1px solid var(--border); flex: none; }
+.inbox .tx { color: var(--muted); line-height: 1.6; flex: 1; word-break: break-all; }
+.pendtag { display: inline-block; font-size: 10px; color: var(--warn); border: 1px solid #e5d5ac; border-radius: 20px; padding: 0 6px; margin-left: 6px; white-space: nowrap; }
 .tag { display: inline-block; font-size: 10.5px; color: var(--faint); border: 1px solid var(--border); border-radius: 20px; padding: 0 7px; margin-left: 7px; vertical-align: 1px; font-weight: 400; }
 </style>
 </head>
@@ -188,7 +235,17 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <label class="todo" data-meal="both"><input type="checkbox" data-k="s10"><span class="t">青瓜 2根 <i>—— 凉拌用</i></span></label>
 <label class="todo" data-meal="both"><input type="checkbox" data-k="s11"><span class="t">鸡蛋 15个 <i>—— 全家 + 狗狗</i></span></label>
 <div id="extraBuys"></div>
-<div class="addrow"><input id="buyInp" placeholder="单子外买了什么？记一笔，会加进上面"><button id="buyAdd" aria-label="加入">＋</button></div>
+<div class="addrow">
+<input type="text" id="buyInp" placeholder="单子外买了什么？记一笔">
+<select id="buyMeal">
+<option value="both" selected>通用</option>
+<option value="brunch">第一餐</option>
+<option value="second">第二餐</option>
+<option value="dinner">第三餐</option>
+</select>
+<button id="buyAdd" aria-label="加入">＋</button>
+</div>
+<div class="hint l">选了哪一餐，"第X餐不在家"时会跟着一起划掉</div>
 <a class="histlink" data-view="buyhist"><span><b>🧾 全部采购记录</b><span class="sub">51 笔 · 7/15 起</span></span><span class="arrow">→</span></a>
 </div>
 
@@ -200,22 +257,46 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <button id="awayDinner">第三餐不在家</button>
 </span>
 </h2>
-<div class="meal" id="mealBrunch"><b>第一餐</b><br>老婆：三明治 + 美式咖啡 + 羊奶粉 + 半个牛油果 + 半根香蕉 + 半盒蓝莓（固定）<span class="kcal">约750千卡</span><br>老公：白菜豆腐、卤牛肉、煮毛豆、煮花生、蒸山药、油条<span class="kcal">整份约1450千卡</span></div>
-<div class="meal" id="mealDinner"><b>第三餐</b><br>老婆、保姆：三文鱼、水煮菜心、苦瓜炒鹅蛋<span class="kcal">共约640千卡 · 两人分约各320</span></div>
-<div class="meal"><b>补剂</b><span class="kcal">每天固定</span><br>姜黄粉×3、磷虾油×1、D3+K2×1、降血脂胶囊×1（两人）；老婆晚益生菌×1</div>
+<div class="meal" id="mealBrunch"><b>第一餐</b><div id="linesB"></div></div>
+<div class="meal" id="mealSecond" hidden><b>第二餐</b><div id="linesS"></div></div>
+<div class="meal" id="mealDinner"><b>第三餐</b><div id="linesD"></div></div>
+<div class="meal"><b>补剂</b><span class="kcal">每天固定</span><div id="linesSupp"></div></div>
 <div class="meal"><b>全天估算</b><br>
-老婆 约750 + 320 ≈ <b>1070千卡</b>（目标1900，增肌期可加餐补足）<br>
-老公 约1450千卡（目标1900）
-<span class="kcal">卡路里为按整道菜估算，仅供参考</span></div>
-<div id="extraEats"></div>
-<div class="addrow"><input id="eatInp" placeholder="额外吃了什么？记一笔，会加进上面"><button id="eatAdd" aria-label="加入">＋</button></div>
+<span id="estWife"></span><br>
+<span id="estHusb"></span>
+<span class="kcal">卡路里按每道菜自动加总 · 仅供参考</span></div>
+<div class="addrow">
+<input type="text" id="eatInp" placeholder="额外吃了什么？记一笔，会加进上面">
+</div>
+<div class="addrow sub">
+<select id="eatMeal">
+<option value="brunch">第一餐</option>
+<option value="second" selected>第二餐</option>
+<option value="dinner">第三餐</option>
+</select>
+<select id="eatType">
+<option value="home" selected>在家</option>
+<option value="out">🍱 外食</option>
+</select>
+<select id="eatWho">
+<option value="wife" selected>老婆</option>
+<option value="husb">老公</option>
+<option value="shared">两人平分</option>
+</select>
+<input class="kcin" id="eatKc" type="number" min="0" placeholder="千卡·选填">
+<button id="eatAdd" aria-label="加入">＋</button>
+</div>
+<div class="hint l">选🍱外食可以不写内容；点菜名可以查菜谱</div>
 <a class="histlink" data-view="eathist"><span><b>📅 全部菜单记录</b><span class="sub">8 天 · 7/15-7/22</span></span><span class="arrow">→</span></a>
 </div>
 
 <div class="fb">
 <textarea id="fbText" placeholder="✍️ 明天想吃什么、买到了什么、家里还剩什么……"></textarea>
+<button class="cam" id="fbCam" title="添加图片">📷</button>
 <button id="fbSave" aria-label="保存"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l5 5L20 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 </div>
+<input type="file" id="fbFile" accept="image/*" multiple hidden>
+<div class="fbimgs" id="fbImgs"></div>
 <div class="hint" id="fbHint"></div>
 </div>
 </div>
@@ -224,122 +305,19 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <!-- ===================== 库存 ===================== -->
 <section id="view-inv" hidden>
 <div class="card">
-<h2>📦 家里还有的<span class="tag">7/21 数据 · 负数=待盘点</span></h2>
-<div class="grp">🥬 蔬菜</div>
-<div class="invgrid">
-<div class="iv"><span>紫苏叶</span><i>60g</i></div>
-<div class="iv"><span>西兰花</span><i>1110g</i></div>
-<div class="iv"><span>胡萝卜</span><i>1200g</i></div>
-<div class="iv"><span>冬瓜</span><i>4800g</i></div>
-<div class="iv"><span>菠菜苗</span><i>500g</i></div>
-<div class="iv"><span>黄洋葱</span><i>1300g</i></div>
-<div class="iv"><span>草莓番茄</span><i>800g</i></div>
-<div class="iv"><span>鸡毛菜</span><i>250g</i></div>
-<div class="iv"><span>油麦菜苗</span><i>500g</i></div>
-<div class="iv"><span>红苋菜苗</span><i>500g</i></div>
-<div class="iv"><span>芹菜苗</span><i>500g</i></div>
-<div class="iv"><span>罗马生菜</span><i>900g</i></div>
-<div class="iv"><span>紫皮大蒜</span><i>500g</i></div>
-<div class="iv"><span>青蒜苗</span><i>600g</i></div>
-<div class="iv"><span>山药</span><i>990g</i></div>
-<div class="iv neg"><span>苦瓜</span><i>-2个</i></div>
-<div class="iv neg"><span>青瓜</span><i>-2根</i></div>
-<div class="iv neg"><span>西红柿</span><i>-2.5个</i></div>
-<div class="iv neg"><span>洋葱</span><i>-30g</i></div>
-<div class="iv neg"><span>豇豆</span><i>-200g</i></div>
-<div class="iv neg"><span>贝贝南瓜</span><i>-2个</i></div>
-<div class="iv neg"><span>青菜任意</span><i>-100g</i></div>
-<div class="iv neg"><span>苋菜</span><i>-250g</i></div>
-<div class="iv neg"><span>青辣椒</span><i>-4个</i></div>
-<div class="iv neg"><span>豆角</span><i>-250g</i></div>
-<div class="iv neg"><span>芹菜</span><i>-250g</i></div>
+<h2>📦 家里还有的<span class="tag">点任何一条可编辑 · 收到+ 送出−</span></h2>
+<div id="invBox"></div>
+<div class="invadd">
+<input class="nm" id="invName" placeholder="名称，如：苹果">
+<input class="qt" id="invQty" placeholder="数量，如：1箱">
+<select id="invDir">
+<option value="+" selected>收到</option>
+<option value="-">送出</option>
+</select>
+<select id="invCat"></select>
+<button id="invAdd" aria-label="加入">＋</button>
 </div>
-<div class="grp">🍓 水果</div>
-<div class="invgrid">
-<div class="iv"><span>牛油果</span><i>14个</i></div>
-<div class="iv"><span>蓝莓</span><i>14盒</i></div>
-<div class="iv neg"><span>李子</span><i>-3个</i></div>
-<div class="iv neg"><span>桃子</span><i>-2个</i></div>
-</div>
-<div class="grp">🥩 肉蛋海鲜</div>
-<div class="invgrid">
-<div class="iv neg"><span>三文鱼</span><i>0g</i></div>
-<div class="iv"><span>谷饲黄牛肉馅</span><i>360g</i></div>
-<div class="iv"><span>卤猪蹄</span><i>200g</i></div>
-<div class="iv"><span>三文鱼厚脂鱼腩切片</span><i>600g</i></div>
-<div class="iv"><span>带筋猪前蹄</span><i>500g</i></div>
-<div class="iv neg"><span>鹅蛋</span><i>-2个</i></div>
-<div class="iv neg"><span>牛肉</span><i>-100g</i></div>
-<div class="iv neg"><span>蛋</span><i>-2个</i></div>
-<div class="iv neg"><span>奶酪片</span><i>-2片</i></div>
-<div class="iv neg"><span>牛肉糜</span><i>-50g</i></div>
-<div class="iv neg"><span>煎带鱼</span><i>-0.5条</i></div>
-<div class="iv neg"><span>腊肉丁</span><i>-50g</i></div>
-<div class="iv neg"><span>鸡蛋</span><i>-1个</i></div>
-<div class="iv neg"><span>蒸蛏子</span><i>-500g</i></div>
-<div class="iv neg"><span>海螺</span><i>-200g</i></div>
-<div class="iv neg"><span>贵州腊肠</span><i>-100g</i></div>
-<div class="iv neg"><span>螃蟹</span><i>-1个</i></div>
-<div class="iv neg"><span>虾</span><i>-200g</i></div>
-<div class="iv neg"><span>五花肉</span><i>-200g</i></div>
-<div class="iv neg"><span>牛肉末</span><i>-100g</i></div>
-</div>
-<div class="grp">🫘 豆类与杂粮</div>
-<div class="invgrid">
-<div class="iv"><span>白玉北豆腐</span><i>1540g</i></div>
-<div class="iv"><span>香豆干</span><i>240g</i></div>
-<div class="iv"><span>鲜花生</span><i>1000g</i></div>
-<div class="iv neg"><span>黄豆</span><i>-65g</i></div>
-<div class="iv neg"><span>黑豆</span><i>-47g</i></div>
-<div class="iv neg"><span>红豆</span><i>-45g</i></div>
-<div class="iv neg"><span>绿豆</span><i>-49g</i></div>
-<div class="iv neg"><span>花生</span><i>-250g</i></div>
-<div class="iv neg"><span>豆腐</span><i>-1块</i></div>
-<div class="iv neg"><span>薏米</span><i>-36g</i></div>
-<div class="iv neg"><span>大花红豆</span><i>-38g</i></div>
-<div class="iv neg"><span>莲子</span><i>-40g</i></div>
-<div class="iv neg"><span>小米</span><i>-42g</i></div>
-<div class="iv neg"><span>豆干</span><i>-120g</i></div>
-</div>
-<div class="grp">🍞 主食</div>
-<div class="invgrid">
-<div class="iv"><span>黑麦贝果</span><i>4个</i></div>
-<div class="iv neg"><span>莜面</span><i>-400g</i></div>
-<div class="iv neg"><span>米饭</span><i>-300g</i></div>
-<div class="iv neg"><span>煮玉米</span><i>-2个</i></div>
-<div class="iv neg"><span>面包</span><i>-50g</i></div>
-<div class="iv neg"><span>面条</span><i>-500g</i></div>
-</div>
-<div class="grp">🧂 调味与香料</div>
-<div class="invgrid">
-<div class="iv neg"><span>辣根</span><i>-20g</i></div>
-<div class="iv neg"><span>寿司酱油</span><i>-60ml</i></div>
-<div class="iv neg"><span>虾米</span><i>-45g</i></div>
-<div class="iv neg"><span>香菜</span><i>-30g</i></div>
-<div class="iv neg"><span>小葱</span><i>-45g</i></div>
-<div class="iv neg"><span>蒜末</span><i>-60g</i></div>
-<div class="iv neg"><span>姜</span><i>-45g</i></div>
-<div class="iv neg"><span>酸黄瓜</span><i>-4根</i></div>
-<div class="iv neg"><span>火锅调料</span><i>-30g</i></div>
-<div class="iv neg"><span>豆豉</span><i>-30g</i></div>
-<div class="iv neg"><span>水豆豉</span><i>-30g</i></div>
-<div class="iv neg"><span>干豆豉</span><i>-30g</i></div>
-<div class="iv neg"><span>糟辣椒</span><i>-15g</i></div>
-<div class="iv neg"><span>折耳根</span><i>-15g</i></div>
-<div class="iv neg"><span>葱</span><i>-15g</i></div>
-<div class="iv neg"><span>蒜</span><i>-15g</i></div>
-</div>
-<div class="grp">🪷 滋补</div>
-<div class="invgrid">
-<div class="iv neg"><span>林蛙油</span><i>-15g</i></div>
-<div class="iv neg"><span>大枣</span><i>-2个</i></div>
-<div class="iv neg"><span>枸杞</span><i>-30g</i></div>
-<div class="iv neg"><span>燕窝</span><i>-1个</i></div>
-</div>
-<div class="grp" id="invExtraGrp" hidden>📝 自己记的（送来 / 送出）</div>
-<div class="invgrid" id="invExtra"></div>
-<div class="invadd"><input class="nm" id="invName" placeholder="名称，如：黄鱼"><input class="qt" id="invQty" placeholder="数量，如：2条 / -1盒"><button id="invAdd" aria-label="加入">＋</button></div>
-<div class="hint">送来的写正数，送出去的写负数，会直接记进上面</div>
+<div class="hint l">添加后直接进上面对应分类；同名的会合并显示，如：苹果 +1箱 −1盒</div>
 <details class="hist"><summary>📜 全部出入库流水（154 条）</summary>
 <div class="hrow"><span class="hd">7/15 ⬇️ 入库</span><span class="hb">牛油果 1个、西兰花 2份、紫苏叶 30g、菠菜苗 250g、油麦菜苗 250g、蓝莓 2盒、带筋猪前蹄 500g、冬瓜 800g、紫皮大蒜 250g、青蒜苗 300g、山药 500g、鲜花生 500g、牛油果 1个、西兰花 2份、紫苏叶 30g、菠菜苗 250g、油麦菜苗 250g、蓝莓 2盒、带筋猪前蹄 500g、冬瓜 800g、紫皮大蒜 250g、青蒜苗 300g、山药 500g、鲜花生 500g</span></div>
 <div class="hrow"><span class="hd">7/16 ⬇️ 入库</span><span class="hb">牛油果 2个、白玉北豆腐 385g、三文鱼厚脂鱼腩切片 300g、牛油果 2个、白玉北豆腐 385g、三文鱼厚脂鱼腩切片 300g</span></div>
@@ -354,74 +332,30 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <!-- ===================== 菜谱库 ===================== -->
 <section id="view-rec" hidden>
 <div class="card">
-<h2>📖 菜谱库<span class="tag">46 道 · 卡路里为估算</span></h2>
-<div class="grp">🥩 肉类 · 7 道</div>
-<div class="recgrid">
-<div class="recipe"><h3>猪蹄黄豆<span class="rid">R004</span><span class="kc">约1000千卡</span></h3><div class="ing">带筋猪前蹄 500g ｜ 配：黄豆 50g ｜ 调：小葱、蒜末、姜</div></div>
-<div class="recipe"><h3>卤猪蹄<span class="rid">R027</span><span class="kc">约500千卡</span></h3><div class="ing">卤猪蹄 200g</div></div>
-<div class="recipe"><h3>腊肠<span class="rid">R028</span><span class="kc">约420千卡</span></h3><div class="ing">贵州腊肠 100g</div></div>
-<div class="recipe"><h3>回锅肉<span class="rid">R032</span><span class="kc">约1000千卡</span></h3><div class="ing">五花肉 200g ｜ 配：青辣椒</div></div>
-<div class="recipe"><h3>炒牛肉芹菜<span class="rid">R035</span><span class="kc">约280千卡</span></h3><div class="ing">牛肉末 100g ｜ 配：芹菜 250g ｜ 调：糟辣椒、葱姜蒜</div></div>
-<div class="recipe"><h3>回锅肉（辣）<span class="rid">R039</span><span class="kc">约1200千卡</span></h3><div class="ing">五花肉 250g ｜ 配：辣椒 ｜ 调：火锅调料</div></div>
-<div class="recipe"><h3>卤牛肉<span class="rid">R041</span><span class="kc">约180千卡</span></h3><div class="ing">牛腱子肉 100g ｜ 调：八角桂皮花椒等 13 味卤料</div></div>
+<h2>📖 菜谱库<span class="tag" id="recCount"></span><span class="tag">点任何一道可编辑</span></h2>
+<div id="recBox"></div>
+<div class="invadd">
+<input class="nm" id="recName" placeholder="菜名，如：西红柿炒蛋">
+<input class="qt" id="recKc" type="number" min="0" placeholder="约千卡">
+<select id="recCat"></select>
+<button id="recAdd" aria-label="加入">＋</button>
 </div>
-<div class="grp">🐟 鱼与海鲜 · 5 道</div>
-<div class="recgrid">
-<div class="recipe"><h3>煎带鱼<span class="rid">R006</span><span class="kc">约250千卡</span></h3><div class="ing">带鱼 0.5条</div></div>
-<div class="recipe"><h3>三文鱼<span class="rid">R007</span><span class="kc">约310千卡</span></h3><div class="ing">三文鱼 150g ｜ 配：紫苏叶 ｜ 调：辣根、寿司酱油</div></div>
-<div class="recipe"><h3>蒸蛏子<span class="rid">R021</span><span class="kc">约150千卡</span></h3><div class="ing">蛏子 500g</div></div>
-<div class="recipe"><h3>蒸螃蟹<span class="rid">R029</span><span class="kc">约100千卡</span></h3><div class="ing">螃蟹 1个</div></div>
-<div class="recipe"><h3>水煮虾<span class="rid">R030</span><span class="kc">约190千卡</span></h3><div class="ing">虾 200g</div></div>
+<div class="addrow" style="margin-top: 8px;">
+<input type="text" id="recIng" placeholder="配料（选填），如：鸡蛋 2个、西红柿 1个">
 </div>
-<div class="grp">🥚 蛋与豆制品 · 8 道</div>
-<div class="recgrid">
-<div class="recipe"><h3>麻婆豆腐<span class="rid">R005</span><span class="kc">约450千卡</span></h3><div class="ing">豆腐 1块、牛肉糜 50g ｜ 调：火锅调料</div></div>
-<div class="recipe"><h3>苦瓜炒鹅蛋<span class="rid">R018</span><span class="kc">约280千卡</span></h3><div class="ing">苦瓜 1个、鹅蛋 1个</div></div>
-<div class="recipe"><h3>炒豆干<span class="rid">R026</span><span class="kc">约250千卡</span></h3><div class="ing">豆干 120g ｜ 配：青辣椒 ｜ 调：干豆豉</div></div>
-<div class="recipe"><h3>水煮花生<span class="rid">R037</span><span class="kc">约450千卡</span></h3><div class="ing">花生 250g</div></div>
-<div class="recipe"><h3>豆浆<span class="rid">R038</span><span class="kc">约230千卡</span></h3><div class="ing">黄豆、黑豆、红豆、绿豆 共 60g</div></div>
-<div class="recipe"><h3>白菜豆腐<span class="rid">R040</span><span class="kc">约150千卡</span></h3><div class="ing">白菜 250g ｜ 配：豆腐 0.5块</div></div>
-<div class="recipe"><h3>煮毛豆<span class="rid">R042</span><span class="kc">约330千卡</span></h3><div class="ing">毛豆 250g</div></div>
-<div class="recipe"><h3>煮花生<span class="rid">R043</span><span class="kc">约450千卡</span></h3><div class="ing">鲜花生 250g</div></div>
+<div class="hint l">加进上面对应分类；配料以后随时点开补</div>
 </div>
-<div class="grp">🥬 蔬菜 · 9 道</div>
-<div class="recgrid">
-<div class="recipe"><h3>煮菠菜<span class="rid">R008</span><span class="kc">约60千卡</span></h3><div class="ing">菠菜苗 250g</div></div>
-<div class="recipe"><h3>炒油麦菜<span class="rid">R016</span><span class="kc">约90千卡</span></h3><div class="ing">油麦菜苗 250g ｜ 配：西红柿 ｜ 调：豆豉</div></div>
-<div class="recipe"><h3>豇豆炒西红柿<span class="rid">R019</span><span class="kc">约100千卡</span></h3><div class="ing">豇豆 100g ｜ 配：西红柿 ｜ 调：豆豉</div></div>
-<div class="recipe"><h3>煮苋菜<span class="rid">R023</span><span class="kc">约70千卡</span></h3><div class="ing">苋菜 250g</div></div>
-<div class="recipe"><h3>煮鸡毛菜<span class="rid">R025</span><span class="kc">约60千卡</span></h3><div class="ing">鸡毛菜 250g ｜ 调：水豆豉、蒜末、折耳根</div></div>
-<div class="recipe"><h3>水煮油麦菜苗<span class="rid">R031</span><span class="kc">约45千卡</span></h3><div class="ing">油麦菜苗 250g</div></div>
-<div class="recipe"><h3>炒豆角<span class="rid">R033</span><span class="kc">约130千卡</span></h3><div class="ing">豆角 250g ｜ 配：西红柿 ｜ 调：干豆豉</div></div>
-<div class="recipe"><h3>水煮菜心<span class="rid">R046</span><span class="kc">约50千卡</span></h3><div class="ing">菜心 250g</div></div>
-<div class="recipe"><h3>素瓜豆<span class="rid">R047</span><span class="kc">约80千卡</span></h3><div class="ing">圆西葫芦 0.5个、四季豆 100g</div></div>
+
+<div class="card">
+<h2>📥 导入菜谱<span class="tag">拍照 / 粘贴文字</span></h2>
+<div id="inboxList"></div>
+<div class="fb" style="margin-top: 10px;">
+<textarea id="inboxText" placeholder="粘贴菜谱文字，或直接拍菜谱照片……"></textarea>
+<button class="cam" id="inboxCam" title="添加图片">📷</button>
+<button id="inboxSave" aria-label="提交"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l5 5L20 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 </div>
-<div class="grp">🍚 主食杂粮 · 11 道</div>
-<div class="recgrid">
-<div class="recipe"><h3>山药<span class="rid">R001</span><span class="kc">约85千卡</span></h3><div class="ing">山药 10厘米</div></div>
-<div class="recipe"><h3>三明治<span class="rid">R003</span><span class="kc">约400千卡</span></h3><div class="ing">牛肉 50g、蛋 1个 ｜ 配：罗马生菜、西红柿 0.5个、奶酪片、酸黄瓜、洋葱</div></div>
-<div class="recipe"><h3>豇豆饭<span class="rid">R011</span><span class="kc">约600千卡</span></h3><div class="ing">米饭 300g ｜ 配：豇豆 100g、腊肉丁 50g</div></div>
-<div class="recipe"><h3>蒸南瓜<span class="rid">R012</span><span class="kc">约150千卡</span></h3><div class="ing">贝贝南瓜 1个</div></div>
-<div class="recipe"><h3>豆粥<span class="rid">R013</span><span class="kc">约430千卡</span></h3><div class="ing">红豆、黑豆、绿豆、薏米、大花红豆、莲子、小米 共约126g</div></div>
-<div class="recipe"><h3>煮玉米<span class="rid">R014</span><span class="kc">约150千卡</span></h3><div class="ing">玉米 1个</div></div>
-<div class="recipe"><h3>面包<span class="rid">R017</span><span class="kc">约135千卡</span></h3><div class="ing">面包 50g</div></div>
-<div class="recipe"><h3>荷包蛋青菜面<span class="rid">R020</span><span class="kc">约700千卡</span></h3><div class="ing">面条 500g ｜ 配：青菜、鸡蛋 1个</div></div>
-<div class="recipe"><h3>凉拌莜面<span class="rid">R034</span><span class="kc">约700千卡</span></h3><div class="ing">莜面 200g ｜ 配：青瓜 ｜ 调：香菜、小葱、蒜末</div></div>
-<div class="recipe"><h3>蒸山药<span class="rid">R044</span><span class="kc">约85千卡</span></h3><div class="ing">山药 10厘米</div></div>
-<div class="recipe"><h3>油条<span class="rid">R045</span><span class="kc">约270千卡</span></h3><div class="ing">冷冻油条 1根</div></div>
-</div>
-<div class="grp">🥣 汤羹滋补 · 4 道</div>
-<div class="recgrid">
-<div class="recipe"><h3>冬瓜汤<span class="rid">R009</span><span class="kc">约60千卡</span></h3><div class="ing">冬瓜 400g ｜ 配：虾米</div></div>
-<div class="recipe"><h3>海螺冬瓜汤<span class="rid">R022</span><span class="kc">约150千卡</span></h3><div class="ing">海螺 200g、冬瓜 400g</div></div>
-<div class="recipe"><h3>燕窝粥<span class="rid">R024</span><span class="kc">约120千卡</span></h3><div class="ing">燕窝 ｜ 配：大枣、枸杞</div></div>
-<div class="recipe"><h3>林蛙油羹<span class="rid">R036</span><span class="kc">约80千卡</span></h3><div class="ing">林蛙油 ｜ 配：大枣、枸杞、姜</div></div>
-</div>
-<div class="grp">🍎 水果小食 · 2 道</div>
-<div class="recgrid">
-<div class="recipe"><h3>李子<span class="rid">R002</span><span class="kc">约30千卡</span></h3><div class="ing">李子 1个</div></div>
-<div class="recipe"><h3>桃子<span class="rid">R015</span><span class="kc">约50千卡</span></h3><div class="ing">桃子 1个</div></div>
-</div>
+<input type="file" id="inboxFile" accept="image/*" multiple hidden>
+<div class="hint l" id="inboxHint">提交后存云端、标"待整理"——大宝下次更新时读取整理进菜谱库，整理完这里自动清空</div>
 </div>
 </section>
 
@@ -521,35 +455,458 @@ var d = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Shanghai" 
 var dayKey = "mama-" + d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
 var state = {};
 try { state = JSON.parse(localStorage.getItem(dayKey) || "{}"); } catch (e) {}
+state.deleted = state.deleted || {};
+state.extraBuys = state.extraBuys || [];
+state.extraEats = state.extraEats || [];
+state.fbImgs = state.fbImgs || [];
 function save() { try { localStorage.setItem(dayKey, JSON.stringify(state)); } catch (e) {} cloudSave(); }
-var cloudTimer = null, cloudInvTimer = null;
+var cloudTimer = null, cloudInvTimer = null, cloudRecTimer = null, cloudInboxTimer = null;
 function cloudPost(key, data) {
   try {
     fetch("/api/state?key=" + key, { method: "POST", headers: { "content-type": "application/json", "x-auth": KEY }, body: JSON.stringify(data) }).catch(function () {});
   } catch (e) {}
 }
 function cloudSave() { clearTimeout(cloudTimer); cloudTimer = setTimeout(function () { cloudPost(dayKey, state); }, 600); }
-function cloudSaveInv() { clearTimeout(cloudInvTimer); cloudInvTimer = setTimeout(function () { cloudPost("inv-extra", invStore); }, 600); }
+
+var RGROUPS = ["🥩 肉类", "🐟 鱼与海鲜", "🥚 蛋与豆制品", "🥬 蔬菜", "🍚 主食杂粮", "🥣 汤羹滋补", "🍎 水果小食"];
+var REC_DEFAULT = { next: 48, list: [
+  { id:"R004", g:0, n:"猪蹄黄豆", kc:1000, ing:"带筋猪前蹄 500g ｜ 配：黄豆 50g ｜ 调：小葱、蒜末、姜" },
+  { id:"R027", g:0, n:"卤猪蹄", kc:500, ing:"卤猪蹄 200g" },
+  { id:"R028", g:0, n:"腊肠", kc:420, ing:"贵州腊肠 100g" },
+  { id:"R032", g:0, n:"回锅肉", kc:1000, ing:"五花肉 200g ｜ 配：青辣椒" },
+  { id:"R035", g:0, n:"炒牛肉芹菜", kc:280, ing:"牛肉末 100g ｜ 配：芹菜 250g ｜ 调：糟辣椒、葱姜蒜" },
+  { id:"R039", g:0, n:"回锅肉（辣）", kc:1200, ing:"五花肉 250g ｜ 配：辣椒 ｜ 调：火锅调料" },
+  { id:"R041", g:0, n:"卤牛肉", kc:180, ing:"牛腱子肉 100g ｜ 调：八角桂皮花椒等 13 味卤料" },
+  { id:"R006", g:1, n:"煎带鱼", kc:250, ing:"带鱼 0.5条" },
+  { id:"R007", g:1, n:"三文鱼", kc:310, ing:"三文鱼 150g ｜ 配：紫苏叶 ｜ 调：辣根、寿司酱油" },
+  { id:"R021", g:1, n:"蒸蛏子", kc:150, ing:"蛏子 500g" },
+  { id:"R029", g:1, n:"蒸螃蟹", kc:100, ing:"螃蟹 1个" },
+  { id:"R030", g:1, n:"水煮虾", kc:190, ing:"虾 200g" },
+  { id:"R005", g:2, n:"麻婆豆腐", kc:450, ing:"豆腐 1块、牛肉糜 50g ｜ 调：火锅调料" },
+  { id:"R018", g:2, n:"苦瓜炒鹅蛋", kc:280, ing:"苦瓜 1个、鹅蛋 1个" },
+  { id:"R026", g:2, n:"炒豆干", kc:250, ing:"豆干 120g ｜ 配：青辣椒 ｜ 调：干豆豉" },
+  { id:"R037", g:2, n:"水煮花生", kc:450, ing:"花生 250g" },
+  { id:"R038", g:2, n:"豆浆", kc:230, ing:"黄豆、黑豆、红豆、绿豆 共 60g" },
+  { id:"R040", g:2, n:"白菜豆腐", kc:150, ing:"白菜 250g ｜ 配：豆腐 0.5块" },
+  { id:"R042", g:2, n:"煮毛豆", kc:330, ing:"毛豆 250g" },
+  { id:"R043", g:2, n:"煮花生", kc:450, ing:"鲜花生 250g" },
+  { id:"R008", g:3, n:"煮菠菜", kc:60, ing:"菠菜苗 250g" },
+  { id:"R016", g:3, n:"炒油麦菜", kc:90, ing:"油麦菜苗 250g ｜ 配：西红柿 ｜ 调：豆豉" },
+  { id:"R019", g:3, n:"豇豆炒西红柿", kc:100, ing:"豇豆 100g ｜ 配：西红柿 ｜ 调：豆豉" },
+  { id:"R023", g:3, n:"煮苋菜", kc:70, ing:"苋菜 250g" },
+  { id:"R025", g:3, n:"煮鸡毛菜", kc:60, ing:"鸡毛菜 250g ｜ 调：水豆豉、蒜末、折耳根" },
+  { id:"R031", g:3, n:"水煮油麦菜苗", kc:45, ing:"油麦菜苗 250g" },
+  { id:"R033", g:3, n:"炒豆角", kc:130, ing:"豆角 250g ｜ 配：西红柿 ｜ 调：干豆豉" },
+  { id:"R046", g:3, n:"水煮菜心", kc:50, ing:"菜心 250g" },
+  { id:"R047", g:3, n:"素瓜豆", kc:80, ing:"圆西葫芦 0.5个、四季豆 100g" },
+  { id:"R001", g:4, n:"山药", kc:85, ing:"山药 10厘米" },
+  { id:"R003", g:4, n:"三明治", kc:400, ing:"牛肉 50g、蛋 1个 ｜ 配：罗马生菜、西红柿 0.5个、奶酪片、酸黄瓜、洋葱" },
+  { id:"R011", g:4, n:"豇豆饭", kc:600, ing:"米饭 300g ｜ 配：豇豆 100g、腊肉丁 50g" },
+  { id:"R012", g:4, n:"蒸南瓜", kc:150, ing:"贝贝南瓜 1个" },
+  { id:"R013", g:4, n:"豆粥", kc:430, ing:"红豆、黑豆、绿豆、薏米、大花红豆、莲子、小米 共约126g" },
+  { id:"R014", g:4, n:"煮玉米", kc:150, ing:"玉米 1个" },
+  { id:"R017", g:4, n:"面包", kc:135, ing:"面包 50g" },
+  { id:"R020", g:4, n:"荷包蛋青菜面", kc:700, ing:"面条 500g ｜ 配：青菜、鸡蛋 1个" },
+  { id:"R034", g:4, n:"凉拌莜面", kc:700, ing:"莜面 200g ｜ 配：青瓜 ｜ 调：香菜、小葱、蒜末" },
+  { id:"R044", g:4, n:"蒸山药", kc:85, ing:"山药 10厘米" },
+  { id:"R045", g:4, n:"油条", kc:270, ing:"冷冻油条 1根" },
+  { id:"R009", g:5, n:"冬瓜汤", kc:60, ing:"冬瓜 400g ｜ 配：虾米" },
+  { id:"R022", g:5, n:"海螺冬瓜汤", kc:150, ing:"海螺 200g、冬瓜 400g" },
+  { id:"R024", g:5, n:"燕窝粥", kc:120, ing:"燕窝 ｜ 配：大枣、枸杞" },
+  { id:"R036", g:5, n:"林蛙油羹", kc:80, ing:"林蛙油 ｜ 配：大枣、枸杞、姜" },
+  { id:"R002", g:6, n:"李子", kc:30, ing:"李子 1个" },
+  { id:"R015", g:6, n:"桃子", kc:50, ing:"桃子 1个" }
+] };
+var INV_DEFAULT = [
+  { g:"🥬 蔬菜", items:[
+    ["紫苏叶","60g"],["西兰花","1110g"],["胡萝卜","1200g"],["冬瓜","4800g"],["菠菜苗","500g"],["黄洋葱","1300g"],
+    ["草莓番茄","800g"],["鸡毛菜","250g"],["油麦菜苗","500g"],["红苋菜苗","500g"],["芹菜苗","500g"],["罗马生菜","900g"],
+    ["紫皮大蒜","500g"],["青蒜苗","600g"],["山药","990g"],["苦瓜","-2个"],["青瓜","-2根"],["西红柿","-2.5个"],
+    ["洋葱","-30g"],["豇豆","-200g"],["贝贝南瓜","-2个"],["青菜任意","-100g"],["苋菜","-250g"],["青辣椒","-4个"],
+    ["豆角","-250g"],["芹菜","-250g"]] },
+  { g:"🍓 水果", items:[["牛油果","14个"],["蓝莓","14盒"],["李子","-3个"],["桃子","-2个"]] },
+  { g:"🥩 肉蛋海鲜", items:[
+    ["三文鱼","0g"],["谷饲黄牛肉馅","360g"],["卤猪蹄","200g"],["三文鱼厚脂鱼腩切片","600g"],["带筋猪前蹄","500g"],
+    ["鹅蛋","-2个"],["牛肉","-100g"],["蛋","-2个"],["奶酪片","-2片"],["牛肉糜","-50g"],["煎带鱼","-0.5条"],
+    ["腊肉丁","-50g"],["鸡蛋","-1个"],["蒸蛏子","-500g"],["海螺","-200g"],["贵州腊肠","-100g"],["螃蟹","-1个"],
+    ["虾","-200g"],["五花肉","-200g"],["牛肉末","-100g"]] },
+  { g:"🫘 豆类与杂粮", items:[
+    ["白玉北豆腐","1540g"],["香豆干","240g"],["鲜花生","1000g"],["黄豆","-65g"],["黑豆","-47g"],["红豆","-45g"],
+    ["绿豆","-49g"],["花生","-250g"],["豆腐","-1块"],["薏米","-36g"],["大花红豆","-38g"],["莲子","-40g"],
+    ["小米","-42g"],["豆干","-120g"]] },
+  { g:"🍞 主食", items:[["黑麦贝果","4个"],["莜面","-400g"],["米饭","-300g"],["煮玉米","-2个"],["面包","-50g"],["面条","-500g"]] },
+  { g:"🧂 调味与香料", items:[
+    ["辣根","-20g"],["寿司酱油","-60ml"],["虾米","-45g"],["香菜","-30g"],["小葱","-45g"],["蒜末","-60g"],
+    ["姜","-45g"],["酸黄瓜","-4根"],["火锅调料","-30g"],["豆豉","-30g"],["水豆豉","-30g"],["干豆豉","-30g"],
+    ["糟辣椒","-15g"],["折耳根","-15g"],["葱","-15g"],["蒜","-15g"]] },
+  { g:"🪷 滋补", items:[["林蛙油","-15g"],["大枣","-2个"],["枸杞","-30g"],["燕窝","-1个"]] },
+  { g:"📝 其他", items:[] }
+];
+function seedInv() {
+  return INV_DEFAULT.map(function (grp) {
+    return { g: grp.g, items: grp.items.map(function (p) { return { n: p[0], terms: [p[1]] }; }) };
+  });
+}
+var invData = null;
+try { invData = JSON.parse(localStorage.getItem("mama-inv-data") || "null"); } catch (e) {}
+if (!invData) invData = seedInv();
+var recData = null;
+try { recData = JSON.parse(localStorage.getItem("mama-rec-data") || "null"); } catch (e) {}
+if (!recData) recData = JSON.parse(JSON.stringify(REC_DEFAULT));
+var inboxData = null;
+try { inboxData = JSON.parse(localStorage.getItem("mama-rec-inbox") || "null"); } catch (e) {}
+if (!inboxData) inboxData = [];
+function saveInvData() {
+  try { localStorage.setItem("mama-inv-data", JSON.stringify(invData)); } catch (e) {}
+  clearTimeout(cloudInvTimer); cloudInvTimer = setTimeout(function () { cloudPost("inv-data", invData); }, 600);
+}
+function saveRecData() {
+  try { localStorage.setItem("mama-rec-data", JSON.stringify(recData)); } catch (e) {}
+  clearTimeout(cloudRecTimer); cloudRecTimer = setTimeout(function () { cloudPost("rec-data", recData); }, 600);
+}
+function saveInboxData() {
+  try { localStorage.setItem("mama-rec-inbox", JSON.stringify(inboxData)); } catch (e) {}
+  clearTimeout(cloudInboxTimer); cloudInboxTimer = setTimeout(function () { cloudPost("rec-inbox", inboxData); }, 600);
+}
+
+var WIFE_B = [
+  { id:"wb1", t:"三明治", kc:400, r:"R003" }, { id:"wb2", t:"美式咖啡", kc:5 }, { id:"wb3", t:"羊奶粉", kc:130 },
+  { id:"wb4", t:"半个牛油果", kc:120 }, { id:"wb5", t:"半根香蕉", kc:55 }, { id:"wb6", t:"半盒蓝莓", kc:40 }
+];
+var HUSB_B = [
+  { id:"hb1", t:"白菜豆腐", kc:150, r:"R040" }, { id:"hb2", t:"卤牛肉", kc:180, r:"R041" }, { id:"hb3", t:"煮毛豆", kc:330, r:"R042" },
+  { id:"hb4", t:"煮花生", kc:450, r:"R043" }, { id:"hb5", t:"蒸山药", kc:85, r:"R044" }, { id:"hb6", t:"油条", kc:270, r:"R045" }
+];
+var WIFE_D = [
+  { id:"dw1", t:"三文鱼", kc:155, r:"R007" }, { id:"dw2", t:"水煮菜心", kc:25, r:"R046" }, { id:"dw3", t:"苦瓜炒鹅蛋", kc:140, r:"R018" }
+];
+var NANNY_D = [
+  { id:"dn1", t:"三文鱼", kc:155, r:"R007" }, { id:"dn2", t:"水煮菜心", kc:25, r:"R046" }, { id:"dn3", t:"苦瓜炒鹅蛋", kc:140, r:"R018" }
+];
+var SUPP_H = [
+  { id:"sh1", t:"姜黄粉×3" }, { id:"sh2", t:"磷虾油×1" }, { id:"sh3", t:"D3+K2×1" }, { id:"sh4", t:"降血脂胶囊×1" }
+];
+var SUPP_W = [
+  { id:"sw1", t:"姜黄粉×3" }, { id:"sw2", t:"磷虾油×1" }, { id:"sw3", t:"D3+K2×1" }, { id:"sw4", t:"降血脂胶囊×1" }, { id:"sw5", t:"晚益生菌×1" }
+];
+var MEAL_NAME = { brunch:"第一餐", second:"第二餐", dinner:"第三餐", both:"通用" };
+var WHO_NAME = { wife:"老婆", husb:"老公" };
+var invEditing = null;
+var recEditing = null;
+
+function alive(arr) { return arr.filter(function (dd) { return !state.deleted[dd.id]; }); }
+function sumKc(arr) { return alive(arr).reduce(function (a, dd) { return a + (dd.kc || 0); }, 0); }
+function exFor(meal, who) {
+  return state.extraEats.map(function (e, i) { return { e: e, i: i }; })
+    .filter(function (o) { return o.e.meal === meal && o.e.who === who; });
+}
+function exSumFor(meal, who) {
+  return exFor(meal, who).reduce(function (a, o) { return a + (o.e.kc || 0); }, 0);
+}
+var VIEWS = ["home", "inv", "rec", "prof", "dash", "buyhist", "eathist"];
+function show(v) {
+  VIEWS.forEach(function (x) { document.getElementById("view-" + x).hidden = (x !== v); });
+  document.getElementById("navHome").hidden = (v !== "home");
+  document.getElementById("navBack").hidden = (v === "home");
+  window.scrollTo(0, 0);
+}
+function jumpRecipe(rid) {
+  show("rec");
+  var el = document.getElementById(rid);
+  if (el) {
+    el.scrollIntoView({ block: "center" });
+    el.classList.remove("flash");
+    void el.offsetWidth;
+    el.classList.add("flash");
+  }
+}
+function chip(t, kc, rid, onDel) {
+  var s = document.createElement("span"); s.className = "dish";
+  var nm = document.createElement("span"); nm.textContent = t;
+  s.appendChild(nm);
+  if (kc) { var k = document.createElement("span"); k.className = "dk"; k.textContent = kc; s.appendChild(k); }
+  if (rid) {
+    s.className = "dish lkc"; s.title = "点击查看菜谱";
+    var g = document.createElement("span"); g.className = "go"; g.textContent = "›"; s.appendChild(g);
+    s.addEventListener("click", function (e) { if (e.target.className !== "dx") jumpRecipe(rid); });
+  }
+  var x = document.createElement("button"); x.className = "dx"; x.textContent = "×"; x.title = "今天不要这个";
+  x.addEventListener("click", function (e) { e.stopPropagation(); onDel(); });
+  s.appendChild(x);
+  return s;
+}
+function presetChips(arr) {
+  return alive(arr).map(function (dd) {
+    return chip(dd.t, dd.kc, dd.r, function () { state.deleted[dd.id] = true; save(); renderMeals(); });
+  });
+}
+function extraChips(meal, who) {
+  return exFor(meal, who).map(function (o) {
+    var c;
+    if (o.e.out) {
+      c = chip("🍱 " + (o.e.t || "外食"), o.e.kc, null, function () { state.extraEats.splice(o.i, 1); save(); renderMeals(); });
+      c.className = "dish out";
+      c.title = "外卖 / 餐厅";
+    } else {
+      c = chip(o.e.t, o.e.kc, null, function () { state.extraEats.splice(o.i, 1); save(); renderMeals(); });
+    }
+    return c;
+  });
+}
+function mline(who, chips, kcalText) {
+  var dd = document.createElement("div"); dd.className = "mline";
+  var w = document.createElement("span"); w.className = "who"; w.textContent = who + "："; dd.appendChild(w);
+  chips.forEach(function (c) { dd.appendChild(c); });
+  if (kcalText) { var k = document.createElement("span"); k.className = "kcal"; k.textContent = kcalText; dd.appendChild(k); }
+  return dd;
+}
+function renderMeals() {
+  var lb = document.getElementById("linesB"); lb.innerHTML = "";
+  var wifeBChips = presetChips(WIFE_B).concat(extraChips("brunch", "wife"));
+  var wifeBSum = sumKc(WIFE_B) + exSumFor("brunch", "wife");
+  if (wifeBChips.length) lb.appendChild(mline("老婆", wifeBChips, "约" + wifeBSum + "千卡"));
+  var husbBChips = presetChips(HUSB_B).concat(extraChips("brunch", "husb"));
+  var husbBSum = sumKc(HUSB_B) + exSumFor("brunch", "husb");
+  if (husbBChips.length) lb.appendChild(mline("老公", husbBChips, "整份约" + husbBSum + "千卡"));
+
+  var ls = document.getElementById("linesS"); ls.innerHTML = "";
+  var nS = 0;
+  ["wife", "husb"].forEach(function (w) {
+    var cs = extraChips("second", w);
+    if (cs.length) {
+      var kcs = exSumFor("second", w);
+      ls.appendChild(mline(WHO_NAME[w], cs, kcs ? "约" + kcs + "千卡" : null));
+      nS += cs.length;
+    }
+  });
+  document.getElementById("mealSecond").hidden = !nS;
+
+  var ld = document.getElementById("linesD"); ld.innerHTML = "";
+  var wifeDChips = presetChips(WIFE_D).concat(extraChips("dinner", "wife"));
+  var wifeDSum = sumKc(WIFE_D) + exSumFor("dinner", "wife");
+  if (wifeDChips.length) ld.appendChild(mline("老婆", wifeDChips, "约" + wifeDSum + "千卡"));
+  var husbDChips = extraChips("dinner", "husb");
+  var husbDSum = exSumFor("dinner", "husb");
+  if (husbDChips.length) ld.appendChild(mline("老公", husbDChips, husbDSum ? "约" + husbDSum + "千卡" : null));
+  var nanDChips = presetChips(NANNY_D);
+  if (nanDChips.length) ld.appendChild(mline("保姆", nanDChips, "约" + sumKc(NANNY_D) + "千卡"));
+
+  var lsp = document.getElementById("linesSupp"); lsp.innerHTML = "";
+  var hs = presetChips(SUPP_H);
+  if (hs.length) lsp.appendChild(mline("老公", hs, null));
+  var ws = presetChips(SUPP_W);
+  if (ws.length) lsp.appendChild(mline("老婆", ws, null));
+
+  var wTotal = wifeBSum + wifeDSum + exSumFor("second", "wife");
+  var hTotal = husbBSum + husbDSum + exSumFor("second", "husb");
+  var ew = document.getElementById("estWife");
+  ew.textContent = "";
+  ew.appendChild(document.createTextNode("老婆 共约 "));
+  var bw = document.createElement("b"); bw.textContent = wTotal + "千卡"; ew.appendChild(bw);
+  ew.appendChild(document.createTextNode("（目标1900，增肌期可加餐补足）"));
+  document.getElementById("estHusb").textContent = "老公 共约 " + hTotal + "千卡（目标1900）";
+}
+function renderExtraBuys() {
+  var eb = document.getElementById("extraBuys"); eb.innerHTML = "";
+  state.extraBuys.forEach(function (it, i) {
+    var lab = document.createElement("label"); lab.className = "todo";
+    var off = (it.meal === "brunch" && state.awayBrunch) || (it.meal === "dinner" && state.awayDinner);
+    if (off) lab.className = "todo off";
+    var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!it.c;
+    cb.addEventListener("change", function () { it.c = cb.checked; save(); });
+    var sp = document.createElement("span"); sp.className = "t"; sp.textContent = it.t;
+    if (it.meal && it.meal !== "both") { var mt = document.createElement("span"); mt.className = "mealtag"; mt.textContent = MEAL_NAME[it.meal]; sp.appendChild(mt); }
+    var tg = document.createElement("span"); tg.className = "selftag"; tg.textContent = "自己加"; sp.appendChild(tg);
+    var x = document.createElement("button"); x.className = "xdel"; x.textContent = "×"; x.title = "删除";
+    x.addEventListener("click", function (e) { e.preventDefault(); state.extraBuys.splice(i, 1); save(); renderExtraBuys(); });
+    lab.appendChild(cb); lab.appendChild(sp); lab.appendChild(x); eb.appendChild(lab);
+  });
+}
+function renderFbImgs() {
+  var box = document.getElementById("fbImgs"); box.innerHTML = "";
+  state.fbImgs.forEach(function (src, i) {
+    var dd = document.createElement("div"); dd.className = "im";
+    var img = document.createElement("img"); img.src = src; dd.appendChild(img);
+    var rm = document.createElement("button"); rm.className = "rm"; rm.textContent = "×";
+    rm.addEventListener("click", function () { state.fbImgs.splice(i, 1); save(); renderFbImgs(); });
+    dd.appendChild(rm); box.appendChild(dd);
+  });
+}
+function termSpan(t) {
+  var s = document.createElement("i"); s.className = "tm";
+  if (t.charAt(0) === "+") s.className = "tm plus";
+  if (t.charAt(0) === "-") { s.className = "tm minus"; t = "−" + t.slice(1); }
+  s.textContent = t;
+  return s;
+}
+function renderInv() {
+  var box = document.getElementById("invBox"); box.innerHTML = "";
+  invData.forEach(function (grp, gi) {
+    if (!grp.items.length) return;
+    var h = document.createElement("div"); h.className = "grp"; h.textContent = grp.g; box.appendChild(h);
+    var grid = document.createElement("div"); grid.className = "invgrid";
+    grp.items.forEach(function (it, ii) {
+      if (invEditing && invEditing[0] === gi && invEditing[1] === ii) {
+        var ed = document.createElement("div"); ed.className = "ivedit";
+        var en = document.createElement("input"); en.className = "en"; en.value = it.n;
+        var eq = document.createElement("input"); eq.className = "eq"; eq.value = it.terms.join(" ");
+        eq.placeholder = "如：+1箱 -1盒";
+        var ok = document.createElement("button"); ok.className = "ok"; ok.textContent = "保存";
+        ok.addEventListener("click", function () {
+          it.n = en.value.trim() || it.n;
+          it.terms = eq.value.trim().split(/\s+/).filter(Boolean);
+          if (!it.terms.length) it.terms = ["?"];
+          invEditing = null; saveInvData(); renderInv();
+        });
+        var rm = document.createElement("button"); rm.className = "rm"; rm.textContent = "删除";
+        rm.addEventListener("click", function () { grp.items.splice(ii, 1); invEditing = null; saveInvData(); renderInv(); });
+        var cc = document.createElement("button"); cc.className = "cc"; cc.textContent = "取消";
+        cc.addEventListener("click", function () { invEditing = null; renderInv(); });
+        ed.appendChild(en); ed.appendChild(eq); ed.appendChild(ok); ed.appendChild(rm); ed.appendChild(cc);
+        grid.appendChild(ed);
+      } else {
+        var dd = document.createElement("div"); dd.className = "iv"; dd.title = "点击编辑";
+        var s = document.createElement("span"); s.textContent = it.n; dd.appendChild(s);
+        var qs = document.createElement("span"); qs.className = "qs";
+        it.terms.forEach(function (t) { qs.appendChild(termSpan(t)); });
+        dd.appendChild(qs);
+        dd.addEventListener("click", function () { invEditing = [gi, ii]; renderInv(); });
+        grid.appendChild(dd);
+      }
+    });
+    box.appendChild(grid);
+  });
+}
+function renderRec() {
+  var box = document.getElementById("recBox"); box.innerHTML = "";
+  document.getElementById("recCount").textContent = recData.list.length + " 道 · 卡路里为估算";
+  RGROUPS.forEach(function (gname, gi) {
+    var rs = recData.list.map(function (r, i) { return { r: r, i: i }; }).filter(function (o) { return o.r.g === gi; });
+    if (!rs.length) return;
+    var h = document.createElement("div"); h.className = "grp"; h.textContent = gname + " · " + rs.length + " 道"; box.appendChild(h);
+    var grid = document.createElement("div"); grid.className = "recgrid";
+    rs.forEach(function (o) {
+      var r = o.r;
+      if (recEditing === o.i) {
+        var ed = document.createElement("div"); ed.className = "recedit";
+        var row = document.createElement("div"); row.className = "row";
+        var rn = document.createElement("input"); rn.className = "rn"; rn.value = r.n;
+        var rk = document.createElement("input"); rk.className = "rk"; rk.type = "number"; rk.value = r.kc || ""; rk.placeholder = "约千卡";
+        row.appendChild(rn); row.appendChild(rk); ed.appendChild(row);
+        var ri = document.createElement("textarea"); ri.rows = 2; ri.value = r.ing || ""; ri.placeholder = "配料"; ed.appendChild(ri);
+        var btns = document.createElement("div"); btns.className = "btns";
+        var ok = document.createElement("button"); ok.className = "ok"; ok.textContent = "保存";
+        ok.addEventListener("click", function () {
+          r.n = rn.value.trim() || r.n;
+          var kv = parseInt(rk.value, 10); r.kc = (kv > 0) ? kv : null;
+          r.ing = ri.value.trim();
+          recEditing = null; saveRecData(); renderRec();
+        });
+        var rm = document.createElement("button"); rm.className = "rm"; rm.textContent = "删除";
+        rm.addEventListener("click", function () { recData.list.splice(o.i, 1); recEditing = null; saveRecData(); renderRec(); });
+        var cc = document.createElement("button"); cc.className = "cc"; cc.textContent = "取消";
+        cc.addEventListener("click", function () { recEditing = null; renderRec(); });
+        btns.appendChild(ok); btns.appendChild(rm); btns.appendChild(cc); ed.appendChild(btns);
+        grid.appendChild(ed);
+      } else {
+        var dd = document.createElement("div"); dd.className = "recipe"; dd.id = r.id; dd.title = "点击编辑";
+        var h3 = document.createElement("h3");
+        h3.appendChild(document.createTextNode(r.n));
+        var rid = document.createElement("span"); rid.className = "rid"; rid.textContent = r.id; h3.appendChild(rid);
+        if (r.kc) { var kc = document.createElement("span"); kc.className = "kc"; kc.textContent = "约" + r.kc + "千卡"; h3.appendChild(kc); }
+        dd.appendChild(h3);
+        if (r.ing) { var ing = document.createElement("div"); ing.className = "ing"; ing.textContent = r.ing; dd.appendChild(ing); }
+        dd.addEventListener("click", function () { recEditing = o.i; renderRec(); });
+        grid.appendChild(dd);
+      }
+    });
+    box.appendChild(grid);
+  });
+}
+function renderInbox() {
+  var box = document.getElementById("inboxList"); box.innerHTML = "";
+  inboxData.forEach(function (it, i) {
+    var dd = document.createElement("div"); dd.className = "inbox";
+    if (it.img) { var img = document.createElement("img"); img.src = it.img; dd.appendChild(img); }
+    var tx = document.createElement("span"); tx.className = "tx";
+    tx.textContent = it.text || "（图片）";
+    var pt = document.createElement("span"); pt.className = "pendtag"; pt.textContent = "待整理"; tx.appendChild(pt);
+    dd.appendChild(tx);
+    var x = document.createElement("button"); x.className = "xdel"; x.textContent = "×"; x.title = "删除";
+    x.addEventListener("click", function () { inboxData.splice(i, 1); saveInboxData(); renderInbox(); });
+    dd.appendChild(x);
+    box.appendChild(dd);
+  });
+}
+function compressImage(file, maxSide, quality, cb) {
+  var rd = new FileReader();
+  rd.onload = function () {
+    var img = new Image();
+    img.onload = function () {
+      var w = img.width, h = img.height;
+      var sc = Math.min(1, maxSide / Math.max(w, h));
+      var cv = document.createElement("canvas");
+      cv.width = Math.round(w * sc); cv.height = Math.round(h * sc);
+      cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+      cb(cv.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = function () { cb(null); };
+    img.src = rd.result;
+  };
+  rd.readAsDataURL(file);
+}
 function applyLoaded() {
   document.querySelectorAll(".todo input").forEach(function (el) { if (el.dataset.k) el.checked = !!state[el.dataset.k]; });
   document.getElementById("fbText").value = state.fb || "";
   applyAway();
-  renderExtras();
+  renderMeals();
+  renderExtraBuys();
+  renderFbImgs();
 }
 function cloudLoad() {
   try {
-    fetch("/api/state?key=" + dayKey, { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (d) {
-      if (d && d.ok && d.data && typeof d.data === "object") {
-        state = d.data;
+    fetch("/api/state?key=" + dayKey, { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (dd) {
+      if (dd && dd.ok && dd.data && typeof dd.data === "object") {
+        state = dd.data;
+        state.deleted = state.deleted || {};
+        state.extraBuys = state.extraBuys || [];
+        state.extraEats = state.extraEats || [];
+        state.fbImgs = state.fbImgs || [];
         try { localStorage.setItem(dayKey, JSON.stringify(state)); } catch (e) {}
         applyLoaded();
       }
     }).catch(function () {});
-    fetch("/api/state?key=inv-extra", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (d) {
-      if (d && d.ok && Array.isArray(d.data)) {
-        invStore = d.data;
-        try { localStorage.setItem("mama-inv-extra", JSON.stringify(invStore)); } catch (e) {}
-        renderInvExtras();
+    fetch("/api/state?key=inv-data", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (dd) {
+      if (dd && dd.ok && dd.data && dd.data.length) {
+        invData = dd.data;
+        try { localStorage.setItem("mama-inv-data", JSON.stringify(invData)); } catch (e) {}
+        renderInv();
+      } else {
+        fetch("/api/state?key=inv-extra", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (le) {
+          if (le && le.ok && Array.isArray(le.data) && le.data.length) {
+            le.data.forEach(function (old) {
+              invData[invData.length - 1].items.push({ n: old.n, terms: [old.q || "?"] });
+            });
+            renderInv();
+          }
+          saveInvData();
+        }).catch(function () { saveInvData(); });
+      }
+    }).catch(function () {});
+    fetch("/api/state?key=rec-data", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (dd) {
+      if (dd && dd.ok && dd.data && dd.data.list && dd.data.list.length) {
+        recData = dd.data;
+        try { localStorage.setItem("mama-rec-data", JSON.stringify(recData)); } catch (e) {}
+        renderRec();
+      } else {
+        saveRecData();
+      }
+    }).catch(function () {});
+    fetch("/api/state?key=rec-inbox", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (dd) {
+      if (dd && dd.ok && Array.isArray(dd.data)) {
+        inboxData = dd.data;
+        try { localStorage.setItem("mama-rec-inbox", JSON.stringify(inboxData)); } catch (e) {}
+        renderInbox();
       }
     }).catch(function () {});
   } catch (e) {}
@@ -559,22 +916,29 @@ function applyAway() {
   document.getElementById("awayDinner").classList.toggle("on", !!state.awayDinner);
   document.getElementById("mealBrunch").hidden = !!state.awayBrunch;
   document.getElementById("mealDinner").hidden = !!state.awayDinner;
-  document.querySelectorAll(".todo").forEach(function (el) {
+  document.querySelectorAll(".todo[data-meal]").forEach(function (el) {
     var m = el.dataset.meal;
     var off = !!((m === "brunch" && state.awayBrunch) || (m === "dinner" && state.awayDinner));
     el.classList.toggle("off", off);
   });
-}
-var VIEWS = ["home", "inv", "rec", "prof", "dash", "buyhist", "eathist"];
-function show(v) {
-  VIEWS.forEach(function (x) { document.getElementById("view-" + x).hidden = (x !== v); });
-  document.getElementById("navHome").hidden = (v !== "home");
-  document.getElementById("navBack").hidden = (v === "home");
-  window.scrollTo(0, 0);
+  renderExtraBuys();
 }
 document.querySelectorAll("[data-view]").forEach(function (a) {
   a.addEventListener("click", function (e) { e.preventDefault(); show(a.dataset.view); });
 });
+function initSelects() {
+  var sel = document.getElementById("invCat");
+  invData.forEach(function (grp, gi) {
+    var o = document.createElement("option"); o.value = gi; o.textContent = grp.g.replace(/^\S+\s/, "");
+    sel.appendChild(o);
+  });
+  sel.value = invData.length - 1;
+  var rsel = document.getElementById("recCat");
+  RGROUPS.forEach(function (g, gi) {
+    var o = document.createElement("option"); o.value = gi; o.textContent = g.replace(/^\S+\s/, "");
+    rsel.appendChild(o);
+  });
+}
 function unlock() {
   document.getElementById("lock").hidden = true;
   document.getElementById("heroBag").style.display = "none";
@@ -589,8 +953,12 @@ function unlock() {
   var fb = document.getElementById("fbText");
   fb.value = state.fb || "";
   applyAway();
-  renderExtras();
-  renderInvExtras();
+  renderMeals();
+  renderExtraBuys();
+  renderFbImgs();
+  renderInv();
+  renderRec();
+  renderInbox();
   cloudLoad();
 }
 function tryPw() {
@@ -612,78 +980,100 @@ document.getElementById("awayDinner").addEventListener("click", function () { st
 document.getElementById("fbSave").addEventListener("click", function () {
   state.fb = document.getElementById("fbText").value;
   save();
-  document.getElementById("fbHint").textContent = "已保存 ✓";
+  document.getElementById("fbHint").textContent = "已保存 ✓" + (state.fbImgs.length ? "（含 " + state.fbImgs.length + " 张图）" : "");
 });
-function renderExtras() {
-  var eb = document.getElementById("extraBuys");
-  eb.innerHTML = "";
-  (state.extraBuys || []).forEach(function (it, i) {
-    var lab = document.createElement("label"); lab.className = "todo";
-    var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!it.c;
-    cb.addEventListener("change", function () { it.c = cb.checked; save(); });
-    var sp = document.createElement("span"); sp.className = "t"; sp.textContent = it.t;
-    var tg = document.createElement("span"); tg.className = "selftag"; tg.textContent = "自己加"; sp.appendChild(tg);
-    var x = document.createElement("button"); x.className = "xdel"; x.textContent = "×"; x.title = "删除";
-    x.addEventListener("click", function (e) { e.preventDefault(); state.extraBuys.splice(i, 1); save(); renderExtras(); });
-    lab.appendChild(cb); lab.appendChild(sp); lab.appendChild(x); eb.appendChild(lab);
+document.getElementById("fbCam").addEventListener("click", function () { document.getElementById("fbFile").click(); });
+document.getElementById("fbFile").addEventListener("change", function () {
+  var room = 3 - state.fbImgs.length;
+  if (room <= 0) { document.getElementById("fbHint").textContent = "最多 3 张图"; this.value = ""; return; }
+  var files = Array.prototype.slice.call(this.files, 0, room);
+  files.forEach(function (f) {
+    compressImage(f, 900, 0.62, function (url) {
+      if (url) { state.fbImgs.push(url); save(); renderFbImgs(); }
+    });
   });
-  var ee = document.getElementById("extraEats");
-  ee.innerHTML = "";
-  (state.extraEats || []).forEach(function (t, i) {
-    var d = document.createElement("div"); d.className = "meal";
-    var bb = document.createElement("b"); bb.textContent = "额外"; d.appendChild(bb);
-    d.appendChild(document.createTextNode("：" + t + " "));
-    var tg = document.createElement("span"); tg.className = "selftag"; tg.textContent = "自己加"; d.appendChild(tg);
-    var x = document.createElement("button"); x.className = "xdel"; x.textContent = "×"; x.title = "删除";
-    x.addEventListener("click", function () { state.extraEats.splice(i, 1); save(); renderExtras(); });
-    d.appendChild(x); ee.appendChild(d);
-  });
-}
-function addBuy() {
+  this.value = "";
+});
+document.getElementById("buyAdd").addEventListener("click", function () {
   var inp = document.getElementById("buyInp");
   var v = inp.value.trim(); if (!v) return;
-  (state.extraBuys = state.extraBuys || []).push({ t: v, c: true });
-  inp.value = ""; save(); renderExtras();
-}
-function addEat() {
+  state.extraBuys.push({ t: v, c: true, meal: document.getElementById("buyMeal").value });
+  inp.value = ""; save(); renderExtraBuys();
+});
+document.getElementById("buyInp").addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("buyAdd").click(); });
+document.getElementById("eatAdd").addEventListener("click", function () {
   var inp = document.getElementById("eatInp");
-  var v = inp.value.trim(); if (!v) return;
-  (state.extraEats = state.extraEats || []).push(v);
-  inp.value = ""; save(); renderExtras();
-}
-document.getElementById("buyAdd").addEventListener("click", addBuy);
-document.getElementById("buyInp").addEventListener("keydown", function (e) { if (e.key === "Enter") addBuy(); });
-document.getElementById("eatAdd").addEventListener("click", addEat);
-document.getElementById("eatInp").addEventListener("keydown", function (e) { if (e.key === "Enter") addEat(); });
-var invStore = [];
-try { invStore = JSON.parse(localStorage.getItem("mama-inv-extra") || "[]"); } catch (e) {}
-function saveInv() { try { localStorage.setItem("mama-inv-extra", JSON.stringify(invStore)); } catch (e) {} cloudSaveInv(); }
-function renderInvExtras() {
-  var g = document.getElementById("invExtraGrp");
-  var box = document.getElementById("invExtra");
-  box.innerHTML = "";
-  g.hidden = !invStore.length;
-  invStore.forEach(function (it, i) {
-    var d = document.createElement("div"); d.className = "iv";
-    var s = document.createElement("span"); s.textContent = it.n;
-    var tg = document.createElement("span"); tg.className = "selftag"; tg.textContent = "自己加"; s.appendChild(tg);
-    var q = document.createElement("i"); q.textContent = it.q;
-    if ((it.q + "").trim().indexOf("-") === 0) d.className = "iv neg";
-    var x = document.createElement("button"); x.className = "xdel"; x.textContent = "×"; x.title = "删除";
-    x.addEventListener("click", function () { invStore.splice(i, 1); saveInv(); renderInvExtras(); });
-    d.appendChild(s); d.appendChild(q); d.appendChild(x); box.appendChild(d);
-  });
-}
-function addInv() {
+  var v = inp.value.trim();
+  var out = document.getElementById("eatType").value === "out";
+  if (!v && !out) return;
+  var kcRaw = parseInt(document.getElementById("eatKc").value, 10);
+  var kc = (kcRaw > 0) ? kcRaw : null;
+  var meal = document.getElementById("eatMeal").value;
+  var who = document.getElementById("eatWho").value;
+  if (who === "shared") {
+    var half = kc ? Math.round(kc / 2) : null;
+    state.extraEats.push({ t: v, meal: meal, who: "wife", kc: half, out: out });
+    state.extraEats.push({ t: v, meal: meal, who: "husb", kc: half, out: out });
+  } else {
+    state.extraEats.push({ t: v, meal: meal, who: who, kc: kc, out: out });
+  }
+  inp.value = ""; document.getElementById("eatKc").value = "";
+  document.getElementById("eatType").value = "home";
+  save(); renderMeals();
+});
+document.getElementById("eatInp").addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("eatAdd").click(); });
+document.getElementById("invAdd").addEventListener("click", function () {
   var n = document.getElementById("invName");
   var q = document.getElementById("invQty");
   if (!n.value.trim()) return;
-  invStore.push({ n: n.value.trim(), q: q.value.trim() || "?" });
-  n.value = ""; q.value = ""; saveInv(); renderInvExtras();
-}
-document.getElementById("invAdd").addEventListener("click", addInv);
-document.getElementById("invQty").addEventListener("keydown", function (e) { if (e.key === "Enter") addInv(); });
-document.getElementById("invName").addEventListener("keydown", function (e) { if (e.key === "Enter") addInv(); });
+  var gi = parseInt(document.getElementById("invCat").value, 10);
+  var dir = document.getElementById("invDir").value;
+  var term = dir + (q.value.trim() || "?");
+  var name = n.value.trim();
+  var found = null;
+  invData[gi].items.forEach(function (it) { if (it.n === name) found = it; });
+  if (found) { found.terms.push(term); } else { invData[gi].items.push({ n: name, terms: [term] }); }
+  n.value = ""; q.value = ""; saveInvData(); renderInv();
+});
+document.getElementById("invQty").addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("invAdd").click(); });
+document.getElementById("invName").addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("invAdd").click(); });
+document.getElementById("recAdd").addEventListener("click", function () {
+  var n = document.getElementById("recName");
+  if (!n.value.trim()) return;
+  var kv = parseInt(document.getElementById("recKc").value, 10);
+  var gi = parseInt(document.getElementById("recCat").value, 10);
+  var num = recData.next++;
+  var id = "R" + (num < 100 ? ("00" + num).slice(-3) : num);
+  recData.list.push({ id: id, g: gi, n: n.value.trim(), kc: (kv > 0) ? kv : null, ing: document.getElementById("recIng").value.trim() });
+  n.value = ""; document.getElementById("recKc").value = ""; document.getElementById("recIng").value = "";
+  saveRecData(); renderRec();
+  jumpRecipe(id);
+});
+document.getElementById("recName").addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("recAdd").click(); });
+document.getElementById("inboxCam").addEventListener("click", function () { document.getElementById("inboxFile").click(); });
+document.getElementById("inboxFile").addEventListener("change", function () {
+  if (inboxData.length >= 6) { document.getElementById("inboxHint").textContent = "导入箱最多存 6 条，等大宝整理后再传～"; this.value = ""; return; }
+  var t = document.getElementById("inboxText").value.trim();
+  var files = Array.prototype.slice.call(this.files, 0, 6 - inboxData.length);
+  files.forEach(function (f, fi) {
+    compressImage(f, 700, 0.55, function (url) {
+      if (url) {
+        inboxData.push({ img: url, text: (fi === 0 ? t : "") });
+        if (fi === 0) document.getElementById("inboxText").value = "";
+        saveInboxData(); renderInbox();
+      }
+    });
+  });
+  this.value = "";
+});
+document.getElementById("inboxSave").addEventListener("click", function () {
+  if (inboxData.length >= 6) { document.getElementById("inboxHint").textContent = "导入箱最多存 6 条，等大宝整理后再传～"; return; }
+  var ta = document.getElementById("inboxText");
+  var t = ta.value.trim(); if (!t) return;
+  inboxData.push({ text: t });
+  ta.value = ""; saveInboxData(); renderInbox();
+});
+initSelects();
 var savedKey = null;
 try { savedKey = localStorage.getItem("mama-key"); } catch (e) {}
 if (savedKey === KEY) { unlock(); }
