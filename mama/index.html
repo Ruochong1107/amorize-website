@@ -222,18 +222,8 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <section id="view-home">
 <div class="cols">
 <div class="card">
-<h2>🧾 采买清单<span class="tag">7/21 数据</span></h2>
-<label class="todo" data-meal="both"><input type="checkbox" data-k="s1"><span class="t">鸡纵菌 1盒 <i>—— 鲜菌，看妈妈安排</i></span></label>
-<label class="todo" data-meal="dinner"><input type="checkbox" data-k="s2"><span class="t">菜心 500克 <i>—— 晚餐水煮菜心</i></span></label>
-<label class="todo" data-meal="brunch"><input type="checkbox" data-k="s3"><span class="t">白菜 1颗 <i>—— 第一餐白菜豆腐</i></span></label>
-<label class="todo" data-meal="brunch"><input type="checkbox" data-k="s4"><span class="t">毛豆 500克 <i>—— 第一餐煮毛豆</i></span></label>
-<label class="todo" data-meal="brunch"><input type="checkbox" data-k="s5"><span class="t">鲜花生 500克 <i>—— 第一餐煮花生</i></span></label>
-<label class="todo" data-meal="both"><input type="checkbox" data-k="s6"><span class="t">茄子 500克 <i>—— 备菜</i></span></label>
-<label class="todo" data-meal="both"><input type="checkbox" data-k="s7"><span class="t">猪耳豆角 500克 <i>—— 备菜（素瓜豆等）</i></span></label>
-<label class="todo" data-meal="both"><input type="checkbox" data-k="s8"><span class="t">青尖椒 500克 <i>—— 炒菜配椒</i></span></label>
-<label class="todo" data-meal="both"><input type="checkbox" data-k="s9"><span class="t">圆西葫芦 1个 <i>—— 素瓜豆用</i></span></label>
-<label class="todo" data-meal="both"><input type="checkbox" data-k="s10"><span class="t">青瓜 2根 <i>—— 凉拌用</i></span></label>
-<label class="todo" data-meal="both"><input type="checkbox" data-k="s11"><span class="t">鸡蛋 15个 <i>—— 全家 + 狗狗</i></span></label>
+<h2>🧾 采买清单<span class="tag" id="buyTag"></span></h2>
+<div id="buyList"></div>
 <div id="extraBuys"></div>
 <div class="addrow">
 <input type="text" id="buyInp" placeholder="单子外买了什么？记一笔">
@@ -246,12 +236,12 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <button id="buyAdd" aria-label="加入">＋</button>
 </div>
 <div class="hint l">选了哪一餐，"第X餐不在家"时会跟着一起划掉</div>
-<a class="histlink" data-view="buyhist"><span><b>🧾 全部采购记录</b><span class="sub">51 笔 · 7/15 起</span></span><span class="arrow">→</span></a>
+<a class="histlink" data-view="buyhist"><span><b>🧾 全部采购记录</b><span class="sub" id="blSub"></span></span><span class="arrow">→</span></a>
 </div>
 
 <div>
 <div class="card menu" style="margin-top: 16px;">
-<h2>🍽 今日菜谱<span class="tag">7/21 数据</span>
+<h2>🍽 今日菜谱<span class="tag" id="menuTag"></span>
 <span class="away">
 <button id="awayBrunch">第一餐不在家</button>
 <button id="awayDinner">第三餐不在家</button>
@@ -287,7 +277,7 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <button id="eatAdd" aria-label="加入">＋</button>
 </div>
 <div class="hint l">选🍱外食可以不写内容；点菜名可以查菜谱</div>
-<a class="histlink" data-view="eathist"><span><b>📅 全部菜单记录</b><span class="sub">8 天 · 7/15-7/22</span></span><span class="arrow">→</span></a>
+<a class="histlink" data-view="eathist"><span><b>📅 全部菜单记录</b><span class="sub" id="elSub"></span></span><span class="arrow">→</span></a>
 </div>
 
 <div class="fb">
@@ -418,28 +408,16 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <!-- ===================== 全部采购记录 ===================== -->
 <section id="view-buyhist" hidden>
 <div class="card">
-<h2>🧾 全部采购记录<span class="tag">51 笔 · 7/15 起</span></h2>
-<div class="hrow"><span class="hd">7/15</span><span class="hb">牛油果 1个、西兰花 2份、紫苏叶 30g、菠菜苗 250g、油麦菜苗 250g、蓝莓 2盒、带筋猪前蹄 500g、冬瓜 800g、紫皮大蒜 250g、青蒜苗 300g、山药 500g、鲜花生 500g<i class="hn">（12 样 · 已送达）</i></span></div>
-<div class="hrow"><span class="hd">7/16</span><span class="hb">牛油果 2个、白玉北豆腐 385g、三文鱼厚脂鱼腩切片 300g<i class="hn">（3 样 · 已送达）</i></span></div>
-<div class="hrow"><span class="hd">7/18</span><span class="hb">牛油果 2个、蓝莓 3盒、西兰花 3份、红苋菜苗 250g、冬瓜 800g、芹菜苗 250g、罗马生菜 500g<i class="hn">（7 样 · 已送达）</i></span></div>
-<div class="hrow"><span class="hd">7/19</span><span class="hb">草莓番茄 400g、鸡毛菜 250g、油麦菜苗 250g、冬瓜 800g、香豆干 120g、卤猪蹄 200g<i class="hn">（6 样 · 已送达）</i></span></div>
-<div class="hrow"><span class="hd">7/20</span><span class="hb">紫苏叶 30g、牛油果 2个、西兰花 550g、蓝莓 2盒、胡萝卜 600g、冬瓜 800g、三文鱼 300g、菠菜苗 250g、黑麦贝果 2个、白玉北豆腐 385g、谷饲黄牛肉馅 180g、黄洋葱 650g<i class="hn">（12 样 · 已送达）</i></span></div>
-<div class="hrow"><span class="hd">7/21</span><span class="hb">鸡纵菌 1盒、菜心 500克、白菜 1颗、毛豆 500克、鲜花生 500克、茄子 500克、猪耳豆角 500克、青尖椒 500克、圆西葫芦 1个、青瓜 2根、鸡蛋 15个<i class="hn">（11 样 · 已送达）</i></span></div>
+<h2>🧾 全部采购记录<span class="tag" id="buyHistTag"></span></h2>
+<div id="buyHistBox"></div>
 </div>
 </section>
 
 <!-- ===================== 全部菜单记录 ===================== -->
 <section id="view-eathist" hidden>
 <div class="card">
-<h2>📅 全部菜单记录<span class="tag">8 天 · 7/15-7/22</span></h2>
-<div class="hrow"><span class="hd">7/15</span><span class="hb"><b>老公 第一餐</b>：山药、李子<br><b>老婆 第一餐</b>：三明治<br><b>老公 第三餐</b>：猪蹄黄豆、麻婆豆腐、煎带鱼<br><b>老婆 第三餐</b>：三文鱼、煮菠菜、冬瓜汤、豇豆饭</span></div>
-<div class="hrow"><span class="hd">7/16</span><span class="hb"><b>老公 第一餐</b>：蒸南瓜、豆粥、煮玉米、桃子、李子<br><b>老婆 第一餐</b>：三明治<br><b>老婆 第三餐</b>：三文鱼、炒油麦菜、紫苏叶、面包、苦瓜炒鹅蛋、豇豆炒西红柿</span></div>
-<div class="hrow"><span class="hd">7/17</span><span class="hb"><b>老婆 第一餐</b>：荷包蛋青菜面<br><b>老公 第一餐</b>：蒸南瓜、豆粥、煮玉米、桃子、李子</span></div>
-<div class="hrow"><span class="hd">7/18</span><span class="hb"><b>老婆 第三餐</b>：蒸蛏子、海螺冬瓜汤、三文鱼、煮苋菜、燕窝粥</span></div>
-<div class="hrow"><span class="hd">7/19</span><span class="hb"><b>老公 第二餐</b>：煮鸡毛菜、炒豆干、卤猪蹄、腊肠<br><b>老婆 第三餐</b>：蒸螃蟹、水煮虾、水煮油麦菜苗<br><b>老公 第三餐</b>：回锅肉、冬瓜汤、炒豆角、凉拌莜面、炒牛肉芹菜</span></div>
-<div class="hrow"><span class="hd">7/20</span><span class="hb"><b>老公 第一餐</b>：豆浆（不喜欢·连续喝好几天了）、水煮花生（喜欢·儿时味道）<br><b>老婆 第三餐</b>：三文鱼、林蛙油羹<br><b>老婆、保姆 第三餐</b>：煮菠菜、苦瓜炒鹅蛋、冬瓜汤、凉拌莜面</span></div>
-<div class="hrow"><span class="hd">7/21</span><span class="hb"><b>老公 第一餐</b>：白菜豆腐、卤牛肉、煮毛豆、煮花生、蒸山药、油条<br><b>老婆、保姆 第三餐</b>：三文鱼、水煮菜心、苦瓜炒鹅蛋</span></div>
-<div class="hrow"><span class="hd">7/22</span><span class="hb"><b>老婆、保姆 第三餐</b>：面包</span></div>
+<h2>📅 全部菜单记录<span class="tag" id="eatHistTag"></span></h2>
+<div id="eatHistBox"></div>
 </div>
 </section>
 
@@ -569,26 +547,59 @@ function saveInboxData() {
   clearTimeout(cloudInboxTimer); cloudInboxTimer = setTimeout(function () { cloudPost("rec-inbox", inboxData); }, 600);
 }
 
-var WIFE_B = [
-  { id:"wb1", t:"三明治", kc:400, r:"R003" }, { id:"wb2", t:"美式咖啡", kc:5 }, { id:"wb3", t:"羊奶粉", kc:130 },
-  { id:"wb4", t:"半个牛油果", kc:120 }, { id:"wb5", t:"半根香蕉", kc:55 }, { id:"wb6", t:"半盒蓝莓", kc:40 }
+var DEFAULT_MENU = {
+  date: "2026-7-21", note: "7/21 数据",
+  buys: [
+    { k:"s1", t:"鸡纵菌 1盒", n:"鲜菌，看妈妈安排", meal:"both" },
+    { k:"s2", t:"菜心 500克", n:"晚餐水煮菜心", meal:"dinner" },
+    { k:"s3", t:"白菜 1颗", n:"第一餐白菜豆腐", meal:"brunch" },
+    { k:"s4", t:"毛豆 500克", n:"第一餐煮毛豆", meal:"brunch" },
+    { k:"s5", t:"鲜花生 500克", n:"第一餐煮花生", meal:"brunch" },
+    { k:"s6", t:"茄子 500克", n:"备菜", meal:"both" },
+    { k:"s7", t:"猪耳豆角 500克", n:"备菜（素瓜豆等）", meal:"both" },
+    { k:"s8", t:"青尖椒 500克", n:"炒菜配椒", meal:"both" },
+    { k:"s9", t:"圆西葫芦 1个", n:"素瓜豆用", meal:"both" },
+    { k:"s10", t:"青瓜 2根", n:"凉拌用", meal:"both" },
+    { k:"s11", t:"鸡蛋 15个", n:"全家 + 狗狗", meal:"both" }
+  ],
+  meals: {
+    brunch: {
+      wife: [ { id:"wb1", t:"三明治", kc:400, r:"R003" }, { id:"wb2", t:"美式咖啡", kc:5 }, { id:"wb3", t:"羊奶粉", kc:130 }, { id:"wb4", t:"半个牛油果", kc:120 }, { id:"wb5", t:"半根香蕉", kc:55 }, { id:"wb6", t:"半盒蓝莓", kc:40 } ],
+      husb: [ { id:"hb1", t:"白菜豆腐", kc:150, r:"R040" }, { id:"hb2", t:"卤牛肉", kc:180, r:"R041" }, { id:"hb3", t:"煮毛豆", kc:330, r:"R042" }, { id:"hb4", t:"煮花生", kc:450, r:"R043" }, { id:"hb5", t:"蒸山药", kc:85, r:"R044" }, { id:"hb6", t:"油条", kc:270, r:"R045" } ]
+    },
+    dinner: {
+      wife: [ { id:"dw1", t:"三文鱼", kc:155, r:"R007" }, { id:"dw2", t:"水煮菜心", kc:25, r:"R046" }, { id:"dw3", t:"苦瓜炒鹅蛋", kc:140, r:"R018" } ],
+      nanny: [ { id:"dn1", t:"三文鱼", kc:155, r:"R007" }, { id:"dn2", t:"水煮菜心", kc:25, r:"R046" }, { id:"dn3", t:"苦瓜炒鹅蛋", kc:140, r:"R018" } ]
+    }
+  },
+  supp: {
+    husb: [ { id:"sh1", t:"姜黄粉×3" }, { id:"sh2", t:"磷虾油×1" }, { id:"sh3", t:"D3+K2×1" }, { id:"sh4", t:"降血脂胶囊×1" } ],
+    wife: [ { id:"sw1", t:"姜黄粉×3" }, { id:"sw2", t:"磷虾油×1" }, { id:"sw3", t:"D3+K2×1" }, { id:"sw4", t:"降血脂胶囊×1" }, { id:"sw5", t:"晚益生菌×1" } ]
+  }
+};
+var menuData = DEFAULT_MENU;
+try { var mc = JSON.parse(localStorage.getItem("mama-menu") || "null"); if (mc && mc.meals) menuData = mc; } catch (e) {}
+var BUYHIST_DEFAULT = [
+  { d:"7/15", t:"牛油果 1个、西兰花 2份、紫苏叶 30g、菠菜苗 250g、油麦菜苗 250g、蓝莓 2盒、带筋猪前蹄 500g、冬瓜 800g、紫皮大蒜 250g、青蒜苗 300g、山药 500g、鲜花生 500g", n:"12 样 · 已送达" },
+  { d:"7/16", t:"牛油果 2个、白玉北豆腐 385g、三文鱼厚脂鱼腩切片 300g", n:"3 样 · 已送达" },
+  { d:"7/18", t:"牛油果 2个、蓝莓 3盒、西兰花 3份、红苋菜苗 250g、冬瓜 800g、芹菜苗 250g、罗马生菜 500g", n:"7 样 · 已送达" },
+  { d:"7/19", t:"草莓番茄 400g、鸡毛菜 250g、油麦菜苗 250g、冬瓜 800g、香豆干 120g、卤猪蹄 200g", n:"6 样 · 已送达" },
+  { d:"7/20", t:"紫苏叶 30g、牛油果 2个、西兰花 550g、蓝莓 2盒、胡萝卜 600g、冬瓜 800g、三文鱼 300g、菠菜苗 250g、黑麦贝果 2个、白玉北豆腐 385g、谷饲黄牛肉馅 180g、黄洋葱 650g", n:"12 样 · 已送达" },
+  { d:"7/21", t:"鸡纵菌 1盒、菜心 500克、白菜 1颗、毛豆 500克、鲜花生 500克、茄子 500克、猪耳豆角 500克、青尖椒 500克、圆西葫芦 1个、青瓜 2根、鸡蛋 15个", n:"11 样 · 已送达" }
 ];
-var HUSB_B = [
-  { id:"hb1", t:"白菜豆腐", kc:150, r:"R040" }, { id:"hb2", t:"卤牛肉", kc:180, r:"R041" }, { id:"hb3", t:"煮毛豆", kc:330, r:"R042" },
-  { id:"hb4", t:"煮花生", kc:450, r:"R043" }, { id:"hb5", t:"蒸山药", kc:85, r:"R044" }, { id:"hb6", t:"油条", kc:270, r:"R045" }
+var EATHIST_DEFAULT = [
+  { d:"7/15", lines:[["老公 第一餐","山药、李子"],["老婆 第一餐","三明治"],["老公 第三餐","猪蹄黄豆、麻婆豆腐、煎带鱼"],["老婆 第三餐","三文鱼、煮菠菜、冬瓜汤、豇豆饭"]] },
+  { d:"7/16", lines:[["老公 第一餐","蒸南瓜、豆粥、煮玉米、桃子、李子"],["老婆 第一餐","三明治"],["老婆 第三餐","三文鱼、炒油麦菜、紫苏叶、面包、苦瓜炒鹅蛋、豇豆炒西红柿"]] },
+  { d:"7/17", lines:[["老婆 第一餐","荷包蛋青菜面"],["老公 第一餐","蒸南瓜、豆粥、煮玉米、桃子、李子"]] },
+  { d:"7/18", lines:[["老婆 第三餐","蒸蛏子、海螺冬瓜汤、三文鱼、煮苋菜、燕窝粥"]] },
+  { d:"7/19", lines:[["老公 第二餐","煮鸡毛菜、炒豆干、卤猪蹄、腊肠"],["老婆 第三餐","蒸螃蟹、水煮虾、水煮油麦菜苗"],["老公 第三餐","回锅肉、冬瓜汤、炒豆角、凉拌莜面、炒牛肉芹菜"]] },
+  { d:"7/20", lines:[["老公 第一餐","豆浆（不喜欢·连续喝好几天了）、水煮花生（喜欢·儿时味道）"],["老婆 第三餐","三文鱼、林蛙油羹"],["老婆、保姆 第三餐","煮菠菜、苦瓜炒鹅蛋、冬瓜汤、凉拌莜面"]] },
+  { d:"7/21", lines:[["老公 第一餐","白菜豆腐、卤牛肉、煮毛豆、煮花生、蒸山药、油条"],["老婆、保姆 第三餐","三文鱼、水煮菜心、苦瓜炒鹅蛋"]] },
+  { d:"7/22", lines:[["老婆、保姆 第三餐","面包"]] }
 ];
-var WIFE_D = [
-  { id:"dw1", t:"三文鱼", kc:155, r:"R007" }, { id:"dw2", t:"水煮菜心", kc:25, r:"R046" }, { id:"dw3", t:"苦瓜炒鹅蛋", kc:140, r:"R018" }
-];
-var NANNY_D = [
-  { id:"dn1", t:"三文鱼", kc:155, r:"R007" }, { id:"dn2", t:"水煮菜心", kc:25, r:"R046" }, { id:"dn3", t:"苦瓜炒鹅蛋", kc:140, r:"R018" }
-];
-var SUPP_H = [
-  { id:"sh1", t:"姜黄粉×3" }, { id:"sh2", t:"磷虾油×1" }, { id:"sh3", t:"D3+K2×1" }, { id:"sh4", t:"降血脂胶囊×1" }
-];
-var SUPP_W = [
-  { id:"sw1", t:"姜黄粉×3" }, { id:"sw2", t:"磷虾油×1" }, { id:"sw3", t:"D3+K2×1" }, { id:"sw4", t:"降血脂胶囊×1" }, { id:"sw5", t:"晚益生菌×1" }
-];
+var buyHist = BUYHIST_DEFAULT, eatHist = EATHIST_DEFAULT;
+try { var bhc = JSON.parse(localStorage.getItem("mama-buy-hist") || "null"); if (Array.isArray(bhc) && bhc.length) buyHist = bhc; } catch (e) {}
+try { var ehc = JSON.parse(localStorage.getItem("mama-eat-hist") || "null"); if (Array.isArray(ehc) && ehc.length) eatHist = ehc; } catch (e) {}
 var MEAL_NAME = { brunch:"第一餐", second:"第二餐", dinner:"第三餐", both:"通用" };
 var WHO_NAME = { wife:"老婆", husb:"老公" };
 var invEditing = null;
@@ -660,51 +671,101 @@ function mline(who, chips, kcalText) {
   if (kcalText) { var k = document.createElement("span"); k.className = "kcal"; k.textContent = kcalText; dd.appendChild(k); }
   return dd;
 }
-function renderMeals() {
-  var lb = document.getElementById("linesB"); lb.innerHTML = "";
-  var wifeBChips = presetChips(WIFE_B).concat(extraChips("brunch", "wife"));
-  var wifeBSum = sumKc(WIFE_B) + exSumFor("brunch", "wife");
-  if (wifeBChips.length) lb.appendChild(mline("老婆", wifeBChips, "约" + wifeBSum + "千卡"));
-  var husbBChips = presetChips(HUSB_B).concat(extraChips("brunch", "husb"));
-  var husbBSum = sumKc(HUSB_B) + exSumFor("brunch", "husb");
-  if (husbBChips.length) lb.appendChild(mline("老公", husbBChips, "整份约" + husbBSum + "千卡"));
-
-  var ls = document.getElementById("linesS"); ls.innerHTML = "";
-  var nS = 0;
-  ["wife", "husb"].forEach(function (w) {
-    var cs = extraChips("second", w);
-    if (cs.length) {
-      var kcs = exSumFor("second", w);
-      ls.appendChild(mline(WHO_NAME[w], cs, kcs ? "约" + kcs + "千卡" : null));
-      nS += cs.length;
-    }
+var PERSONS = [["wife","老婆"],["husb","老公"],["nanny","保姆"]];
+var MEAL_ORDER = ["brunch","second","dinner"];
+function mealLines(mealKey, boxId) {
+  var box = document.getElementById(boxId); box.innerHTML = "";
+  var mdef = (menuData.meals && menuData.meals[mealKey]) || {};
+  var n = 0;
+  PERSONS.forEach(function (p) {
+    var preset = mdef[p[0]] || [];
+    var chips = presetChips(preset).concat(extraChips(mealKey, p[0]));
+    if (!chips.length) return;
+    var kcs = sumKc(preset) + exSumFor(mealKey, p[0]);
+    box.appendChild(mline(p[1], chips, kcs ? "约" + kcs + "千卡" : null));
+    n += chips.length;
   });
+  return n;
+}
+function personTotal(who) {
+  var t = 0;
+  MEAL_ORDER.forEach(function (m) {
+    t += sumKc(((menuData.meals || {})[m] || {})[who] || []) + exSumFor(m, who);
+  });
+  return t;
+}
+function shortD(ds) { var p = String(ds || "").split("-"); return p.length === 3 ? p[1] + "/" + p[2] : ds; }
+function applyMenuTags() {
+  var todayStr = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
+  var t = (menuData.date === todayStr) ? (menuData.note || shortD(menuData.date) + " 数据") : "沿用 " + shortD(menuData.date) + " 菜单";
+  document.getElementById("menuTag").textContent = t;
+  document.getElementById("buyTag").textContent = t;
+}
+function renderMeals() {
+  applyMenuTags();
+  mealLines("brunch", "linesB");
+  var nS = mealLines("second", "linesS");
   document.getElementById("mealSecond").hidden = !nS;
-
-  var ld = document.getElementById("linesD"); ld.innerHTML = "";
-  var wifeDChips = presetChips(WIFE_D).concat(extraChips("dinner", "wife"));
-  var wifeDSum = sumKc(WIFE_D) + exSumFor("dinner", "wife");
-  if (wifeDChips.length) ld.appendChild(mline("老婆", wifeDChips, "约" + wifeDSum + "千卡"));
-  var husbDChips = extraChips("dinner", "husb");
-  var husbDSum = exSumFor("dinner", "husb");
-  if (husbDChips.length) ld.appendChild(mline("老公", husbDChips, husbDSum ? "约" + husbDSum + "千卡" : null));
-  var nanDChips = presetChips(NANNY_D);
-  if (nanDChips.length) ld.appendChild(mline("保姆", nanDChips, "约" + sumKc(NANNY_D) + "千卡"));
-
+  mealLines("dinner", "linesD");
   var lsp = document.getElementById("linesSupp"); lsp.innerHTML = "";
-  var hs = presetChips(SUPP_H);
+  var sdef = menuData.supp || {};
+  var hs = presetChips(sdef.husb || []);
   if (hs.length) lsp.appendChild(mline("老公", hs, null));
-  var ws = presetChips(SUPP_W);
+  var ws = presetChips(sdef.wife || []);
   if (ws.length) lsp.appendChild(mline("老婆", ws, null));
-
-  var wTotal = wifeBSum + wifeDSum + exSumFor("second", "wife");
-  var hTotal = husbBSum + husbDSum + exSumFor("second", "husb");
+  var wTotal = personTotal("wife");
+  var hTotal = personTotal("husb");
   var ew = document.getElementById("estWife");
   ew.textContent = "";
   ew.appendChild(document.createTextNode("老婆 共约 "));
   var bw = document.createElement("b"); bw.textContent = wTotal + "千卡"; ew.appendChild(bw);
   ew.appendChild(document.createTextNode("（目标1900，增肌期可加餐补足）"));
   document.getElementById("estHusb").textContent = "老公 共约 " + hTotal + "千卡（目标1900）";
+}
+function renderBuys() {
+  var box = document.getElementById("buyList"); box.innerHTML = "";
+  (menuData.buys || []).forEach(function (b) {
+    var lab = document.createElement("label"); lab.className = "todo";
+    var off = (b.meal === "brunch" && state.awayBrunch) || (b.meal === "dinner" && state.awayDinner);
+    if (off) lab.className = "todo off";
+    var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!state[b.k];
+    cb.addEventListener("change", function () { state[b.k] = cb.checked; save(); });
+    var sp = document.createElement("span"); sp.className = "t";
+    sp.appendChild(document.createTextNode(b.t + " "));
+    if (b.n) { var it = document.createElement("i"); it.textContent = "—— " + b.n; sp.appendChild(it); }
+    lab.appendChild(cb); lab.appendChild(sp); box.appendChild(lab);
+  });
+}
+function renderHists() {
+  var bb = document.getElementById("buyHistBox"); bb.innerHTML = "";
+  var cnt = 0;
+  buyHist.forEach(function (e) {
+    cnt += e.t ? e.t.split("、").length : 0;
+    var row = document.createElement("div"); row.className = "hrow";
+    var hd = document.createElement("span"); hd.className = "hd"; hd.textContent = e.d; row.appendChild(hd);
+    var hb = document.createElement("span"); hb.className = "hb";
+    hb.appendChild(document.createTextNode(e.t || ""));
+    if (e.n) { var hn = document.createElement("i"); hn.className = "hn"; hn.textContent = "（" + e.n + "）"; hb.appendChild(hn); }
+    row.appendChild(hb); bb.appendChild(row);
+  });
+  var bTag = buyHist.length ? cnt + " 笔 · " + buyHist[0].d + " 起" : "暂无记录";
+  document.getElementById("buyHistTag").textContent = bTag;
+  document.getElementById("blSub").textContent = bTag;
+  var eb2 = document.getElementById("eatHistBox"); eb2.innerHTML = "";
+  eatHist.forEach(function (e) {
+    var row = document.createElement("div"); row.className = "hrow";
+    var hd = document.createElement("span"); hd.className = "hd"; hd.textContent = e.d; row.appendChild(hd);
+    var hb = document.createElement("span"); hb.className = "hb";
+    (e.lines || []).forEach(function (ln, li) {
+      if (li) hb.appendChild(document.createElement("br"));
+      var b = document.createElement("b"); b.textContent = ln[0]; hb.appendChild(b);
+      hb.appendChild(document.createTextNode("：" + ln[1]));
+    });
+    row.appendChild(hb); eb2.appendChild(row);
+  });
+  var eTag = eatHist.length ? eatHist.length + " 天 · " + eatHist[0].d + "-" + eatHist[eatHist.length-1].d : "暂无记录";
+  document.getElementById("eatHistTag").textContent = eTag;
+  document.getElementById("elSub").textContent = eTag;
 }
 function renderExtraBuys() {
   var eb = document.getElementById("extraBuys"); eb.innerHTML = "";
@@ -856,7 +917,7 @@ function compressImage(file, maxSide, quality, cb) {
   rd.readAsDataURL(file);
 }
 function applyLoaded() {
-  document.querySelectorAll(".todo input").forEach(function (el) { if (el.dataset.k) el.checked = !!state[el.dataset.k]; });
+  renderBuys();
   document.getElementById("fbText").value = state.fb || "";
   applyAway();
   renderMeals();
@@ -909,6 +970,27 @@ function cloudLoad() {
         renderInbox();
       }
     }).catch(function () {});
+    fetch("/api/state?key=menu-today", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (dd) {
+      if (dd && dd.ok && dd.data && dd.data.meals) {
+        menuData = dd.data;
+        try { localStorage.setItem("mama-menu", JSON.stringify(menuData)); } catch (e) {}
+        renderMeals(); renderBuys();
+      }
+    }).catch(function () {});
+    fetch("/api/state?key=buy-hist", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (dd) {
+      if (dd && dd.ok && Array.isArray(dd.data) && dd.data.length) {
+        buyHist = dd.data;
+        try { localStorage.setItem("mama-buy-hist", JSON.stringify(buyHist)); } catch (e) {}
+        renderHists();
+      }
+    }).catch(function () {});
+    fetch("/api/state?key=eat-hist", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (dd) {
+      if (dd && dd.ok && Array.isArray(dd.data) && dd.data.length) {
+        eatHist = dd.data;
+        try { localStorage.setItem("mama-eat-hist", JSON.stringify(eatHist)); } catch (e) {}
+        renderHists();
+      }
+    }).catch(function () {});
   } catch (e) {}
 }
 function applyAway() {
@@ -916,11 +998,7 @@ function applyAway() {
   document.getElementById("awayDinner").classList.toggle("on", !!state.awayDinner);
   document.getElementById("mealBrunch").hidden = !!state.awayBrunch;
   document.getElementById("mealDinner").hidden = !!state.awayDinner;
-  document.querySelectorAll(".todo[data-meal]").forEach(function (el) {
-    var m = el.dataset.meal;
-    var off = !!((m === "brunch" && state.awayBrunch) || (m === "dinner" && state.awayDinner));
-    el.classList.toggle("off", off);
-  });
+  renderBuys();
   renderExtraBuys();
 }
 document.querySelectorAll("[data-view]").forEach(function (a) {
@@ -946,10 +1024,8 @@ function unlock() {
   document.body.classList.add("unlocked");
   var week = ["日","一","二","三","四","五","六"];
   document.getElementById("today").textContent = (d.getMonth()+1) + "月" + d.getDate() + "日 星期" + week[d.getDay()];
-  document.querySelectorAll(".todo input").forEach(function (el) {
-    if (state[el.dataset.k]) el.checked = true;
-    el.addEventListener("change", function () { state[el.dataset.k] = el.checked; save(); });
-  });
+  renderBuys();
+  renderHists();
   var fb = document.getElementById("fbText");
   fb.value = state.fb || "";
   applyAway();
