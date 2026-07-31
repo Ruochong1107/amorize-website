@@ -38,7 +38,7 @@ module.exports = async function (req, res) {
     });
   }
   var MEALN = { brunch: "第一餐", second: "第二餐", dinner: "第三餐", both: "通用" };
-  var WHON = { wife: "老婆", husb: "老公", nanny: "保姆" };
+  var WHON = { wife: "老婆", husb: "老公", nanny: "保姆", dogs: "狗狗" };
   function shortD(ds) { var p = String(ds || "").split("-"); return p.length === 3 ? p[1] + "/" + p[2] : ds; }
   function menuLines(menu, st) {
     // -> [[人+餐, "菜1、菜2"], ...] 减 deleted 加 extraEats(🍱外食)，跳过不在家的餐
@@ -49,7 +49,7 @@ module.exports = async function (req, res) {
     ["brunch", "second", "dinner"].forEach(function (mk) {
       if (st && ((mk === "brunch" && st.awayBrunch) || (mk === "dinner" && st.awayDinner))) return;
       var mdef = menu.meals[mk] || {};
-      ["wife", "husb", "nanny"].forEach(function (p) {
+      ["wife", "husb", "nanny", "dogs"].forEach(function (p) {
         var names = [];
         (mdef[p] || []).forEach(function (dd) { if (!del[dd.id]) names.push(dd.t); });
         extras.forEach(function (e) { if (e.meal === mk && e.who === p) names.push((e.out ? "🍱" : "") + (e.t || "外食")); });
@@ -69,6 +69,7 @@ module.exports = async function (req, res) {
       var rec = await kvGet("rec-data");
       var inbox = await kvGet("rec-inbox");
       var eatHist = await kvGet("eat-hist");
+      var habits = await kvGet("habits-data");
       var L = [];
       L.push("DIGEST v1 day=" + (day || "?"));
       L.push("[反馈] " + ((st && st.fb) ? st.fb : "无") + ((st && st.fbImgs && st.fbImgs.length) ? "（附图" + st.fbImgs.length + "张）" : ""));
@@ -80,7 +81,7 @@ module.exports = async function (req, res) {
           if (!st.deleted[id]) return;
           ["brunch", "second", "dinner"].forEach(function (mk) {
             var mdef = menu.meals[mk] || {};
-            ["wife", "husb", "nanny"].forEach(function (p) {
+            ["wife", "husb", "nanny", "dogs"].forEach(function (p) {
               (mdef[p] || []).forEach(function (dd) { if (dd.id === id) delNames.push(dd.t + "(" + WHON[p] + MEALN[mk] + ")"); });
             });
           });
@@ -118,6 +119,11 @@ module.exports = async function (req, res) {
       });
       L.push("[近两天吃过] " + (recent.length ? recent.join(" | ") : "无"));
       L.push("[导入箱] " + (Array.isArray(inbox) ? inbox.length : 0) + " 条");
+      if (Array.isArray(habits) && habits.length) {
+        L.push("[固定习惯] " + habits.map(function (h) { return (h.who || "?") + "：" + (h.text || ""); }).join("；"));
+      } else {
+        L.push("[固定习惯] 未设置，按默认值兜底（见 trigger 说明）");
+      }
       L.push("DIGEST END");
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
       return res.status(200).send(L.join("\n"));
