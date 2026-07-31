@@ -271,6 +271,8 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <select id="eatWho">
 <option value="wife" selected>老婆</option>
 <option value="husb">老公</option>
+<option value="nanny">保姆</option>
+<option value="dogs">两只狗狗</option>
 <option value="shared">两人平分</option>
 </select>
 <input class="kcin" id="eatKc" type="number" min="0" placeholder="千卡·选填">
@@ -366,11 +368,14 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <b>淘淘、鸡腿</b>：鲜食不吃狗粮，保姆制作</div>
 </div>
 <div class="card">
-<h2>🔁 固定习惯</h2>
-<div class="prof"><b>老婆第一餐</b>：咖啡1杯 + 羊奶粉1袋 + 三明治1个 + 牛油果半个 + 香蕉半根 + 蓝莓半盒<br>
-<b>老公第一餐</b>：豆浆1杯 + 鸡蛋1个 + 牛油果半个<br>
-<b>补剂（两人每天）</b>：姜黄粉3粒 · 磷虾油1粒 · D3+K2 1粒 · 降血脂胶囊1粒<br>
-<b>老婆第三餐</b>：益生菌1袋</div>
+<h2>🔁 固定习惯<span class="tag">点任何一条可编辑 · 改完自动保存</span></h2>
+<div id="habitsBox"></div>
+<div class="invadd">
+<input class="nm" id="habitWho" placeholder="谁 / 哪一餐，如：老婆第一餐">
+<input class="qt" id="habitText" placeholder="固定吃什么，如：咖啡1杯 + 羊奶粉1袋…">
+<button id="habitAdd" aria-label="加入">＋</button>
+</div>
+<div class="hint l">这里改了会存到云端；以后每天生成菜单也会参考这里的内容</div>
 </div>
 </section>
 
@@ -438,7 +443,7 @@ state.extraBuys = state.extraBuys || [];
 state.extraEats = state.extraEats || [];
 state.fbImgs = state.fbImgs || [];
 function save() { try { localStorage.setItem(dayKey, JSON.stringify(state)); } catch (e) {} cloudSave(); }
-var cloudTimer = null, cloudInvTimer = null, cloudRecTimer = null, cloudInboxTimer = null;
+var cloudTimer = null, cloudInvTimer = null, cloudRecTimer = null, cloudInboxTimer = null, cloudHabitsTimer = null;
 function cloudPost(key, data) {
   try {
     fetch("/api/state?key=" + key, { method: "POST", headers: { "content-type": "application/json", "x-auth": KEY }, body: JSON.stringify(data) }).catch(function () {});
@@ -534,6 +539,54 @@ if (!recData) recData = JSON.parse(JSON.stringify(REC_DEFAULT));
 var inboxData = null;
 try { inboxData = JSON.parse(localStorage.getItem("mama-rec-inbox") || "null"); } catch (e) {}
 if (!inboxData) inboxData = [];
+var HABITS_DEFAULT = [
+  { id:"hb1", who:"老婆第一餐", text:"咖啡1杯 + 羊奶粉1袋 + 三明治1个 + 牛油果半个 + 香蕉半根 + 蓝莓半盒" },
+  { id:"hb2", who:"老公第一餐", text:"豆浆1杯 + 鸡蛋1个 + 牛油果半个" },
+  { id:"hb3", who:"狗狗第一餐（淘淘+鸡腿 两只共用量）", text:"鸡蛋2个 + 主食3两（熟重）+ 青菜300克 + 鸡胸肉100克" },
+  { id:"hb4", who:"补剂（两人每天）", text:"姜黄粉3粒 · 磷虾油1粒 · D3+K2 1粒 · 降血脂胶囊1粒" },
+  { id:"hb5", who:"老婆第三餐", text:"益生菌1袋" },
+  { id:"hb6", who:"保姆第三餐", text:"每天单独生成1道菜（不跟老婆老公重复，具体菜式随当天菜单变化）" }
+];
+var habitsData = null;
+try { habitsData = JSON.parse(localStorage.getItem("mama-habits-data") || "null"); } catch (e) {}
+if (!habitsData) habitsData = JSON.parse(JSON.stringify(HABITS_DEFAULT));
+var habitsNext = 7;
+var habitEditing = null;
+function saveHabitsData() {
+  try { localStorage.setItem("mama-habits-data", JSON.stringify(habitsData)); } catch (e) {}
+  clearTimeout(cloudHabitsTimer); cloudHabitsTimer = setTimeout(function () { cloudPost("habits-data", habitsData); }, 600);
+}
+function renderHabits() {
+  var box = document.getElementById("habitsBox"); box.innerHTML = "";
+  habitsData.forEach(function (h, i) {
+    if (habitEditing === i) {
+      var ed = document.createElement("div"); ed.className = "recedit";
+      var row = document.createElement("div"); row.className = "row";
+      var wn = document.createElement("input"); wn.className = "rn"; wn.value = h.who;
+      row.appendChild(wn); ed.appendChild(row);
+      var tx = document.createElement("textarea"); tx.rows = 2; tx.value = h.text; ed.appendChild(tx);
+      var btns = document.createElement("div"); btns.className = "btns";
+      var ok = document.createElement("button"); ok.className = "ok"; ok.textContent = "保存";
+      ok.addEventListener("click", function () {
+        h.who = wn.value.trim() || h.who;
+        h.text = tx.value.trim();
+        habitEditing = null; saveHabitsData(); renderHabits();
+      });
+      var rm = document.createElement("button"); rm.className = "rm"; rm.textContent = "删除";
+      rm.addEventListener("click", function () { habitsData.splice(i, 1); habitEditing = null; saveHabitsData(); renderHabits(); });
+      var cc = document.createElement("button"); cc.className = "cc"; cc.textContent = "取消";
+      cc.addEventListener("click", function () { habitEditing = null; renderHabits(); });
+      btns.appendChild(ok); btns.appendChild(rm); btns.appendChild(cc); ed.appendChild(btns);
+      box.appendChild(ed);
+    } else {
+      var dd = document.createElement("div"); dd.className = "prof"; dd.style.cursor = "pointer"; dd.title = "点击编辑";
+      var b = document.createElement("b"); b.textContent = h.who; dd.appendChild(b);
+      dd.appendChild(document.createTextNode("：" + h.text));
+      dd.addEventListener("click", function () { habitEditing = i; renderHabits(); });
+      box.appendChild(dd);
+    }
+  });
+}
 function saveInvData() {
   try { localStorage.setItem("mama-inv-data", JSON.stringify(invData)); } catch (e) {}
   clearTimeout(cloudInvTimer); cloudInvTimer = setTimeout(function () { cloudPost("inv-data", invData); }, 600);
@@ -565,11 +618,12 @@ var DEFAULT_MENU = {
   meals: {
     brunch: {
       wife: [ { id:"wb1", t:"三明治", kc:400, r:"R003" }, { id:"wb2", t:"美式咖啡", kc:5 }, { id:"wb3", t:"羊奶粉", kc:130 }, { id:"wb4", t:"半个牛油果", kc:120 }, { id:"wb5", t:"半根香蕉", kc:55 }, { id:"wb6", t:"半盒蓝莓", kc:40 } ],
-      husb: [ { id:"hb1", t:"白菜豆腐", kc:150, r:"R040" }, { id:"hb2", t:"卤牛肉", kc:180, r:"R041" }, { id:"hb3", t:"煮毛豆", kc:330, r:"R042" }, { id:"hb4", t:"煮花生", kc:450, r:"R043" }, { id:"hb5", t:"蒸山药", kc:85, r:"R044" }, { id:"hb6", t:"油条", kc:270, r:"R045" } ]
+      husb: [ { id:"hb1", t:"白菜豆腐", kc:150, r:"R040" }, { id:"hb2", t:"卤牛肉", kc:180, r:"R041" }, { id:"hb3", t:"煮毛豆", kc:330, r:"R042" }, { id:"hb4", t:"煮花生", kc:450, r:"R043" }, { id:"hb5", t:"蒸山药", kc:85, r:"R044" }, { id:"hb6", t:"油条", kc:270, r:"R045" } ],
+      dogs: [ { id:"dg1", t:"鸡蛋2个" }, { id:"dg2", t:"主食3两（熟重）" }, { id:"dg3", t:"青菜300克" }, { id:"dg4", t:"鸡胸肉100克" } ]
     },
     dinner: {
       wife: [ { id:"dw1", t:"三文鱼", kc:155, r:"R007" }, { id:"dw2", t:"水煮菜心", kc:25, r:"R046" }, { id:"dw3", t:"苦瓜炒鹅蛋", kc:140, r:"R018" } ],
-      nanny: [ { id:"dn1", t:"三文鱼", kc:155, r:"R007" }, { id:"dn2", t:"水煮菜心", kc:25, r:"R046" }, { id:"dn3", t:"苦瓜炒鹅蛋", kc:140, r:"R018" } ]
+      nanny: [ { id:"dn1", t:"水煮虾", kc:190, r:"R030" } ]
     }
   },
   supp: {
@@ -671,7 +725,7 @@ function mline(who, chips, kcalText) {
   if (kcalText) { var k = document.createElement("span"); k.className = "kcal"; k.textContent = kcalText; dd.appendChild(k); }
   return dd;
 }
-var PERSONS = [["wife","老婆"],["husb","老公"],["nanny","保姆"]];
+var PERSONS = [["wife","老婆"],["husb","老公"],["nanny","保姆"],["dogs","狗狗"]];
 var MEAL_ORDER = ["brunch","second","dinner"];
 function mealLines(mealKey, boxId) {
   var box = document.getElementById(boxId); box.innerHTML = "";
@@ -970,6 +1024,13 @@ function cloudLoad() {
         renderInbox();
       }
     }).catch(function () {});
+    fetch("/api/state?key=habits-data", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (dd) {
+      if (dd && dd.ok && Array.isArray(dd.data) && dd.data.length) {
+        habitsData = dd.data;
+        try { localStorage.setItem("mama-habits-data", JSON.stringify(habitsData)); } catch (e) {}
+        renderHabits();
+      } else { saveHabitsData(); }
+    }).catch(function () {});
     fetch("/api/state?key=menu-today", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (dd) {
       if (dd && dd.ok && dd.data && dd.data.meals) {
         menuData = dd.data;
@@ -1035,6 +1096,7 @@ function unlock() {
   renderInv();
   renderRec();
   renderInbox();
+  renderHabits();
   cloudLoad();
 }
 function tryPw() {
@@ -1126,6 +1188,13 @@ document.getElementById("recAdd").addEventListener("click", function () {
   jumpRecipe(id);
 });
 document.getElementById("recName").addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("recAdd").click(); });
+document.getElementById("habitAdd").addEventListener("click", function () {
+  var w = document.getElementById("habitWho"), t = document.getElementById("habitText");
+  if (!w.value.trim()) return;
+  habitsData.push({ id: "hb" + (habitsNext++), who: w.value.trim(), text: t.value.trim() });
+  w.value = ""; t.value = ""; saveHabitsData(); renderHabits();
+});
+document.getElementById("habitText").addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("habitAdd").click(); });
 document.getElementById("inboxCam").addEventListener("click", function () { document.getElementById("inboxFile").click(); });
 document.getElementById("inboxFile").addEventListener("change", function () {
   if (inboxData.length >= 6) { document.getElementById("inboxHint").textContent = "导入箱最多存 6 条，等大宝整理后再传～"; this.value = ""; return; }
