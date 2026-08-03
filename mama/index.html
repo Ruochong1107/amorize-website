@@ -233,6 +233,7 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <option value="second">第二餐</option>
 <option value="dinner">第三餐</option>
 </select>
+<select id="buyCat" title="入库分类"><option value="">🤖 自动</option></select>
 <button id="buyAdd" aria-label="加入">＋</button>
 </div>
 <div class="hint l">选了哪一餐，"第X餐不在家"时会跟着一起划掉</div>
@@ -325,6 +326,9 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <section id="view-rec" hidden>
 <div class="card">
 <h2>📖 菜谱库<span class="tag" id="recCount"></span><span class="tag">点任何一道可编辑</span></h2>
+<div class="addrow" style="margin-bottom: 10px;">
+<input type="text" id="recSearch" placeholder="🔍 搜菜名 / 食材 / 编号">
+</div>
 <div id="recBox"></div>
 <div class="invadd">
 <input class="nm" id="recName" placeholder="菜名，如：西红柿炒蛋">
@@ -333,9 +337,15 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <button id="recAdd" aria-label="加入">＋</button>
 </div>
 <div class="addrow" style="margin-top: 8px;">
-<input type="text" id="recIng" placeholder="配料（选填），如：鸡蛋 2个、西红柿 1个">
+<input type="text" id="recIngM" placeholder="主料，如：五花肉 200g">
 </div>
-<div class="hint l">加进上面对应分类；配料以后随时点开补</div>
+<div class="addrow" style="margin-top: 6px;">
+<input type="text" id="recIngP" placeholder="配料（选填），如：青辣椒">
+</div>
+<div class="addrow" style="margin-top: 6px;">
+<input type="text" id="recIngT" placeholder="调料（选填），如：葱姜蒜、生抽">
+</div>
+<div class="hint l">加进上面对应分类；主料/配料/调料以后随时点开补</div>
 </div>
 
 <div class="card">
@@ -347,7 +357,7 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <button id="inboxSave" aria-label="提交"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l5 5L20 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 </div>
 <input type="file" id="inboxFile" accept="image/*" multiple hidden>
-<div class="hint l" id="inboxHint">提交后存云端、标"待整理"——大宝下次更新时读取整理进菜谱库，整理完这里自动清空</div>
+<div class="hint l" id="inboxHint">提交后存云端——AI 每天早7点/午间11:30自动识别整理进菜谱库（主料/配料/调料/估算千卡），整理完这里自动清空</div>
 </div>
 </section>
 
@@ -591,6 +601,108 @@ function saveInvData() {
   try { localStorage.setItem("mama-inv-data", JSON.stringify(invData)); } catch (e) {}
   clearTimeout(cloudInvTimer); cloudInvTimer = setTimeout(function () { cloudPost("inv-data", invData); }, 600);
 }
+/* ===== v12: 勾选采买 → 自动入库 ===== */
+var INV_CLASSIFY = [
+  ["肉蛋海鲜", /肉|蛋(?!糕)|鱼|虾|蟹|螺|蛏|鲍|贝|鸡|鸭|鹅|牛|猪|羊|蹄|排骨|香肠|腊肠|腊肉|火腿|培根|鱿|海参/],
+  ["主食", /面包|贝果|吐司|馒头|包子|饺|面条|米饭|年糕|莜面|玉米|燕麦|麦片|粉丝|米粉|挂面/],
+  ["豆类与杂粮", /豆$|豆腐|豆干|豆皮|腐竹|花生|莲子|薏米|小米|糙米|藜麦|芝麻|杂粮/],
+  ["水果", /苹果|香蕉|橙|橘|柚|桃|李子|梨|莓|葡萄|樱桃|荔枝|龙眼|芒果|菠萝|猕猴桃|火龙果|西瓜|哈密瓜|甜瓜|柿|石榴/],
+  ["滋补", /人参|黄芪|枸杞|红枣|桂圆|燕窝|阿胶|石斛|虫草|天麻|当归|茯苓/],
+  ["调味与香料", /油$|盐|糖$|醋|酱|生抽|老抽|蚝油|料酒|花椒|八角|桂皮|香叶|胡椒|味精|鸡精|淀粉|香油/],
+  ["蔬菜", /菜|瓜|茄|椒|葱|蒜|姜|萝卜|芹|笋|藕|山药|土豆|红薯|紫薯|番茄|西红柿|豆角|豇豆|毛豆|苗$|生|韭|蘑|菇|木耳|银耳|海带/]
+];
+function parseBuyText(t) {
+  t = String(t || "").trim();
+  var m = t.match(/^([^0-9０-９]+?)[\s·，,]*([0-9０-９][\s\S]*)$/);
+  if (m) return { n: m[1].trim(), q: m[2].replace(/\s+/g, "") };
+  return { n: t, q: "?" };
+}
+function invFindItem(name) {
+  for (var gi = 0; gi < invData.length; gi++) {
+    var items = invData[gi].items || [];
+    for (var ii = 0; ii < items.length; ii++) {
+      if (items[ii].n === name) return { gi: gi, it: items[ii] };
+    }
+  }
+  if (name.length >= 2) {
+    for (var gj = 0; gj < invData.length; gj++) {
+      var its = invData[gj].items || [];
+      for (var jj = 0; jj < its.length; jj++) {
+        var n2 = its[jj].n;
+        if (n2.length >= 2 && (n2.indexOf(name) !== -1 || name.indexOf(n2) !== -1)) return { gi: gj, it: its[jj] };
+      }
+    }
+  }
+  return null;
+}
+function invPickGroup(name, hint) {
+  var gi = -1;
+  function byLabel(lab) {
+    for (var i = 0; i < invData.length; i++) if (invData[i].g.indexOf(lab) !== -1) return i;
+    return -1;
+  }
+  if (hint) { gi = byLabel(hint); if (gi !== -1) return gi; }
+  for (var c = 0; c < INV_CLASSIFY.length; c++) {
+    if (INV_CLASSIFY[c][1].test(name)) { gi = byLabel(INV_CLASSIFY[c][0]); if (gi !== -1) return gi; }
+  }
+  gi = byLabel("其他");
+  return gi !== -1 ? gi : invData.length - 1;
+}
+function invToast(msg) {
+  var el = document.getElementById("invToast");
+  if (!el) {
+    el = document.createElement("div"); el.id = "invToast";
+    el.style.cssText = "position:fixed;bottom:76px;left:50%;transform:translateX(-50%);background:rgba(43,43,40,.92);color:#fff;font-size:13px;padding:8px 14px;border-radius:10px;z-index:9998;max-width:86%;text-align:center;transition:opacity .3s;";
+    document.body.appendChild(el);
+  }
+  el.textContent = msg; el.style.opacity = "1";
+  clearTimeout(el._t); el._t = setTimeout(function () { el.style.opacity = "0"; }, 2600);
+}
+function invAbsorb(logKey, text, hint) {
+  state.invLog = state.invLog || {};
+  if (state.invLog[logKey]) return;
+  var p = parseBuyText(text);
+  if (!p.n) return;
+  var tag = p.q + "🛒" + (new Date().getMonth() + 1) + "/" + (new Date().getDate());
+  var hit = invFindItem(p.n), gi, created = false;
+  if (hit) { gi = hit.gi; hit.it.terms.push(tag); }
+  else {
+    gi = invPickGroup(p.n, hint);
+    invData[gi].items.push({ n: p.n, terms: [tag] });
+    created = true;
+  }
+  state.invLog[logKey] = { n: hit ? hit.it.n : p.n, g: invData[gi].g, term: tag, created: created };
+  save(); saveInvData(); renderInv();
+  invToast("📦 已入库：" + (hit ? hit.it.n : p.n) + " " + p.q + " → " + invData[gi].g + "（取消勾选可撤回）");
+}
+function invUndo(logKey) {
+  state.invLog = state.invLog || {};
+  var log = state.invLog[logKey];
+  if (!log) return;
+  for (var gi = 0; gi < invData.length; gi++) {
+    if (invData[gi].g !== log.g) continue;
+    var items = invData[gi].items || [];
+    for (var ii = 0; ii < items.length; ii++) {
+      if (items[ii].n !== log.n) continue;
+      var ti = items[ii].terms.lastIndexOf(log.term);
+      if (ti !== -1) items[ii].terms.splice(ti, 1);
+      if (log.created && items[ii].terms.length === 0) items.splice(ii, 1);
+      break;
+    }
+    break;
+  }
+  delete state.invLog[logKey];
+  save(); saveInvData(); renderInv();
+  invToast("↩️ 已从库存撤回：" + log.n);
+}
+function fillBuyCat() {
+  var sel = document.getElementById("buyCat");
+  if (!sel || sel.options.length > 1) return;
+  invData.forEach(function (g) {
+    var o = document.createElement("option"); o.value = g.g; o.textContent = g.g; sel.appendChild(o);
+  });
+}
+fillBuyCat();
 function saveRecData() {
   try { localStorage.setItem("mama-rec-data", JSON.stringify(recData)); } catch (e) {}
   clearTimeout(cloudRecTimer); cloudRecTimer = setTimeout(function () { cloudPost("rec-data", recData); }, 600);
@@ -658,6 +770,26 @@ var MEAL_NAME = { brunch:"第一餐", second:"第二餐", dinner:"第三餐", bo
 var WHO_NAME = { wife:"老婆", husb:"老公" };
 var invEditing = null;
 var recEditing = null;
+var recQuery = "";
+function parseIng(s) {
+  s = String(s || "").trim();
+  var m = "", p = "", t = "";
+  if (!s) return { m: m, p: p, t: t };
+  s.split(/｜|\|/).forEach(function (part) {
+    part = part.trim();
+    if (/^配[：:]/.test(part)) p = p ? p + "、" + part.replace(/^配[：:]\s*/, "") : part.replace(/^配[：:]\s*/, "");
+    else if (/^调[：:]/.test(part)) t = t ? t + "、" + part.replace(/^调[：:]\s*/, "") : part.replace(/^调[：:]\s*/, "");
+    else m = m ? m + " ｜ " + part : part;
+  });
+  return { m: m, p: p, t: t };
+}
+function buildIng(m, p, t) {
+  var parts = [];
+  if (m) parts.push(m);
+  if (p) parts.push("配：" + p);
+  if (t) parts.push("调：" + t);
+  return parts.join(" ｜ ");
+}
 
 function alive(arr) { return arr.filter(function (dd) { return !state.deleted[dd.id]; }); }
 function sumKc(arr) { return alive(arr).reduce(function (a, dd) { return a + (dd.kc || 0); }, 0); }
@@ -783,7 +915,7 @@ function renderBuys() {
     var off = (b.meal === "brunch" && state.awayBrunch) || (b.meal === "dinner" && state.awayDinner);
     if (off) lab.className = "todo off";
     var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!state[b.k];
-    cb.addEventListener("change", function () { state[b.k] = cb.checked; save(); });
+    cb.addEventListener("change", function () { state[b.k] = cb.checked; save(); if (cb.checked) invAbsorb("m:" + b.k, b.t); else invUndo("m:" + b.k); });
     var sp = document.createElement("span"); sp.className = "t";
     sp.appendChild(document.createTextNode(b.t + " "));
     if (b.n) { var it = document.createElement("i"); it.textContent = "—— " + b.n; sp.appendChild(it); }
@@ -828,12 +960,12 @@ function renderExtraBuys() {
     var off = (it.meal === "brunch" && state.awayBrunch) || (it.meal === "dinner" && state.awayDinner);
     if (off) lab.className = "todo off";
     var cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!it.c;
-    cb.addEventListener("change", function () { it.c = cb.checked; save(); });
+    cb.addEventListener("change", function () { it.c = cb.checked; save(); if (cb.checked) invAbsorb("e:" + it.t, it.t, it.g); else invUndo("e:" + it.t); });
     var sp = document.createElement("span"); sp.className = "t"; sp.textContent = it.t;
     if (it.meal && it.meal !== "both") { var mt = document.createElement("span"); mt.className = "mealtag"; mt.textContent = MEAL_NAME[it.meal]; sp.appendChild(mt); }
     var tg = document.createElement("span"); tg.className = "selftag"; tg.textContent = "自己加"; sp.appendChild(tg);
     var x = document.createElement("button"); x.className = "xdel"; x.textContent = "×"; x.title = "删除";
-    x.addEventListener("click", function (e) { e.preventDefault(); state.extraBuys.splice(i, 1); save(); renderExtraBuys(); });
+    x.addEventListener("click", function (e) { e.preventDefault(); if (it.c) invUndo("e:" + it.t); state.extraBuys.splice(i, 1); save(); renderExtraBuys(); });
     lab.appendChild(cb); lab.appendChild(sp); lab.appendChild(x); eb.appendChild(lab);
   });
 }
@@ -894,9 +1026,18 @@ function renderInv() {
 }
 function renderRec() {
   var box = document.getElementById("recBox"); box.innerHTML = "";
-  document.getElementById("recCount").textContent = recData.list.length + " 道 · 卡路里为估算";
+  var _rq = recQuery ? recData.list.filter(function (r) {
+    var q = recQuery.toLowerCase();
+    return (r.n || "").toLowerCase().indexOf(q) !== -1 || (r.id || "").toLowerCase().indexOf(q) !== -1 || (r.ing || "").toLowerCase().indexOf(q) !== -1;
+  }).length : null;
+  document.getElementById("recCount").textContent = (recQuery ? ("🔍 " + _rq + " / " + recData.list.length + " 道") : (recData.list.length + " 道 · 卡路里为估算"));
   RGROUPS.forEach(function (gname, gi) {
-    var rs = recData.list.map(function (r, i) { return { r: r, i: i }; }).filter(function (o) { return o.r.g === gi; });
+    var rs = recData.list.map(function (r, i) { return { r: r, i: i }; }).filter(function (o) {
+      if (o.r.g !== gi) return false;
+      if (!recQuery) return true;
+      var q = recQuery.toLowerCase();
+      return (o.r.n || "").toLowerCase().indexOf(q) !== -1 || (o.r.id || "").toLowerCase().indexOf(q) !== -1 || (o.r.ing || "").toLowerCase().indexOf(q) !== -1;
+    });
     if (!rs.length) return;
     var h = document.createElement("div"); h.className = "grp"; h.textContent = gname + " · " + rs.length + " 道"; box.appendChild(h);
     var grid = document.createElement("div"); grid.className = "recgrid";
@@ -908,13 +1049,16 @@ function renderRec() {
         var rn = document.createElement("input"); rn.className = "rn"; rn.value = r.n;
         var rk = document.createElement("input"); rk.className = "rk"; rk.type = "number"; rk.value = r.kc || ""; rk.placeholder = "约千卡";
         row.appendChild(rn); row.appendChild(rk); ed.appendChild(row);
-        var ri = document.createElement("textarea"); ri.rows = 2; ri.value = r.ing || ""; ri.placeholder = "配料"; ed.appendChild(ri);
+        var _pi = parseIng(r.ing);
+        var rim = document.createElement("input"); rim.value = _pi.m; rim.placeholder = "主料，如：五花肉 200g"; rim.style.cssText = "width:100%;margin-top:6px;"; ed.appendChild(rim);
+        var rip = document.createElement("input"); rip.value = _pi.p; rip.placeholder = "配料（选填）"; rip.style.cssText = "width:100%;margin-top:6px;"; ed.appendChild(rip);
+        var rit = document.createElement("input"); rit.value = _pi.t; rit.placeholder = "调料（选填）"; rit.style.cssText = "width:100%;margin-top:6px;"; ed.appendChild(rit);
         var btns = document.createElement("div"); btns.className = "btns";
         var ok = document.createElement("button"); ok.className = "ok"; ok.textContent = "保存";
         ok.addEventListener("click", function () {
           r.n = rn.value.trim() || r.n;
           var kv = parseInt(rk.value, 10); r.kc = (kv > 0) ? kv : null;
-          r.ing = ri.value.trim();
+          r.ing = buildIng(rim.value.trim(), rip.value.trim(), rit.value.trim());
           recEditing = null; saveRecData(); renderRec();
         });
         var rm = document.createElement("button"); rm.className = "rm"; rm.textContent = "删除";
@@ -930,7 +1074,16 @@ function renderRec() {
         var rid = document.createElement("span"); rid.className = "rid"; rid.textContent = r.id; h3.appendChild(rid);
         if (r.kc) { var kc = document.createElement("span"); kc.className = "kc"; kc.textContent = "约" + r.kc + "千卡"; h3.appendChild(kc); }
         dd.appendChild(h3);
-        if (r.ing) { var ing = document.createElement("div"); ing.className = "ing"; ing.textContent = r.ing; dd.appendChild(ing); }
+        var _pd = parseIng(r.ing);
+        var ing = document.createElement("div"); ing.className = "ing";
+        [["主料", _pd.m], ["配料", _pd.p], ["调料", _pd.t]].forEach(function (pair) {
+          var line = document.createElement("div");
+          var lb = document.createElement("b"); lb.textContent = pair[0] + "："; line.appendChild(lb);
+          if (pair[1]) line.appendChild(document.createTextNode(pair[1]));
+          else { var wt = document.createElement("i"); wt.textContent = "待补"; wt.style.cssText = "color:#c9c5ba;font-style:normal;"; line.appendChild(wt); }
+          ing.appendChild(line);
+        });
+        dd.appendChild(ing);
         dd.addEventListener("click", function () { recEditing = o.i; renderRec(); });
         grid.appendChild(dd);
       }
@@ -1135,8 +1288,10 @@ document.getElementById("fbFile").addEventListener("change", function () {
 document.getElementById("buyAdd").addEventListener("click", function () {
   var inp = document.getElementById("buyInp");
   var v = inp.value.trim(); if (!v) return;
-  state.extraBuys.push({ t: v, c: true, meal: document.getElementById("buyMeal").value });
-  inp.value = ""; save(); renderExtraBuys();
+  var cat = document.getElementById("buyCat").value || "";
+  state.extraBuys.push({ t: v, c: true, meal: document.getElementById("buyMeal").value, g: cat });
+  inp.value = ""; document.getElementById("buyCat").value = ""; save(); renderExtraBuys();
+  invAbsorb("e:" + v, v, cat);
 });
 document.getElementById("buyInp").addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("buyAdd").click(); });
 document.getElementById("eatAdd").addEventListener("click", function () {
@@ -1182,12 +1337,13 @@ document.getElementById("recAdd").addEventListener("click", function () {
   var gi = parseInt(document.getElementById("recCat").value, 10);
   var num = recData.next++;
   var id = "R" + (num < 100 ? ("00" + num).slice(-3) : num);
-  recData.list.push({ id: id, g: gi, n: n.value.trim(), kc: (kv > 0) ? kv : null, ing: document.getElementById("recIng").value.trim() });
-  n.value = ""; document.getElementById("recKc").value = ""; document.getElementById("recIng").value = "";
+  recData.list.push({ id: id, g: gi, n: n.value.trim(), kc: (kv > 0) ? kv : null, ing: buildIng(document.getElementById("recIngM").value.trim(), document.getElementById("recIngP").value.trim(), document.getElementById("recIngT").value.trim()) });
+  n.value = ""; document.getElementById("recKc").value = ""; document.getElementById("recIngM").value = ""; document.getElementById("recIngP").value = ""; document.getElementById("recIngT").value = "";
   saveRecData(); renderRec();
   jumpRecipe(id);
 });
 document.getElementById("recName").addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("recAdd").click(); });
+document.getElementById("recSearch").addEventListener("input", function () { recQuery = this.value.trim(); recEditing = null; renderRec(); });
 document.getElementById("habitAdd").addEventListener("click", function () {
   var w = document.getElementById("habitWho"), t = document.getElementById("habitText");
   if (!w.value.trim()) return;
