@@ -1,4 +1,4 @@
-// 每日买菜助手 · 云同步接口 v3
+// 每日买菜助手 · 云同步接口 v4
 // 基础：GET ?key=xxx 读；POST ?key=xxx 写；GET ?key=xxx&setb64= / &appendb64= 管道写（v2）
 // v3 新增（供定时管道用，避免 AI 解析大 JSON）：
 //   GET ?digest=1&day=Y-M-D       返回该日纯文本摘要（反馈/记录/库存/菜谱/当日菜单），固定小节标题
@@ -136,10 +136,65 @@ module.exports = async function (req, res) {
       if (!amenu) return res.status(200).json({ ok: true, skipped: "no_menu", day: aday });
       var dShort = shortD(amenu.date || aday);
       var result = { ok: true, day: dShort };
+      // v4: 订单识别兜底 —— 归档日（及更早）仍未被页面消费的识别结果，直接合并进 inv-data 并计入当日采购
+      var ordAdd = [];
+      try {
+        var oinbox = await kvGet("order-inbox");
+        if (Array.isArray(oinbox) && oinbox.length) {
+          var dnum = function (s) { var p = String(s || "").split("-"); return (+p[0] || 0) * 10000 + (+p[1] || 0) * 100 + (+p[2] || 0); };
+          var CLS = [
+            ["肉蛋海鲜", /肉|蛋(?!糕)|鱼|虾|蟹|螺|蛏|鲍|贝|鸡|鸭|鹅|牛|猪|羊|蹄|排骨|香肠|腊肠|腊肉|火腿|培根|鱿|海参/],
+            ["主食", /面包|贝果|吐司|馒头|包子|饺|面条|米饭|年糕|莜面|玉米|燕麦|麦片|粉丝|米粉|挂面/],
+            ["豆类与杂粮", /豆$|豆腐|豆干|豆皮|腐竹|花生|莲子|薏米|小米|糙米|藜麦|芝麻|杂粮/],
+            ["水果", /苹果|香蕉|橙|橘|柚|桃|李子|梨|莓|葡萄|樱桃|荔枝|龙眼|芒果|菠萝|猕猴桃|火龙果|西瓜|哈密瓜|甜瓜|柿|石榴/],
+            ["滋补", /人参|黄芪|枸杞|红枣|桂圆|燕窝|阿胶|石斛|虫草|天麻|当归|茯苓/],
+            ["调味与香料", /油$|盐|糖$|醋|酱|生抽|老抽|蚝油|料酒|花椒|八角|桂皮|香叶|胡椒|味精|鸡精|淀粉|香油/],
+            ["蔬菜", /菜|瓜|茄|椒|葱|蒜|姜|萝卜|芹|笋|藕|山药|土豆|红薯|紫薯|番茄|西红柿|豆角|豇豆|毛豆|苗$|生|韭|蘑|菇|木耳|银耳|海带/]
+          ];
+          var eatO = [], keepO = [];
+          oinbox.forEach(function (o) {
+            if (o && o.status === "parsed" && Array.isArray(o.items) && dnum(o.d) <= dnum(aday)) eatO.push(o);
+            else keepO.push(o);
+          });
+          if (eatO.length) {
+            var ainv = await kvGet("inv-data");
+            if (Array.isArray(ainv) && ainv.length) {
+              eatO.forEach(function (o) {
+                o.items.forEach(function (m) {
+                  var text = String((m && m.t) || "").trim();
+                  if (!text) return;
+                  var mm = text.match(/^([^0-9０-９]+?)[\s·，,]*([0-9０-９][\s\S]*)$/);
+                  var nm = mm ? mm[1].trim() : text, qq = mm ? mm[2].replace(/\s+/g, "") : "?";
+                  var tag = qq + "🛒" + shortD(o.d || aday);
+                  var hitIt = null;
+                  ainv.forEach(function (grp) { (grp.items || []).forEach(function (it) { if (!hitIt && it.n === nm) hitIt = it; }); });
+                  if (!hitIt && nm.length >= 2) ainv.forEach(function (grp) { (grp.items || []).forEach(function (it) { if (!hitIt && it.n && it.n.length >= 2 && (String(it.n).indexOf(nm) !== -1 || nm.indexOf(it.n) !== -1)) hitIt = it; }); });
+                  if (hitIt && (hitIt.terms || []).indexOf(tag) !== -1) return; // 已有同日同量标记，防重
+                  if (hitIt) { hitIt.terms.push(tag); }
+                  else {
+                    var lab = m.g ? String(m.g).replace(/^\S+\s/, "") : null;
+                    if (!lab) for (var ci = 0; ci < CLS.length; ci++) { if (CLS[ci][1].test(nm)) { lab = CLS[ci][0]; break; } }
+                    var tgt = null;
+                    if (lab) ainv.forEach(function (grp) { if (!tgt && grp.g.indexOf(lab) !== -1) tgt = grp; });
+                    if (!tgt) ainv.forEach(function (grp) { if (grp.g.indexOf("其他") !== -1) tgt = grp; });
+                    if (!tgt) tgt = ainv[ainv.length - 1];
+                    tgt.items.push({ n: nm, terms: [tag] });
+                  }
+                  ordAdd.push(text);
+                });
+              });
+              await kvSet("inv-data", JSON.stringify(ainv));
+              await kvSet("order-inbox", JSON.stringify(keepO));
+              result.orders = "absorbed:" + ordAdd.length;
+            }
+          }
+        }
+      } catch (eo) { result.orders = "error:" + String((eo && eo.message) || eo); }
       // buy-hist
       var bought = [];
       (amenu.buys || []).forEach(function (b) { if (ast && ast[b.k]) bought.push(b.t); });
       ((ast && ast.extraBuys) || []).forEach(function (b) { if (b.c) bought.push(b.t); });
+      ordAdd.forEach(function (t) { bought.push(t + "(订单)"); });
       if (bought.length) {
         var bh = await kvGet("buy-hist");
         if (!Array.isArray(bh)) bh = [];
