@@ -65,6 +65,8 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 .dish .dk { font-size: 10px; color: var(--faint); margin-left: 1px; }
 .dish .dx { border: 0; background: none; color: #c9b8b8; cursor: pointer; font-size: 14px; line-height: 1; padding: 2px 4px; border-radius: 6px; }
 .dish .dx:hover { color: #b98a8a; background: #f3ece6; }
+.dish .pt { border: 0; background: #efe8d8; color: #8a7a55; cursor: pointer; font-size: 10px; line-height: 1; padding: 2.5px 5px; border-radius: 7px; margin-left: 1px; }
+.dish .pt.on { background: #e3f2e3; color: #2f7d43; font-weight: 700; }
 .dish.out { background: #fdf3e7; border: 1px dashed #ddb98a; color: #a97b3f; padding-left: 8px; }
 .dish.out .dk { color: #c4a06c; }
 .dish.out .dx { color: #d7bd9c; }
@@ -138,6 +140,9 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 .addrow button.cam { background: #fff; color: var(--green-dark); border: 1px solid var(--green); font-size: 16px; }
 .addrow button.cam:active { background: var(--bg); }
 .sugdrop { border: 1px solid var(--border); border-radius: 10px; background: #fff; margin-top: 6px; overflow: hidden; }
+.wish { margin-top: 16px; padding-top: 12px; border-top: 1px dashed #e3dac6; }
+.wish h3 { margin: 0 0 4px; font-size: 15px; }
+.wish .wtag { font-size: 11px; color: var(--faint); font-weight: 400; margin-left: 6px; }
 .sugitem { padding: 8px 12px; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .sugitem:active { background: var(--bg); }
 .sugitem + .sugitem { border-top: 1px solid var(--border); }
@@ -292,6 +297,17 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 </div>
 <div class="hint l">选🍱外食可以不写内容；点菜名可以查菜谱</div>
 <a class="histlink" data-view="eathist"><span><b>📅 全部菜单记录</b><span class="sub" id="elSub"></span></span><span class="arrow">→</span></a>
+</div>
+
+<div class="wish">
+<h3>🌅 明日想吃<span class="wtag" id="wishTag"></span></h3>
+<div id="wishList"></div>
+<div class="addrow">
+<input type="text" id="wishInp" placeholder="明天想吃什么？输入可搜菜谱">
+<button id="wishAdd" aria-label="加入">＋</button>
+</div>
+<div id="wishSug" class="sugdrop" hidden></div>
+<div class="hint l">记在这里的菜，明早 AI 会排进明日菜单，并对照库存生成采买清单</div>
 </div>
 
 <div class="fb">
@@ -460,66 +476,78 @@ var dayKey = "mama-" + d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDat
 var state = {};
 try { state = JSON.parse(localStorage.getItem(dayKey) || "{}"); } catch (e) {}
 state.deleted = state.deleted || {};
+  state.port = state.port || {};
 state.extraBuys = state.extraBuys || [];
 state.extraEats = state.extraEats || [];
 state.fbImgs = state.fbImgs || [];
 function save() { try { localStorage.setItem(dayKey, JSON.stringify(state)); } catch (e) {} cloudSave(); }
 var cloudTimer = null, cloudInvTimer = null, cloudRecTimer = null, cloudInboxTimer = null, cloudHabitsTimer = null;
+var cloudStReady = false;
 function cloudPost(key, data) {
   try {
-    fetch("/api/state?key=" + key, { method: "POST", headers: { "content-type": "application/json", "x-auth": KEY }, body: JSON.stringify(data) }).catch(function () {});
+    fetch("/api/state?key=" + key, { method: "POST", headers: { "content-type": "application/json", "x-auth": KEY }, keepalive: true, body: JSON.stringify(data) }).catch(function () {});
   } catch (e) {}
 }
 function cloudSave() { clearTimeout(cloudTimer); cloudTimer = setTimeout(function () { cloudPost(dayKey, state); }, 600); }
 
 var RGROUPS = ["🥩 肉类", "🐟 鱼与海鲜", "🥚 蛋与豆制品", "🥬 蔬菜", "🍚 主食杂粮", "🥣 汤羹滋补", "🍎 水果小食"];
-var REC_DEFAULT = { next: 48, list: [
-  { id:"R004", g:0, n:"猪蹄黄豆", kc:1000, ing:"带筋猪前蹄 500g ｜ 配：黄豆 50g ｜ 调：小葱、蒜末、姜" },
+var REC_DEFAULT = { next: 58, list: [ /* v15: 单位=小份(一人份) */
+  { id:"R004", g:0, n:"猪蹄黄豆", kc:500, ing:"带筋猪前蹄 250g ｜ 配：黄豆 25g ｜ 调：小葱、蒜末、姜" },
   { id:"R027", g:0, n:"卤猪蹄", kc:500, ing:"卤猪蹄 200g" },
-  { id:"R028", g:0, n:"腊肠", kc:420, ing:"贵州腊肠 100g" },
-  { id:"R032", g:0, n:"回锅肉", kc:1000, ing:"五花肉 200g ｜ 配：青辣椒" },
-  { id:"R035", g:0, n:"炒牛肉芹菜", kc:280, ing:"牛肉末 100g ｜ 配：芹菜 250g ｜ 调：糟辣椒、葱姜蒜" },
-  { id:"R039", g:0, n:"回锅肉（辣）", kc:1200, ing:"五花肉 250g ｜ 配：辣椒 ｜ 调：火锅调料" },
+  { id:"R028", g:0, n:"腊肠", kc:210, ing:"贵州腊肠 50g" },
+  { id:"R032", g:0, n:"回锅肉", kc:500, ing:"五花肉 100g ｜ 配：青辣椒" },
+  { id:"R035", g:0, n:"炒牛肉芹菜", kc:140, ing:"牛肉末 50g ｜ 配：芹菜 125g ｜ 调：糟辣椒、葱姜蒜" },
+  { id:"R039", g:0, n:"回锅肉（辣）", kc:600, ing:"五花肉 125g ｜ 配：辣椒 ｜ 调：火锅调料" },
   { id:"R041", g:0, n:"卤牛肉", kc:180, ing:"牛腱子肉 100g ｜ 调：八角桂皮花椒等 13 味卤料" },
   { id:"R006", g:1, n:"煎带鱼", kc:250, ing:"带鱼 0.5条" },
   { id:"R007", g:1, n:"三文鱼", kc:310, ing:"三文鱼 150g ｜ 配：紫苏叶 ｜ 调：辣根、寿司酱油" },
-  { id:"R021", g:1, n:"蒸蛏子", kc:150, ing:"蛏子 500g" },
+  { id:"R021", g:1, n:"蒸蛏子", kc:75, ing:"蛏子 250g" },
   { id:"R029", g:1, n:"蒸螃蟹", kc:100, ing:"螃蟹 1个" },
   { id:"R030", g:1, n:"水煮虾", kc:190, ing:"虾 200g" },
-  { id:"R005", g:2, n:"麻婆豆腐", kc:450, ing:"豆腐 1块、牛肉糜 50g ｜ 调：火锅调料" },
-  { id:"R018", g:2, n:"苦瓜炒鹅蛋", kc:280, ing:"苦瓜 1个、鹅蛋 1个" },
-  { id:"R026", g:2, n:"炒豆干", kc:250, ing:"豆干 120g ｜ 配：青辣椒 ｜ 调：干豆豉" },
-  { id:"R037", g:2, n:"水煮花生", kc:450, ing:"花生 250g" },
-  { id:"R038", g:2, n:"豆浆", kc:230, ing:"黄豆、黑豆、红豆、绿豆 共 60g" },
-  { id:"R040", g:2, n:"白菜豆腐", kc:150, ing:"白菜 250g ｜ 配：豆腐 0.5块" },
-  { id:"R042", g:2, n:"煮毛豆", kc:330, ing:"毛豆 250g" },
-  { id:"R043", g:2, n:"煮花生", kc:450, ing:"鲜花生 250g" },
-  { id:"R008", g:3, n:"煮菠菜", kc:60, ing:"菠菜苗 250g" },
-  { id:"R016", g:3, n:"炒油麦菜", kc:90, ing:"油麦菜苗 250g ｜ 配：西红柿 ｜ 调：豆豉" },
-  { id:"R019", g:3, n:"豇豆炒西红柿", kc:100, ing:"豇豆 100g ｜ 配：西红柿 ｜ 调：豆豉" },
-  { id:"R023", g:3, n:"煮苋菜", kc:70, ing:"苋菜 250g" },
-  { id:"R025", g:3, n:"煮鸡毛菜", kc:60, ing:"鸡毛菜 250g ｜ 调：水豆豉、蒜末、折耳根" },
-  { id:"R031", g:3, n:"水煮油麦菜苗", kc:45, ing:"油麦菜苗 250g" },
-  { id:"R033", g:3, n:"炒豆角", kc:130, ing:"豆角 250g ｜ 配：西红柿 ｜ 调：干豆豉" },
-  { id:"R046", g:3, n:"水煮菜心", kc:50, ing:"菜心 250g" },
-  { id:"R047", g:3, n:"素瓜豆", kc:80, ing:"圆西葫芦 0.5个、四季豆 100g" },
+  { id:"R005", g:2, n:"麻婆豆腐", kc:225, ing:"豆腐 0.5块、牛肉糜 25g ｜ 调：火锅调料" },
+  { id:"R018", g:2, n:"苦瓜炒鹅蛋", kc:140, ing:"苦瓜 0.5个、鹅蛋 0.5个" },
+  { id:"R026", g:2, n:"炒豆干", kc:125, ing:"豆干 60g ｜ 配：青辣椒 ｜ 调：干豆豉" },
+  { id:"R037", g:2, n:"水煮花生", kc:225, ing:"花生 125g" },
+  { id:"R038", g:2, n:"豆浆", kc:115, ing:"黄豆、黑豆、红豆、绿豆 共 30g" },
+  { id:"R040", g:2, n:"白菜豆腐", kc:75, ing:"白菜 125g ｜ 配：豆腐 1/4块" },
+  { id:"R042", g:2, n:"煮毛豆", kc:165, ing:"毛豆 125g" },
+  { id:"R043", g:2, n:"煮花生", kc:225, ing:"鲜花生 125g" },
+  { id:"R008", g:3, n:"煮菠菜", kc:30, ing:"菠菜苗 125g" },
+  { id:"R016", g:3, n:"炒油麦菜", kc:45, ing:"油麦菜苗 125g ｜ 配：西红柿 ｜ 调：豆豉" },
+  { id:"R019", g:3, n:"豇豆炒西红柿", kc:50, ing:"豇豆 50g ｜ 配：西红柿 ｜ 调：豆豉" },
+  { id:"R023", g:3, n:"煮苋菜", kc:35, ing:"苋菜 125g" },
+  { id:"R025", g:3, n:"煮鸡毛菜", kc:30, ing:"鸡毛菜 125g ｜ 调：水豆豉、蒜末、折耳根" },
+  { id:"R031", g:3, n:"水煮油麦菜苗", kc:25, ing:"油麦菜苗 125g" },
+  { id:"R033", g:3, n:"炒豆角", kc:65, ing:"豆角 125g ｜ 配：西红柿 ｜ 调：干豆豉" },
+  { id:"R046", g:3, n:"水煮菜心", kc:25, ing:"菜心 125g" },
+  { id:"R047", g:3, n:"素瓜豆", kc:40, ing:"圆西葫芦 1/4个、四季豆 50g" },
   { id:"R001", g:4, n:"山药", kc:85, ing:"山药 10厘米" },
   { id:"R003", g:4, n:"三明治", kc:400, ing:"牛肉 50g、蛋 1个 ｜ 配：罗马生菜、西红柿 0.5个、奶酪片、酸黄瓜、洋葱" },
-  { id:"R011", g:4, n:"豇豆饭", kc:600, ing:"米饭 300g ｜ 配：豇豆 100g、腊肉丁 50g" },
+  { id:"R011", g:4, n:"豇豆饭", kc:300, ing:"米饭 150g ｜ 配：豇豆 50g、腊肉丁 25g" },
   { id:"R012", g:4, n:"蒸南瓜", kc:150, ing:"贝贝南瓜 1个" },
-  { id:"R013", g:4, n:"豆粥", kc:430, ing:"红豆、黑豆、绿豆、薏米、大花红豆、莲子、小米 共约126g" },
+  { id:"R013", g:4, n:"豆粥", kc:215, ing:"红豆、黑豆、绿豆、薏米、大花红豆、莲子、小米 共约63g" },
   { id:"R014", g:4, n:"煮玉米", kc:150, ing:"玉米 1个" },
   { id:"R017", g:4, n:"面包", kc:135, ing:"面包 50g" },
-  { id:"R020", g:4, n:"荷包蛋青菜面", kc:700, ing:"面条 500g ｜ 配：青菜、鸡蛋 1个" },
-  { id:"R034", g:4, n:"凉拌莜面", kc:700, ing:"莜面 200g ｜ 配：青瓜 ｜ 调：香菜、小葱、蒜末" },
+  { id:"R020", g:4, n:"荷包蛋青菜面", kc:350, ing:"面条 250g ｜ 配：青菜、鸡蛋 0.5个" },
+  { id:"R034", g:4, n:"凉拌莜面", kc:350, ing:"莜面 100g ｜ 配：青瓜 ｜ 调：香菜、小葱、蒜末" },
   { id:"R044", g:4, n:"蒸山药", kc:85, ing:"山药 10厘米" },
   { id:"R045", g:4, n:"油条", kc:270, ing:"冷冻油条 1根" },
-  { id:"R009", g:5, n:"冬瓜汤", kc:60, ing:"冬瓜 400g ｜ 配：虾米" },
-  { id:"R022", g:5, n:"海螺冬瓜汤", kc:150, ing:"海螺 200g、冬瓜 400g" },
+  { id:"R009", g:5, n:"冬瓜汤", kc:30, ing:"冬瓜 200g ｜ 配：虾米" },
+  { id:"R022", g:5, n:"海螺冬瓜汤", kc:75, ing:"海螺 100g、冬瓜 200g" },
   { id:"R024", g:5, n:"燕窝粥", kc:120, ing:"燕窝 ｜ 配：大枣、枸杞" },
   { id:"R036", g:5, n:"林蛙油羹", kc:80, ing:"林蛙油 ｜ 配：大枣、枸杞、姜" },
   { id:"R002", g:6, n:"李子", kc:30, ing:"李子 1个" },
-  { id:"R015", g:6, n:"桃子", kc:50, ing:"桃子 1个" }
+  { id:"R015", g:6, n:"桃子", kc:50, ing:"桃子 1个" },
+  { id:"R048", g:0, n:"煎牛排", kc:250, ing:"牛排 100g ｜ 调：迷迭香 10g" },
+  { id:"R049", g:0, n:"豌豆尖鸡蛋汤", kc:70, ing:"豌豆尖 125g、鸡蛋 0.5个" },
+  { id:"R050", g:0, n:"煎豆干", kc:130, ing:"大方豆干 50g" },
+  { id:"R051", g:0, n:"豌豆炒肉沫", kc:180, ing:"豌豆 100g、肉沫 25g ｜ 调：葱姜蒜" },
+  { id:"R052", g:0, n:"鸡蛋羹", kc:80, ing:"鸡蛋 1个、西红柿 1/4个" },
+  { id:"R053", g:0, n:"棒骨煮菜", kc:200, ing:"棒骨 250g ｜ 配：青菜任选 125g" },
+  { id:"R054", g:0, n:"茄子炒西红柿", kc:250, ing:"茄子 1根、西红柿 0.5个、肉末 50g ｜ 调：葱姜蒜" },
+  { id:"R055", g:0, n:"豆汤", kc:180, ing:"大红豆 50g、酸菜 25g、青菜 50g、西红柿 1/4个" },
+  { id:"R056", g:4, n:"番茄肥牛饭", kc:650, ing:"番茄、肥牛卷 ｜ 配：米饭 ｜ 调：生抽、老抽、番茄酱、淀粉水" },
+  { id:"R057", g:0, n:"猪蹄炖芸豆", kc:600, ing:"带筋猪前蹄 250g ｜ 配：芸豆 250g" }
 ] };
 var INV_DEFAULT = [
   { g:"🥬 蔬菜", items:[
@@ -557,6 +585,16 @@ if (!invData) invData = seedInv();
 var recData = null;
 try { recData = JSON.parse(localStorage.getItem("mama-rec-data") || "null"); } catch (e) {}
 if (!recData) recData = JSON.parse(JSON.stringify(REC_DEFAULT));
+/* v15: 明日想吃 */
+var TMR = new Date(d.getTime() + 86400000);
+var tomorrowStr = TMR.getFullYear() + "-" + (TMR.getMonth()+1) + "-" + TMR.getDate();
+var wishData = { d: tomorrowStr, items: [] };
+try { var wc = JSON.parse(localStorage.getItem("mama-wish-data") || "null"); if (wc && wc.d === tomorrowStr && wc.items) wishData = wc; } catch (e) {}
+var cloudWishTimer = null;
+function saveWishData() {
+  try { localStorage.setItem("mama-wish-data", JSON.stringify(wishData)); } catch (e) {}
+  clearTimeout(cloudWishTimer); cloudWishTimer = setTimeout(function () { cloudWishTimer = null; cloudPost("wish-data", wishData); }, 600);
+}
 var inboxData = null;
 try { inboxData = JSON.parse(localStorage.getItem("mama-rec-inbox") || "null"); } catch (e) {}
 if (!inboxData) inboxData = [];
@@ -851,7 +889,16 @@ function buildIng(m, p, t) {
 }
 
 function alive(arr) { return arr.filter(function (dd) { return !state.deleted[dd.id]; }); }
-function sumKc(arr) { return alive(arr).reduce(function (a, dd) { return a + (dd.kc || 0); }, 0); }
+/* ===== v15: 小份单位。菜谱 kc=一小份(一人份)；菜单每人每菜默认1份，可调 2/0.5 ===== */
+function recKc(rid) {
+  if (!rid || !recData || !recData.list) return null;
+  for (var i = 0; i < recData.list.length; i++) if (recData.list[i].id === rid) return recData.list[i].kc;
+  return null;
+}
+function dishKc(dd) { var k = recKc(dd.r); return (k == null) ? (dd.kc || 0) : k; }
+function portOf(dd) { var p = state.port && state.port[dd.id]; return (p === 0.5 || p === 2) ? p : 1; }
+function effKc(dd) { return Math.round(dishKc(dd) * portOf(dd)); }
+function sumKc(arr) { return alive(arr).reduce(function (a, dd) { return a + effKc(dd); }, 0); }
 function exFor(meal, who) {
   return state.extraEats.map(function (e, i) { return { e: e, i: i }; })
     .filter(function (o) { return o.e.meal === meal && o.e.who === who; });
@@ -876,11 +923,24 @@ function jumpRecipe(rid) {
     el.classList.add("flash");
   }
 }
-function chip(t, kc, rid, onDel) {
+function chip(t, kc, rid, onDel, dd) {
   var s = document.createElement("span"); s.className = "dish";
   var nm = document.createElement("span"); nm.textContent = t;
   s.appendChild(nm);
   if (kc) { var k = document.createElement("span"); k.className = "dk"; k.textContent = kc; s.appendChild(k); }
+  if (dd && dishKc(dd) > 0) {
+    var pv = portOf(dd);
+    var pb = document.createElement("button"); pb.className = "pt" + (pv !== 1 ? " on" : "");
+    pb.textContent = "×" + (pv === 0.5 ? "½" : pv);
+    pb.title = "份量：1 → 2 → ½ 循环";
+    pb.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var cur = portOf(dd), nx = (cur === 1) ? 2 : (cur === 2 ? 0.5 : 1);
+      if (nx === 1) delete state.port[dd.id]; else state.port[dd.id] = nx;
+      save(); renderMeals();
+    });
+    s.appendChild(pb);
+  }
   if (rid) {
     s.className = "dish lkc"; s.title = "点击查看菜谱";
     var g = document.createElement("span"); g.className = "go"; g.textContent = "›"; s.appendChild(g);
@@ -893,7 +953,7 @@ function chip(t, kc, rid, onDel) {
 }
 function presetChips(arr) {
   return alive(arr).map(function (dd) {
-    return chip(dd.t, dd.kc, dd.r, function () { state.deleted[dd.id] = true; save(); renderMeals(); });
+    return chip(dd.t, effKc(dd), dd.r, function () { state.deleted[dd.id] = true; save(); renderMeals(); }, dd);
   });
 }
 function extraChips(meal, who) {
@@ -924,9 +984,17 @@ function mealLines(mealKey, boxId) {
   var n = 0;
   PERSONS.forEach(function (p) {
     var preset = mdef[p[0]] || [];
-    var chips = presetChips(preset).concat(extraChips(mealKey, p[0]));
+    var exs = exFor(mealKey, p[0]);
+    var hasOut = exs.some(function (o) { return o.e.out; });
+    var chips, kcs;
+    if (hasOut) { /* v15: 外食时该顿只显示外食、只算外食热量 */
+      chips = extraChips(mealKey, p[0]).filter(function (c, ci) { return exs[ci].e.out; });
+      kcs = exs.reduce(function (a, o) { return a + (o.e.out ? (o.e.kc || 0) : 0); }, 0);
+    } else {
+      chips = presetChips(preset).concat(extraChips(mealKey, p[0]));
+      kcs = sumKc(preset) + exSumFor(mealKey, p[0]);
+    }
     if (!chips.length) return;
-    var kcs = sumKc(preset) + exSumFor(mealKey, p[0]);
     box.appendChild(mline(p[1], chips, kcs ? "约" + kcs + "千卡" : null));
     n += chips.length;
   });
@@ -935,7 +1003,10 @@ function mealLines(mealKey, boxId) {
 function personTotal(who) {
   var t = 0;
   MEAL_ORDER.forEach(function (m) {
-    t += sumKc(((menuData.meals || {})[m] || {})[who] || []) + exSumFor(m, who);
+    var exs = exFor(m, who);
+    var hasOut = exs.some(function (o) { return o.e.out; });
+    if (hasOut) t += exs.reduce(function (a, o) { return a + (o.e.out ? (o.e.kc || 0) : 0); }, 0);
+    else t += sumKc(((menuData.meals || {})[m] || {})[who] || []) + exSumFor(m, who);
   });
   return t;
 }
@@ -1089,7 +1160,7 @@ function renderRec() {
     var q = recQuery.toLowerCase();
     return (r.n || "").toLowerCase().indexOf(q) !== -1 || (r.id || "").toLowerCase().indexOf(q) !== -1 || (r.ing || "").toLowerCase().indexOf(q) !== -1;
   }).length : null;
-  document.getElementById("recCount").textContent = (recQuery ? ("🔍 " + _rq + " / " + recData.list.length + " 道") : (recData.list.length + " 道 · 卡路里为估算"));
+  document.getElementById("recCount").textContent = (recQuery ? ("🔍 " + _rq + " / " + recData.list.length + " 道") : (recData.list.length + " 道 · 热量/食材按一小份(一人份)估算"));
   RGROUPS.forEach(function (gname, gi) {
     var rs = recData.list.map(function (r, i) { return { r: r, i: i }; }).filter(function (o) {
       if (o.r.g !== gi) return false;
@@ -1131,7 +1202,7 @@ function renderRec() {
         var h3 = document.createElement("h3");
         h3.appendChild(document.createTextNode(r.n));
         var rid = document.createElement("span"); rid.className = "rid"; rid.textContent = r.id; h3.appendChild(rid);
-        if (r.kc) { var kc = document.createElement("span"); kc.className = "kc"; kc.textContent = "约" + r.kc + "千卡"; h3.appendChild(kc); }
+        if (r.kc) { var kc = document.createElement("span"); kc.className = "kc"; kc.textContent = "约" + r.kc + "千卡/份"; h3.appendChild(kc); }
         dd.appendChild(h3);
         var _pd = parseIng(r.ing);
         var ing = document.createElement("div"); ing.className = "ing";
@@ -1196,10 +1267,12 @@ function cloudLoad() {
       if (dd && dd.ok && dd.data && typeof dd.data === "object") {
         state = dd.data;
         state.deleted = state.deleted || {};
+  state.port = state.port || {};
         state.extraBuys = state.extraBuys || [];
         state.extraEats = state.extraEats || [];
         state.fbImgs = state.fbImgs || [];
         try { localStorage.setItem(dayKey, JSON.stringify(state)); } catch (e) {}
+        cloudStReady = true;
         applyLoaded();
       }
       v13Flag("st");
@@ -1244,6 +1317,13 @@ function cloudLoad() {
         try { localStorage.setItem("mama-habits-data", JSON.stringify(habitsData)); } catch (e) {}
         renderHabits();
       } else { saveHabitsData(); }
+    }).catch(function () {});
+    fetch("/api/state?key=wish-data", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (dd) {
+      if (dd && dd.ok && dd.data && dd.data.d === tomorrowStr && dd.data.items) {
+        wishData = dd.data;
+        try { localStorage.setItem("mama-wish-data", JSON.stringify(wishData)); } catch (e) {}
+        renderWish();
+      }
     }).catch(function () {});
     fetch("/api/state?key=menu-today", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (dd) {
       if (dd && dd.ok && dd.data && dd.data.meals) {
@@ -1330,6 +1410,78 @@ document.getElementById("go").addEventListener("click", tryPw);
 document.getElementById("pw").addEventListener("keydown", function (e) { if (e.key === "Enter") tryPw(); });
 document.getElementById("awayBrunch").addEventListener("click", function () { state.awayBrunch = !state.awayBrunch; save(); applyAway(); });
 document.getElementById("awayDinner").addEventListener("click", function () { state.awayDinner = !state.awayDinner; save(); applyAway(); });
+/* ===== v15: 明日想吃 ===== */
+var wishSel = null;
+function renderWish() {
+  var box = document.getElementById("wishList"); box.innerHTML = "";
+  wishData.items.forEach(function (w, i) {
+    var s = document.createElement("span"); s.className = "dish";
+    var nm = document.createElement("span"); nm.textContent = w.t; s.appendChild(nm);
+    if (w.kc) { var k = document.createElement("span"); k.className = "dk"; k.textContent = w.kc + "/份"; s.appendChild(k); }
+    var x = document.createElement("button"); x.className = "dx"; x.textContent = "×"; x.title = "不要了";
+    x.addEventListener("click", function () { wishData.items.splice(i, 1); saveWishData(); renderWish(); });
+    s.appendChild(x);
+    box.appendChild(s);
+  });
+  document.getElementById("wishTag").textContent = wishData.items.length ? ("共 " + wishData.items.length + " 道 · 已存云端") : "";
+}
+function wishAddItem() {
+  var inp = document.getElementById("wishInp");
+  var t = inp.value.trim();
+  if (!t) return;
+  var it = { t: t };
+  if (wishSel) {
+    for (var i = 0; i < recData.list.length; i++) {
+      if (recData.list[i].id === wishSel && recData.list[i].n === t) { it.r = wishSel; if (recData.list[i].kc) it.kc = recData.list[i].kc; }
+    }
+  }
+  wishData.items.push(it);
+  inp.value = ""; wishSel = null;
+  var sb = document.getElementById("wishSug"); sb.hidden = true; sb.innerHTML = "";
+  saveWishData(); renderWish();
+}
+function renderWishSug() {
+  var box = document.getElementById("wishSug");
+  var q = document.getElementById("wishInp").value.trim();
+  box.innerHTML = "";
+  if (!q || !recData || !recData.list) { box.hidden = true; return; }
+  var ql = q.toLowerCase(); var hits = [];
+  recData.list.forEach(function (r) {
+    if (hits.length >= 6) return;
+    var n = String(r.n || ""), ing = String(r.ing || ""), id = String(r.id || "");
+    if (n.toLowerCase().indexOf(ql) !== -1 || ing.toLowerCase().indexOf(ql) !== -1 || id.toLowerCase() === ql) hits.push(r);
+  });
+  if (!hits.length) { box.hidden = true; return; }
+  hits.forEach(function (r) {
+    var dv = document.createElement("div"); dv.className = "sugitem";
+    var b = document.createElement("b"); b.textContent = r.n; dv.appendChild(b);
+    var sp = document.createElement("span"); sp.textContent = (r.kc ? "约" + r.kc + "千卡/份 · " : "") + r.id; dv.appendChild(sp);
+    dv.addEventListener("click", function () {
+      document.getElementById("wishInp").value = r.n;
+      wishSel = r.id;
+      box.hidden = true; box.innerHTML = "";
+    });
+    box.appendChild(dv);
+  });
+  box.hidden = false;
+}
+document.getElementById("wishAdd").addEventListener("click", wishAddItem);
+document.getElementById("wishInp").addEventListener("keydown", function (e) { if (e.key === "Enter") wishAddItem(); });
+document.getElementById("wishInp").addEventListener("input", function () { wishSel = null; renderWishSug(); });
+renderWish();
+
+/* ===== v15: 留言箱输入即自动保存;切走/关页前强制同步 ===== */
+var fbTimer = null;
+document.getElementById("fbText").addEventListener("input", function () {
+  state.fb = this.value;
+  clearTimeout(fbTimer);
+  fbTimer = setTimeout(function () { save(); document.getElementById("fbHint").textContent = "已自动保存 ✓"; }, 500);
+});
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState !== "hidden") return;
+  if (cloudStReady) { clearTimeout(cloudTimer); cloudPost(dayKey, state); }
+  if (cloudWishTimer) { clearTimeout(cloudWishTimer); cloudWishTimer = null; cloudPost("wish-data", wishData); }
+});
 document.getElementById("fbSave").addEventListener("click", function () {
   state.fb = document.getElementById("fbText").value;
   save();
@@ -1416,7 +1568,7 @@ function renderEatSug() {
   hits.forEach(function (r) {
     var d = document.createElement("div"); d.className = "sugitem";
     var b = document.createElement("b"); b.textContent = r.n; d.appendChild(b);
-    var s = document.createElement("span"); s.textContent = (r.kc ? "约" + r.kc + "千卡 · " : "") + r.id; d.appendChild(s);
+    var s = document.createElement("span"); s.textContent = (r.kc ? "约" + r.kc + "千卡/份 · " : "") + r.id; d.appendChild(s);
     d.addEventListener("click", function () {
       document.getElementById("eatInp").value = r.n;
       if (r.kc) document.getElementById("eatKc").value = r.kc;
