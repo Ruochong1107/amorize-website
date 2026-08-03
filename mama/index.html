@@ -137,6 +137,11 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 .addrow button:active { background: var(--green-dark); }
 .addrow button.cam { background: #fff; color: var(--green-dark); border: 1px solid var(--green); font-size: 16px; }
 .addrow button.cam:active { background: var(--bg); }
+.sugdrop { border: 1px solid var(--border); border-radius: 10px; background: #fff; margin-top: 6px; overflow: hidden; }
+.sugitem { padding: 8px 12px; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.sugitem:active { background: var(--bg); }
+.sugitem + .sugitem { border-top: 1px solid var(--border); }
+.sugitem span { color: var(--muted); font-size: 12px; flex: none; }
 .addrow.sub { margin-top: 8px; justify-content: flex-end; flex-wrap: wrap; }
 .selftag { display: inline-block; font-size: 10px; color: var(--green-dark); border: 1px solid var(--green); border-radius: 20px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
 .mealtag { display: inline-block; font-size: 10px; color: var(--warn); border: 1px solid #e5d5ac; border-radius: 20px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
@@ -264,6 +269,7 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <div class="addrow">
 <input type="text" id="eatInp" placeholder="额外吃了什么？记一笔，会加进上面">
 </div>
+<div id="eatSug" class="sugdrop" hidden></div>
 <div class="addrow sub">
 <select id="eatMeal">
 <option value="brunch">第一餐</option>
@@ -730,7 +736,8 @@ function applyOrderResults() {
       var bk = (m && m.k) || null, bt = null;
       if (bk) (menuData.buys || []).forEach(function (b) { if (b.k === bk) bt = b.t; });
       if (bt) {
-        if (!state[bk]) { state[bk] = true; invAbsorb("m:" + bk, bt); nCheck++; }
+        /* v14: 命中清单也按订单真实数量入库（清单显示仍是推荐文案） */
+        if (!state[bk]) { state[bk] = true; invAbsorb("m:" + bk, text); nCheck++; }
       } else {
         var dup = !!(state.invLog && state.invLog["e:" + text]);
         state.extraBuys.forEach(function (b) { if (b.t === text) dup = true; });
@@ -1376,18 +1383,51 @@ document.getElementById("eatAdd").addEventListener("click", function () {
   var kc = (kcRaw > 0) ? kcRaw : null;
   var meal = document.getElementById("eatMeal").value;
   var who = document.getElementById("eatWho").value;
+  function mkEat(w, k2) { var o = { t: v, meal: meal, who: w, kc: k2, out: out }; if (eatSel) o.r = eatSel; return o; }
   if (who === "shared") {
     var half = kc ? Math.round(kc / 2) : null;
-    state.extraEats.push({ t: v, meal: meal, who: "wife", kc: half, out: out });
-    state.extraEats.push({ t: v, meal: meal, who: "husb", kc: half, out: out });
+    state.extraEats.push(mkEat("wife", half));
+    state.extraEats.push(mkEat("husb", half));
   } else {
-    state.extraEats.push({ t: v, meal: meal, who: who, kc: kc, out: out });
+    state.extraEats.push(mkEat(who, kc));
   }
   inp.value = ""; document.getElementById("eatKc").value = "";
   document.getElementById("eatType").value = "home";
+  eatSel = null; renderEatSug();
   save(); renderMeals();
 });
 document.getElementById("eatInp").addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("eatAdd").click(); });
+/* ===== v14: 加菜实时搜菜谱，点选自动带千卡 ===== */
+var eatSel = null;
+function renderEatSug() {
+  var box = document.getElementById("eatSug");
+  if (!box) return;
+  var q = document.getElementById("eatInp").value.trim();
+  box.innerHTML = "";
+  if (!q || !recData || !recData.list) { box.hidden = true; return; }
+  var ql = q.toLowerCase();
+  var hits = [];
+  recData.list.forEach(function (r) {
+    if (hits.length >= 6) return;
+    var n = String(r.n || ""), ing = String(r.ing || ""), id = String(r.id || "");
+    if (n.toLowerCase().indexOf(ql) !== -1 || ing.toLowerCase().indexOf(ql) !== -1 || id.toLowerCase() === ql) hits.push(r);
+  });
+  if (!hits.length || (hits.length === 1 && hits[0].n === q && eatSel === hits[0].id)) { box.hidden = true; return; }
+  hits.forEach(function (r) {
+    var d = document.createElement("div"); d.className = "sugitem";
+    var b = document.createElement("b"); b.textContent = r.n; d.appendChild(b);
+    var s = document.createElement("span"); s.textContent = (r.kc ? "约" + r.kc + "千卡 · " : "") + r.id; d.appendChild(s);
+    d.addEventListener("click", function () {
+      document.getElementById("eatInp").value = r.n;
+      if (r.kc) document.getElementById("eatKc").value = r.kc;
+      eatSel = r.id;
+      box.hidden = true; box.innerHTML = "";
+    });
+    box.appendChild(d);
+  });
+  box.hidden = false;
+}
+document.getElementById("eatInp").addEventListener("input", function () { eatSel = null; renderEatSug(); });
 document.getElementById("invAdd").addEventListener("click", function () {
   var n = document.getElementById("invName");
   var q = document.getElementById("invQty");
