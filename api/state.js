@@ -1,4 +1,5 @@
-// 每日买菜助手 · 云同步接口 v4
+// 每日买菜助手 · 云同步接口 v5
+// v5 新增：archive 时按实际菜单×小份食材确定性扣减库存（负流水 🍳M/D 标签，同项同日防重）
 // 基础：GET ?key=xxx 读；POST ?key=xxx 写；GET ?key=xxx&setb64= / &appendb64= 管道写（v2）
 // v3 新增（供定时管道用，避免 AI 解析大 JSON）：
 //   GET ?digest=1&day=Y-M-D       返回该日纯文本摘要（反馈/记录/库存/菜谱/当日菜单），固定小节标题
@@ -190,6 +191,80 @@ module.exports = async function (req, res) {
           }
         }
       } catch (eo) { result.orders = "error:" + String((eo && eo.message) || eo); }
+      // v5: 消耗扣减 —— 实际菜单(减删菜/外食/不在家)×份数×小份食材 → 聚合后负流水写回 inv-data
+      try {
+        var rec5 = await kvGet("rec-data");
+        var inv5 = await kvGet("inv-data");
+        if (amenu && amenu.meals && rec5 && rec5.list && Array.isArray(inv5) && inv5.length) {
+          var del5 = (ast && ast.deleted) || {};
+          var port5 = (ast && ast.port) || {};
+          var ex5 = (ast && ast.extraEats) || [];
+          var byId5 = {}; var byName5 = {};
+          rec5.list.forEach(function (r) { byId5[r.id] = r; if (r.n) byName5[r.n] = r; });
+          var servings = {}; // 菜谱id -> 总小份数
+          ["brunch", "second", "dinner"].forEach(function (mk) {
+            if (ast && ((mk === "brunch" && ast.awayBrunch) || (mk === "dinner" && ast.awayDinner))) return;
+            var mdef5 = amenu.meals[mk] || {};
+            ["wife", "husb", "nanny", "dogs"].forEach(function (p) {
+              if (ex5.some(function (e) { return e.meal === mk && e.who === p && e.out; })) return; // 外食：该人该顿不消耗
+              (mdef5[p] || []).forEach(function (dd) {
+                if (del5[dd.id]) return;
+                var r5 = dd.r ? byId5[dd.r] : byName5[dd.t];
+                if (!r5) return;
+                var pp = port5[dd.id]; pp = (pp === 0.5 || pp === 2) ? pp : 1;
+                servings[r5.id] = (servings[r5.id] || 0) + pp;
+              });
+              ex5.forEach(function (e) {
+                if (e.meal !== mk || e.who !== p || e.out || !e.r || !byId5[e.r]) return;
+                servings[e.r] = (servings[e.r] || 0) + 1; // 加菜(带菜谱)算1小份
+              });
+            });
+          });
+          function num5(s) {
+            var m5 = String(s).match(/^([0-9]+(?:\.[0-9]+)?)(?:\/([0-9]+))?$/);
+            if (!m5) return null;
+            var v = parseFloat(m5[1]);
+            if (m5[2]) { var dv = parseFloat(m5[2]); if (!dv) return null; v = v / dv; }
+            return v;
+          }
+          function fmt5(v) { return String(Math.round(v * 100) / 100); }
+          var need5 = {}; // "食材名|单位" -> 总量
+          Object.keys(servings).forEach(function (rid) {
+            var r = byId5[rid];
+            if (!r || !r.ing) return;
+            String(r.ing).split(/｜|\|/).forEach(function (seg) {
+              seg = seg.trim();
+              if (/^调[：:]/.test(seg)) return; // 调料不扣
+              seg = seg.replace(/^配[：:]\s*/, "");
+              if (seg.indexOf("共") !== -1) return; // "黄豆、黑豆…共30g" 无法分摊，跳过
+              seg.split("、").forEach(function (item) {
+                item = item.trim();
+                var mm5 = item.match(/^(.+?)\s+([0-9][0-9.\/]*)\s*([^\s0-9]*)$/);
+                if (!mm5) return; // 无数量不扣
+                var qv = num5(mm5[2]);
+                if (qv == null || !mm5[1].trim()) return;
+                var k5 = mm5[1].trim() + "|" + (mm5[3] || "");
+                need5[k5] = (need5[k5] || 0) + qv * servings[rid];
+              });
+            });
+          });
+          var tag5 = "🍳" + shortD(aday);
+          var ded5 = 0, miss5 = [];
+          Object.keys(need5).forEach(function (k5) {
+            var nm5 = k5.split("|")[0], un5 = k5.split("|")[1];
+            var hit5 = null;
+            inv5.forEach(function (grp) { (grp.items || []).forEach(function (it) { if (!hit5 && it.n === nm5) hit5 = it; }); });
+            if (!hit5 && nm5.length >= 2) inv5.forEach(function (grp) { (grp.items || []).forEach(function (it) { if (!hit5 && it.n && it.n.length >= 2 && (String(it.n).indexOf(nm5) !== -1 || nm5.indexOf(it.n) !== -1)) hit5 = it; }); });
+            if (!hit5) { if (miss5.indexOf(nm5) === -1) miss5.push(nm5); return; }
+            if (!Array.isArray(hit5.terms)) hit5.terms = [];
+            if (hit5.terms.some(function (t) { return String(t).indexOf(tag5) !== -1 && String(t).charAt(0) === "-"; })) return; // 同项同日防重
+            hit5.terms.push("-" + fmt5(need5[k5]) + un5 + tag5);
+            ded5++;
+          });
+          if (ded5) await kvSet("inv-data", JSON.stringify(inv5));
+          result.consume = "deducted:" + ded5 + (miss5.length ? " untracked:" + miss5.join(",") : "");
+        } else result.consume = "skip";
+      } catch (ec) { result.consume = "error:" + String((ec && ec.message) || ec); }
       // buy-hist
       var bought = [];
       (amenu.buys || []).forEach(function (b) { if (ast && ast[b.k]) bought.push(b.t); });
