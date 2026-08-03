@@ -135,6 +135,8 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 .addrow .kcin { flex: none; width: 96px; font-size: 12.5px; padding: 8px 10px; }
 .addrow button { width: 38px; height: 37px; flex: none; color: #fff; background: var(--green); border: 0; border-radius: 10px; cursor: pointer; font-size: 20px; line-height: 1; }
 .addrow button:active { background: var(--green-dark); }
+.addrow button.cam { background: #fff; color: var(--green-dark); border: 1px solid var(--green); font-size: 16px; }
+.addrow button.cam:active { background: var(--bg); }
 .addrow.sub { margin-top: 8px; justify-content: flex-end; flex-wrap: wrap; }
 .selftag { display: inline-block; font-size: 10px; color: var(--green-dark); border: 1px solid var(--green); border-radius: 20px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
 .mealtag { display: inline-block; font-size: 10px; color: var(--warn); border: 1px solid #e5d5ac; border-radius: 20px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
@@ -235,8 +237,11 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 </select>
 <select id="buyCat" title="入库分类"><option value="">🤖 自动</option></select>
 <button id="buyAdd" aria-label="加入">＋</button>
+<button id="orderCam" class="cam" aria-label="传订单截图" title="传美团/买菜订单截图，AI 自动识别">📷</button>
+<input type="file" id="orderFile" accept="image/*" multiple hidden>
 </div>
-<div class="hint l">选了哪一餐，"第X餐不在家"时会跟着一起划掉</div>
+<div class="hint l">选了哪一餐，"第X餐不在家"时会跟着一起划掉；📷 传订单截图，AI 识别后自动打勾入库</div>
+<div class="hint l" id="orderHint" hidden></div>
 <a class="histlink" data-view="buyhist"><span><b>🧾 全部采购记录</b><span class="sub" id="blSub"></span></span><span class="arrow">→</span></a>
 </div>
 
@@ -695,6 +700,53 @@ function invUndo(logKey) {
   save(); saveInvData(); renderInv();
   invToast("↩️ 已从库存撤回：" + log.n);
 }
+/* ===== v13: 订单截图 → AI 班车识别 → 页面自应用（页面是唯一写入者，杜绝整包覆盖冲突） ===== */
+var orderInbox = [];
+var v13Ready = { st: false, inv: false, menu: false, done: false };
+function v13Flag(k) { v13Ready[k] = true; v13TryApply(); }
+function v13TryApply() {
+  if (v13Ready.done || !v13Ready.st || !v13Ready.inv || !v13Ready.menu) return;
+  v13Ready.done = true;
+  fetch("/api/state?key=order-inbox", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (dd) {
+    if (dd && dd.ok && Array.isArray(dd.data)) { orderInbox = dd.data; applyOrderResults(); }
+  }).catch(function () {});
+}
+function saveOrderInbox() { cloudPost("order-inbox", orderInbox); }
+function renderOrderHint() {
+  var el = document.getElementById("orderHint");
+  if (!el) return;
+  var pend = 0;
+  orderInbox.forEach(function (o) { if (o && o.status === "new") pend++; });
+  if (pend) { el.hidden = false; el.textContent = "📷 " + pend + " 单待识别 · AI 每天早7点/午间11:30自动处理"; }
+  else { el.hidden = true; }
+}
+function applyOrderResults() {
+  var keep = [], nCheck = 0, nAdd = 0, changed = false;
+  orderInbox.forEach(function (o) {
+    if (!o || o.status !== "parsed" || !Array.isArray(o.items)) { keep.push(o); return; }
+    o.items.forEach(function (m) {
+      var text = String((m && m.t) || "").trim();
+      if (!text) return;
+      var bk = (m && m.k) || null, bt = null;
+      if (bk) (menuData.buys || []).forEach(function (b) { if (b.k === bk) bt = b.t; });
+      if (bt) {
+        if (!state[bk]) { state[bk] = true; invAbsorb("m:" + bk, bt); nCheck++; }
+      } else {
+        var dup = !!(state.invLog && state.invLog["e:" + text]);
+        state.extraBuys.forEach(function (b) { if (b.t === text) dup = true; });
+        if (!dup) { state.extraBuys.push({ t: text, c: true, meal: "both", g: (m.g || "") }); invAbsorb("e:" + text, text, m.g || ""); nAdd++; }
+      }
+    });
+    changed = true;
+  });
+  if (changed) {
+    orderInbox = keep;
+    save(); saveOrderInbox();
+    renderBuys(); renderExtraBuys();
+    invToast("📷 订单识别完成：清单勾掉 " + nCheck + " 项，自加入库 " + nAdd + " 项");
+  }
+  renderOrderHint();
+}
 function fillBuyCat() {
   var sel = document.getElementById("buyCat");
   if (!sel || sel.options.length > 1) return;
@@ -1143,7 +1195,8 @@ function cloudLoad() {
         try { localStorage.setItem(dayKey, JSON.stringify(state)); } catch (e) {}
         applyLoaded();
       }
-    }).catch(function () {});
+      v13Flag("st");
+    }).catch(function () { v13Flag("st"); });
     fetch("/api/state?key=inv-data", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (dd) {
       if (dd && dd.ok && dd.data && dd.data.length) {
         invData = dd.data;
@@ -1160,7 +1213,8 @@ function cloudLoad() {
           saveInvData();
         }).catch(function () { saveInvData(); });
       }
-    }).catch(function () {});
+      v13Flag("inv");
+    }).catch(function () { v13Flag("inv"); });
     fetch("/api/state?key=rec-data", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (dd) {
       if (dd && dd.ok && dd.data && dd.data.list && dd.data.list.length) {
         recData = dd.data;
@@ -1190,7 +1244,8 @@ function cloudLoad() {
         try { localStorage.setItem("mama-menu", JSON.stringify(menuData)); } catch (e) {}
         renderMeals(); renderBuys();
       }
-    }).catch(function () {});
+      v13Flag("menu");
+    }).catch(function () { v13Flag("menu"); });
     fetch("/api/state?key=buy-hist", { headers: { "x-auth": KEY } }).then(function (r) { return r.json(); }).then(function (dd) {
       if (dd && dd.ok && Array.isArray(dd.data) && dd.data.length) {
         buyHist = dd.data;
@@ -1294,6 +1349,24 @@ document.getElementById("buyAdd").addEventListener("click", function () {
   invAbsorb("e:" + v, v, cat);
 });
 document.getElementById("buyInp").addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("buyAdd").click(); });
+document.getElementById("orderCam").addEventListener("click", function () { document.getElementById("orderFile").click(); });
+document.getElementById("orderFile").addEventListener("change", function () {
+  var pend = 0;
+  orderInbox.forEach(function (o) { if (o && o.status === "new") pend++; });
+  var room = 3 - pend;
+  if (room <= 0) { invToast("📷 已有 " + pend + " 单在排队，等 AI 识别完再传"); this.value = ""; return; }
+  var files = Array.prototype.slice.call(this.files, 0, room);
+  var left = files.length;
+  if (!left) { this.value = ""; return; }
+  files.forEach(function (f) {
+    compressImage(f, 1100, 0.68, function (url) {
+      if (url) orderInbox.push({ id: "o" + Date.now().toString(36) + Math.floor(Math.random() * 10000), d: dayKey.replace("mama-", ""), status: "new", img: url });
+      left--;
+      if (left === 0) { saveOrderInbox(); renderOrderHint(); invToast("📷 已收到订单截图，AI 将在下一班（早7点/午11:30）识别更新清单"); }
+    });
+  });
+  this.value = "";
+});
 document.getElementById("eatAdd").addEventListener("click", function () {
   var inp = document.getElementById("eatInp");
   var v = inp.value.trim();
