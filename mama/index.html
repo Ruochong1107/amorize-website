@@ -140,13 +140,14 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 .addrow button.cam { background: #fff; color: var(--green-dark); border: 1px solid var(--green); font-size: 16px; }
 .addrow button.cam:active { background: var(--bg); }
 .sugdrop { border: 1px solid var(--border); border-radius: 10px; background: #fff; margin-top: 6px; overflow: hidden; }
-.wish { margin-top: 16px; padding-top: 12px; border-top: 1px dashed #e3dac6; }
+.wish { padding-bottom: 14px; border-bottom: 1px dashed #e3dac6; }
 .wish h3 { margin: 0 0 4px; font-size: 15px; }
 .wish .wtag { font-size: 11px; color: var(--faint); font-weight: 400; margin-left: 6px; }
 .sugitem { padding: 8px 12px; font-size: 13px; cursor: pointer; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
 .sugitem:active { background: var(--bg); }
 .sugitem + .sugitem { border-top: 1px solid var(--border); }
 .sugitem span { color: var(--muted); font-size: 12px; flex: none; }
+.sugempty { padding: 8px 12px; font-size: 12.5px; color: var(--muted); }
 .addrow.sub { margin-top: 8px; justify-content: flex-end; flex-wrap: wrap; }
 .selftag { display: inline-block; font-size: 10px; color: var(--green-dark); border: 1px solid var(--green); border-radius: 20px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
 .mealtag { display: inline-block; font-size: 10px; color: var(--warn); border: 1px solid #e5d5ac; border-radius: 20px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
@@ -180,6 +181,21 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 .inbox .tx { color: var(--muted); line-height: 1.6; flex: 1; word-break: break-all; }
 .pendtag { display: inline-block; font-size: 10px; color: var(--warn); border: 1px solid #e5d5ac; border-radius: 20px; padding: 0 6px; margin-left: 6px; white-space: nowrap; }
 .tag { display: inline-block; font-size: 10.5px; color: var(--faint); border: 1px solid var(--border); border-radius: 20px; padding: 0 7px; margin-left: 7px; vertical-align: 1px; font-weight: 400; }
+.ainote { margin: 10px 0 2px; }
+.ainote .ahd { display: flex; align-items: center; gap: 6px; border: 0; background: transparent; font: inherit; font-size: 11.5px; color: var(--muted); cursor: pointer; padding: 2px 0; width: 100%; text-align: left; }
+.ainote .ahd .bot { font-size: 13px; flex: none; }
+.ainote .ahd .cnt { color: var(--faint); }
+.ainote .ahd .chev { margin-left: auto; color: var(--faint); font-size: 10px; transition: transform .15s; }
+.ainote.open .ahd .chev { transform: rotate(180deg); }
+.ainote .abody { display: none; margin-top: 7px; background: #faf9f4; border: 1px solid var(--border); border-radius: 12px; padding: 8px 12px; }
+.ainote.open .abody { display: block; }
+.arow { display: flex; gap: 8px; align-items: flex-start; padding: 4px 0; font-size: 12.5px; line-height: 1.6; color: var(--muted); }
+.arow + .arow { border-top: 1px dashed var(--border); }
+.arow .albl { flex: none; font-size: 10px; line-height: 1; border-radius: 6px; padding: 3.5px 6px; margin-top: 3.5px; background: #f1f0ec; color: var(--muted); white-space: nowrap; }
+.albl.g { background: #e7efe2; color: #5c7a48; }
+.albl.r { background: #f6e7e2; color: #b0705c; }
+.albl.o { background: #faf0dd; color: #a9853f; }
+.albl.b { background: #e5edf3; color: #5a7d99; }
 </style>
 </head>
 <body>
@@ -235,6 +251,7 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <div class="cols">
 <div class="card">
 <h2>🧾 采买清单<span class="tag" id="buyTag"></span></h2>
+<div class="ainote" id="buyNote" hidden></div>
 <div id="buyList"></div>
 <div id="extraBuys"></div>
 <div class="addrow">
@@ -263,6 +280,7 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <button id="awayDinner">第三餐不在家</button>
 </span>
 </h2>
+<div class="ainote" id="menuNote" hidden></div>
 <div class="meal" id="mealBrunch"><b>第一餐</b><div id="linesB"></div></div>
 <div class="meal" id="mealSecond" hidden><b>第二餐</b><div id="linesS"></div></div>
 <div class="meal" id="mealDinner"><b>第三餐</b><div id="linesD"></div></div>
@@ -299,6 +317,7 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <a class="histlink" data-view="eathist"><span><b>📅 全部菜单记录</b><span class="sub" id="elSub"></span></span><span class="arrow">→</span></a>
 </div>
 
+<div class="card">
 <div class="wish">
 <h3>🌅 明日想吃<span class="wtag" id="wishTag"></span></h3>
 <div id="wishList"></div>
@@ -318,6 +337,7 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <input type="file" id="fbFile" accept="image/*" multiple hidden>
 <div class="fbimgs" id="fbImgs"></div>
 <div class="hint" id="fbHint"></div>
+</div>
 </div>
 </div>
 </section>
@@ -1013,9 +1033,53 @@ function personTotal(who) {
 function shortD(ds) { var p = String(ds || "").split("-"); return p.length === 3 ? p[1] + "/" + p[2] : ds; }
 function applyMenuTags() {
   var todayStr = d.getFullYear() + "-" + (d.getMonth()+1) + "-" + d.getDate();
-  var t = (menuData.date === todayStr) ? (menuData.note || shortD(menuData.date) + " 数据") : "沿用 " + shortD(menuData.date) + " 菜单";
+  var isToday = menuData.date === todayStr;
+  var note = String(menuData.note || "");
+  var isAi = isToday && /^AI生成/.test(note);
+  var t = isToday ? (isAi ? shortD(menuData.date) + " · AI生成" : (note || shortD(menuData.date) + " 数据")) : "沿用 " + shortD(menuData.date) + " 菜单";
   document.getElementById("menuTag").textContent = t;
   document.getElementById("buyTag").textContent = t;
+  renderAiNote("menuNote", isAi ? note : "", true);
+  renderAiNote("buyNote", isAi ? note : "", false);
+}
+var aiNoteOpen = {};
+function aiNoteRowMeta(seg) {
+  var m = seg.match(/^(反馈|额外吃信号|删菜|想吃|采买)\s*[::]\s*([\s\S]*)$/);
+  if (m) {
+    if (m[1] === "反馈") return { l: "反馈", c: "g", t: m[2] };
+    if (m[1] === "额外吃信号") return { l: "想吃信号", c: "b", t: m[2] };
+    if (m[1] === "删菜") return { l: "删菜", c: "r", t: m[2] };
+    return { l: m[1], c: "b", t: m[2] };
+  }
+  if (seg.indexOf("外食") > -1) return { l: "外食", c: "o", t: seg.replace(/^🍱\s*/, "") };
+  return { l: "说明", c: "n", t: seg };
+}
+function renderAiNote(id, note, defOpen) {
+  var box = document.getElementById(id); if (!box) return;
+  box.innerHTML = "";
+  var segs = String(note || "").split(" | ").map(function (s) { return s.trim(); }).filter(Boolean);
+  var badge = "AI 备注";
+  if (segs.length && /^AI生成/.test(segs[0])) badge = segs.shift().replace(/^AI生成[··]?\s*/, "AI · ");
+  if (!segs.length) { box.hidden = true; return; }
+  box.hidden = false;
+  if (!(id in aiNoteOpen)) aiNoteOpen[id] = !!defOpen;
+  box.className = "ainote" + (aiNoteOpen[id] ? " open" : "");
+  var hd = document.createElement("button"); hd.className = "ahd"; hd.type = "button";
+  var bt = document.createElement("span"); bt.className = "bot"; bt.textContent = "🤖"; hd.appendChild(bt);
+  hd.appendChild(document.createTextNode(badge + " 排菜说明"));
+  var cn = document.createElement("span"); cn.className = "cnt"; cn.textContent = segs.length + " 条"; hd.appendChild(cn);
+  var ch = document.createElement("span"); ch.className = "chev"; ch.textContent = "▼"; hd.appendChild(ch);
+  hd.addEventListener("click", function () { aiNoteOpen[id] = !aiNoteOpen[id]; box.className = "ainote" + (aiNoteOpen[id] ? " open" : ""); });
+  box.appendChild(hd);
+  var body = document.createElement("div"); body.className = "abody";
+  segs.forEach(function (seg) {
+    var meta = aiNoteRowMeta(seg);
+    var row = document.createElement("div"); row.className = "arow";
+    var lb = document.createElement("span"); lb.className = "albl " + meta.c; lb.textContent = meta.l; row.appendChild(lb);
+    var tx = document.createElement("span"); tx.textContent = meta.t; row.appendChild(tx);
+    body.appendChild(row);
+  });
+  box.appendChild(body);
 }
 function renderMeals() {
   applyMenuTags();
@@ -1451,7 +1515,11 @@ function renderWishSug() {
     var n = String(r.n || ""), ing = String(r.ing || ""), id = String(r.id || "");
     if (n.toLowerCase().indexOf(ql) !== -1 || ing.toLowerCase().indexOf(ql) !== -1 || id.toLowerCase() === ql) hits.push(r);
   });
-  if (!hits.length) { box.hidden = true; return; }
+  if (!hits.length) {
+    var em2 = document.createElement("div"); em2.className = "sugempty";
+    em2.textContent = "菜谱库里没搜到「" + q + "」～ 直接点＋记上，明早 AI 会按常识安排";
+    box.appendChild(em2); box.hidden = false; return;
+  }
   hits.forEach(function (r) {
     var dv = document.createElement("div"); dv.className = "sugitem";
     var b = document.createElement("b"); b.textContent = r.n; dv.appendChild(b);
@@ -1564,7 +1632,12 @@ function renderEatSug() {
     var n = String(r.n || ""), ing = String(r.ing || ""), id = String(r.id || "");
     if (n.toLowerCase().indexOf(ql) !== -1 || ing.toLowerCase().indexOf(ql) !== -1 || id.toLowerCase() === ql) hits.push(r);
   });
-  if (!hits.length || (hits.length === 1 && hits[0].n === q && eatSel === hits[0].id)) { box.hidden = true; return; }
+  if (hits.length === 1 && hits[0].n === q && eatSel === hits[0].id) { box.hidden = true; return; }
+  if (!hits.length) {
+    var em = document.createElement("div"); em.className = "sugempty";
+    em.textContent = "菜谱库里没搜到「" + q + "」～ 直接点＋也能记上";
+    box.appendChild(em); box.hidden = false; return;
+  }
   hits.forEach(function (r) {
     var d = document.createElement("div"); d.className = "sugitem";
     var b = document.createElement("b"); b.textContent = r.n; d.appendChild(b);
