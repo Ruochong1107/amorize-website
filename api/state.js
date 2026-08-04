@@ -1,4 +1,5 @@
-// 每日买菜助手 · 云同步接口 v5
+// 每日买菜助手 · 云同步接口 v5.1
+// v5.1 新增：archive 扣减遇库存无此项 → 自动按分类建条目记负数（零基库存,消耗不再丢失,原 untracked 改 created）
 // v5 新增：archive 时按实际菜单×小份食材确定性扣减库存（负流水 🍳M/D 标签，同项同日防重）
 // 基础：GET ?key=xxx 读；POST ?key=xxx 写；GET ?key=xxx&setb64= / &appendb64= 管道写（v2）
 // v3 新增（供定时管道用，避免 AI 解析大 JSON）：
@@ -249,20 +250,40 @@ module.exports = async function (req, res) {
             });
           });
           var tag5 = "🍳" + shortD(aday);
-          var ded5 = 0, miss5 = [];
+          var CLS5 = [
+            ["肉蛋海鲜", /肉|蛋(?!糕)|鱼|虾|蟹|螺|蛏|鲍|贝|鸡|鸭|鹅|牛|猪|羊(?!奶)|蹄|排骨|香肠|腊肠|腊肉|火腿|培根|鱿|海参/],
+            ["主食", /面包|贝果|吐司|馒头|包子|饺|馄饨皮|面条|米饭|年糕|莜面|玉米|燕麦|麦片|粉丝|米粉|挂面/],
+            ["豆类与杂粮", /豆$|豆腐|豆干|豆皮|腐竹|花生|莲子|薏米|小米|糙米|藜麦|芝麻|杂粮|豌豆/],
+            ["水果", /苹果|香蕉|橙|橘|柚|桃|李子|梨|莓|葡萄|樱桃|荔枝|龙眼|芒果|菠萝|猕猴桃|火龙果|西瓜|哈密瓜|甜瓜|柿|石榴/],
+            ["滋补", /人参|黄芪|枸杞|红枣|桂圆|燕窝|阿胶|石斛|虫草|天麻|当归|茯苓|奶粉/],
+            ["调味与香料", /油$|盐|糖$|醋|酱|生抽|老抽|蚝油|料酒|花椒|八角|桂皮|香叶|胡椒|味精|鸡精|淀粉|香油/],
+            ["蔬菜", /菜|瓜|茄|椒|葱|蒜|姜|萝卜|芹|笋|藕|山药|土豆|红薯|紫薯|番茄|西红柿|豆角|豇豆|毛豆|苗$|生|韭|蘑|菇|木耳|银耳|海带/]
+          ];
+          var ded5 = 0, crt5 = [];
           Object.keys(need5).forEach(function (k5) {
             var nm5 = k5.split("|")[0], un5 = k5.split("|")[1];
             var hit5 = null;
             inv5.forEach(function (grp) { (grp.items || []).forEach(function (it) { if (!hit5 && it.n === nm5) hit5 = it; }); });
             if (!hit5 && nm5.length >= 2) inv5.forEach(function (grp) { (grp.items || []).forEach(function (it) { if (!hit5 && it.n && it.n.length >= 2 && (String(it.n).indexOf(nm5) !== -1 || nm5.indexOf(it.n) !== -1)) hit5 = it; }); });
-            if (!hit5) { if (miss5.indexOf(nm5) === -1) miss5.push(nm5); return; }
+            if (!hit5) {
+              // v5.1: 库存无此项 → 按分类自动建条目,从0起记负数(消耗流水不丢失)
+              var lab5 = null;
+              for (var c5 = 0; c5 < CLS5.length; c5++) { if (CLS5[c5][1].test(nm5)) { lab5 = CLS5[c5][0]; break; } }
+              var tgt5 = null;
+              if (lab5) inv5.forEach(function (grp) { if (!tgt5 && grp.g.indexOf(lab5) !== -1) tgt5 = grp; });
+              if (!tgt5) inv5.forEach(function (grp) { if (!tgt5 && grp.g.indexOf("其他") !== -1) tgt5 = grp; });
+              if (!tgt5) tgt5 = inv5[inv5.length - 1];
+              tgt5.items.push({ n: nm5, terms: ["-" + fmt5(need5[k5]) + un5 + tag5] });
+              ded5++; if (crt5.indexOf(nm5) === -1) crt5.push(nm5);
+              return;
+            }
             if (!Array.isArray(hit5.terms)) hit5.terms = [];
             if (hit5.terms.some(function (t) { return String(t).indexOf(tag5) !== -1 && String(t).charAt(0) === "-"; })) return; // 同项同日防重
             hit5.terms.push("-" + fmt5(need5[k5]) + un5 + tag5);
             ded5++;
           });
           if (ded5) await kvSet("inv-data", JSON.stringify(inv5));
-          result.consume = "deducted:" + ded5 + (miss5.length ? " untracked:" + miss5.join(",") : "");
+          result.consume = "deducted:" + ded5 + (crt5.length ? " created:" + crt5.join(",") : "");
         } else result.consume = "skip";
       } catch (ec) { result.consume = "error:" + String((ec && ec.message) || ec); }
       // buy-hist
