@@ -149,6 +149,9 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 .sugitem span { color: var(--muted); font-size: 12px; flex: none; }
 .sugempty { padding: 8px 12px; font-size: 12.5px; color: var(--muted); }
 .addrow.sub { margin-top: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.addrow button.impbtn { width: auto; height: 37px; padding: 0 12px; border: 1px solid var(--green); background: #fff; color: var(--green-dark); border-radius: 10px; font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; line-height: 35px; }
+.addrow button.impbtn:active, .addrow button.impbtn.on { background: var(--green); color: #fff; }
+.imppanel { background: #faf9f4; border: 1px solid var(--border); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; }
 .selftag { display: inline-block; font-size: 10px; color: var(--green-dark); border: 1px solid var(--green); border-radius: 20px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
 .mealtag { display: inline-block; font-size: 10px; color: var(--warn); border: 1px solid #e5d5ac; border-radius: 20px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
 .xdel { border: 0; background: none; color: var(--faint); cursor: pointer; font-size: 15px; margin-left: 4px; padding: 0 4px; }
@@ -308,7 +311,7 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <option value="husb">老公</option>
 <option value="nanny">保姆</option>
 <option value="dogs">两只狗狗</option>
-<option value="shared">两人平分</option>
+<option value="shared">两人都吃(各1小份)</option>
 </select>
 <input class="kcin" id="eatKc" type="number" min="0" placeholder="千卡·选填">
 <button id="eatAdd" aria-label="加入">＋</button>
@@ -375,6 +378,17 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <h2>📖 菜谱库<span class="tag" id="recCount"></span><span class="tag">点任何一道可编辑</span></h2>
 <div class="addrow" style="margin-bottom: 10px;">
 <input type="text" id="recSearch" placeholder="🔍 搜菜名 / 食材 / 编号">
+<button id="impToggle" class="impbtn" type="button">📥 导入菜谱</button>
+</div>
+<div id="impPanel" class="imppanel" hidden>
+<div id="inboxList"></div>
+<div class="fb" style="margin-top: 6px;">
+<textarea id="inboxText" placeholder="粘贴菜谱文字，或直接拍菜谱照片……"></textarea>
+<button class="cam" id="inboxCam" title="添加图片">📷</button>
+<button id="inboxSave" aria-label="提交"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l5 5L20 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+</div>
+<input type="file" id="inboxFile" accept="image/*" multiple hidden>
+<div class="hint l" id="inboxHint">提交后存云端——AI 每天早7点/午间11:30自动识别整理进菜谱库（主料/配料/调料/估算千卡），整理完这里自动清空</div>
 </div>
 <div id="recBox"></div>
 <div class="invadd">
@@ -395,17 +409,6 @@ body.unlocked footer { position: static; margin-top: 36px; background: rgba(255,
 <div class="hint l">加进上面对应分类；主料/配料/调料以后随时点开补</div>
 </div>
 
-<div class="card">
-<h2>📥 导入菜谱<span class="tag">拍照 / 粘贴文字</span></h2>
-<div id="inboxList"></div>
-<div class="fb" style="margin-top: 10px;">
-<textarea id="inboxText" placeholder="粘贴菜谱文字，或直接拍菜谱照片……"></textarea>
-<button class="cam" id="inboxCam" title="添加图片">📷</button>
-<button id="inboxSave" aria-label="提交"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 13l5 5L20 7" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
-</div>
-<input type="file" id="inboxFile" accept="image/*" multiple hidden>
-<div class="hint l" id="inboxHint">提交后存云端——AI 每天早7点/午间11:30自动识别整理进菜谱库（主料/配料/调料/估算千卡），整理完这里自动清空</div>
-</div>
 </section>
 
 <!-- ===================== 档案 ===================== -->
@@ -1287,6 +1290,10 @@ function renderRec() {
 }
 function renderInbox() {
   var box = document.getElementById("inboxList"); box.innerHTML = "";
+  var tg = document.getElementById("impToggle");
+  if (tg) tg.textContent = "📥 导入菜谱" + (inboxData.length ? "（" + inboxData.length + "）" : "");
+  var pn = document.getElementById("impPanel");
+  if (pn && inboxData.length) pn.hidden = false;
   inboxData.forEach(function (it, i) {
     var dd = document.createElement("div"); dd.className = "inbox";
     if (it.img) { var img = document.createElement("img"); img.src = it.img; dd.appendChild(img); }
@@ -1605,9 +1612,9 @@ document.getElementById("eatAdd").addEventListener("click", function () {
   var who = document.getElementById("eatWho").value;
   function mkEat(w, k2) { var o = { t: v, meal: meal, who: w, kc: k2, out: out }; if (eatSel) o.r = eatSel; return o; }
   if (who === "shared") {
-    var half = kc ? Math.round(kc / 2) : null;
-    state.extraEats.push(mkEat("wife", half));
-    state.extraEats.push(mkEat("husb", half));
+    /* v17: 小份体系——两人都吃=各记一整小份,不再平分 */
+    state.extraEats.push(mkEat("wife", kc));
+    state.extraEats.push(mkEat("husb", kc));
   } else {
     state.extraEats.push(mkEat(who, kc));
   }
@@ -1682,6 +1689,11 @@ document.getElementById("recAdd").addEventListener("click", function () {
 });
 document.getElementById("recName").addEventListener("keydown", function (e) { if (e.key === "Enter") document.getElementById("recAdd").click(); });
 document.getElementById("recSearch").addEventListener("input", function () { recQuery = this.value.trim(); recEditing = null; renderRec(); });
+document.getElementById("impToggle").addEventListener("click", function () {
+  var pn = document.getElementById("impPanel");
+  pn.hidden = !pn.hidden;
+  this.classList.toggle("on", !pn.hidden);
+});
 document.getElementById("habitAdd").addEventListener("click", function () {
   var w = document.getElementById("habitWho"), t = document.getElementById("habitText");
   if (!w.value.trim()) return;
